@@ -1,0 +1,351 @@
+#musicBarPanel .page_block {
+    padding: 6px 0;
+}
+
+._ui_rmenu_audio_equalizers_list, ._audio_equalizer_item {
+    position: relative;
+}
+
+.equalizer_name {
+    font-weight: 500;
+}
+
+.surround_toggle, .visualization_toggle {
+    padding: 8.5px 15px !important;
+}
+
+.surround_toggle .ui_toggler_label, .visualization_toggle .ui_toggler_label {
+    padding-left: 5px !important;
+    font-size: 13px !important;
+    color: #2a5885 !important;
+}
+
+.audio_playlist_wrap .audio_row > *{
+    position: relative;
+    z-index: 2;
+}
+
+.audio_playlist_wrap .audio_row canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+}
+
+.audio_equalizer_del_btn {
+    float: right;
+    -o-transition: opacity 60ms linear;
+    transition: opacity 60ms linear;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    padding: 3px;
+    margin-top: 6px;
+    margin-right: 4px;
+}
+
+.ui_rmenu_item:hover .audio_equalizer_btn,
+.ui_rmenu_subitem:hover .audio_equalizer_btn {
+    opacity: 0.75;
+    filter: alpha(opacity=75);
+}
+
+.audio_equalizer_del_btn .audio_equalizer_btn_icon {
+    background-image: url(/images/icons/common.png?6);
+    height: 13px;
+    width: 13px;
+    background-position: 0 -28px;
+}
+
+.audio_equalizer_edit_btn .audio_equalizer_btn_icon {
+    background-image: url(/images/icons/common.png?6);
+    height: 13px;
+    width: 13px;
+    background-position: 0px -43px;
+}
+
+.audio_equalizer_title {
+    float: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.equalizer_edit_label {
+    color: #555;
+    padding: 5px 5px 0px;
+    width: 70px;
+}
+
+.equalizer_edit_input {
+    width: 320px;
+}
+
+.equalizer_edit_input input, .equalizer_edit_input textarea {
+    width: 320px;
+    padding: 7px 5px 8px !important;
+}
+
+.gains {
+    height: 100px;
+    position: relative;
+    padding: 10px 10px;
+}
+
+.gain_range {
+    cursor: pointer;
+    width: 100px !important;
+    -webkit-appearance: none;
+    z-index: 200;
+    height: 9px;
+    border-radius: 45px;
+    background-color: #d1d9e0;
+    -webkit-transform:rotate(-90deg);
+    transform:rotate(-90deg);
+
+    position: absolute;
+    top: 42px;
+    left: -48px;
+
+}
+
+.range-wrapper {
+    float: left;
+    width: 10px;
+    height: 100px;
+    position: relative;
+    margin-left: 32px;
+}
+
+.range-wrapper .label {
+    position: absolute;
+    bottom: -22px;
+    width: 35px;
+    left: -13px;
+    text-align: center;
+    color: #2a5885;
+    font-size: 13px;
+}
+
+.range-wrapper:nth-of-type(1) {
+    margin-left: 0;
+}
+
+.gain_range:focus {
+    outline: none;
+}
+
+.gain_range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px;
+    height: 15px;
+    border: 1px solid #b2bcc5;
+    background-color: #fff;
+    border-radius: 50%;
+}
+
+.audio_playlist_wrap .audio_acts {
+    position: relative;
+
+}
+
+.audio_playlist_wrap .audio_row:hover {
+    z-index: 100;
+}
+
+.audio_playlist_wrap .audio_row:hover .audio_act#actions {
+    z-index: 1000;
+    opacity: 1;
+}
+
+.audio_playlist_wrap .audio_row .audio_acts .audio_act {
+    position: relative;
+}
+
+.gain_range:focus::-webkit-slider-thumb {
+    background-color: #6287ae;
+}
+
+.audio_playlist_wrap .audio_row .audio_acts #actions {
+    display: block;
+}
+
+.audio_row .audio_acts #actions > div:first-child, .gear-icon {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkFCOUYwQkRDNzM2NTExRTY5QjNBQUU2RTRENDhEOTY5IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkFCOUYwQkRENzM2NTExRTY5QjNBQUU2RTRENDhEOTY5Ij4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6QUI5RjBCREE3MzY1MTFFNjlCM0FBRTZFNEQ0OEQ5NjkiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6QUI5RjBCREI3MzY1MTFFNjlCM0FBRTZFNEQ0OEQ5NjkiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4wwLZvAAABxklEQVR42lRSsUpcURA9M++9BUEJksQUKSV+gNnCNBYGtNzCNOmEfIFikQUbMbgJSP4gkEDSWSRlAlqIYIpVe0NKC0URMRDcu3fGM28XQh485p6Zc+6dM/fKxpddDD8pUHiBEhn9drJeu9JGh7hDzFwWhXsQdSh4Qs2qG6YTevcM/aeF61jEwJGP+oAHblsL5YXANwE7E/OfrphFISz5HPEn5mdYf1Q3A3+nbMkE8l1MTpl4SEGLO4+7+XlEg7eYfxB1h/5wlK5FfZidsNAlQR1+yebXoPJyEHHJfJzQDV5FfpmRXlPVJH0WNMGm3vPkzWzsXYVT8nC/XtchH8nvlslSh6Yx9HDDwh7++wL7X8ZxZF9MkhbLSqu2ITfDNBljjLHj/j9RYIwwXqHAboWqWxZovDXcjnJKn+mnxVZWSBBVOSB+RrwcU+Yg9lxlifw/4SlamCKxqZBs5vdJfEN8zjgxuEzJ4ZurqYR8pLxpTswWaOsxxRckfOPUrkRlImLgyEddkOcFPannzX/bIZyc7rjab57yIUyHB7b0SkwnKXjO/NcwWQ7d/uJ6Kx5XiUa8vcMkvfkKjUPe43XS/hFfxHEIgnwnwABQ8NY1Ze7kugAAAABJRU5ErkJggg==');
+}
+.gear-icon {
+    width: 13px;
+    height: 13px;
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+
+.audio_row_dropdown {
+    position: absolute;
+    cursor: pointer;
+    border: 1px solid #c5d0db;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    z-index: 100;
+    line-height: 1.154;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    display: none;
+    left: -7px;
+    top: -4px;
+    width: auto !important;
+    height: auto !important;
+    background: none;
+}
+
+.audio_row_dropdown.pdd_ralign {
+    left: auto;
+    right: -11px
+}
+
+.audio_row_dropdown .rows {
+    white-space: nowrap
+}
+
+.audio_row_dropdown .header {
+    border: 1px solid #c5d0db;
+    border-width: 0 0 1px;
+    color: #5d6d80;
+    background-color: #dce1e6
+}
+
+.audio_row .audio_info {
+    z-index: 5;
+}
+
+.audio_row_dropdown .header .header_label {
+    padding: 6px 26px 7px 12px;
+    position: relative
+}
+
+.audio_row_dropdown .header .header_label:after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: 10px;
+    width: 9px;
+    height: 5px;
+    background: url(/images/icons/multidd.png?2) no-repeat;
+    background-position: left -38px
+}
+
+.audio_row_dropdown .body {
+    background: #fff
+}
+
+.audio_row_dropdown .item,.audio_row_dropdown .item_sel,.audio_row_dropdown .item_sel_plus {
+    padding: 6px 26px 7px 12px;
+    color: #2a5885;
+    overflow: hidden
+}
+
+.item:hover {
+    background-color: #e7edf2;
+    color: #2a5885;
+}
+
+.audio_row_video_block, .audio_row_chords_block {
+    margin-top: 12px;
+}
+
+.audio_row_chords_block {
+    white-space: pre-wrap;
+    padding-left: 30px;
+}
+
+.audio_row_video_block .close, .audio_row_chords_block .close {
+    font-size: 35px;
+    color: #c4d2e1;
+    top: 5px;
+    position: absolute;
+    right: 15px;
+    text-shadow: -1px 0px 1px rgba(0,0,0,0.5),1px 0px 1px rgba(0,0,0,0.5), 0px -1px 1px rgba(0,0,0,0.5), 0px 1px 1px rgba(0,0,0,0.5);
+}
+
+.audio_row_chords_block .close {
+    color: #6287ae;
+    text-shadow: none;
+    font-size: 28px;
+}
+
+.audio_row_video_block iframe {
+    width: 100% !important;
+}
+
+.performer-info {
+    overflow: hidden;
+    position: relative;
+}
+
+.last_fm_link {
+    background: url('http://www.last.fm/static/images/logo_static_mob.png');
+    background-size: contain;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 60px;
+    height: 16px;
+}
+
+.performer-info .photo {
+    float: left;
+}
+
+.performer-info .photo img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+.band_info {
+    float: left;
+    margin-left: 20px;
+    max-width: calc(100% - 120px);
+}
+
+.band_info .name {
+    font-size: 24px;
+    font-weight: 700;
+    -webkit-font-smoothing: antialiased;
+    line-height: 33px;
+    color: #000;
+    margin-top: 15px;
+}
+
+.band_info .tags {
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.band_info .tag {
+    float: left;
+    margin: 0 5px 5px 0;
+    background-color: #dae2ea;
+    border-radius: 2px;
+    display: inline-block;
+    vertical-align: top;
+    color: #55677d;
+    font-size: 12.5px;
+    padding: 5px 6px 6px 6px;
+    text-transform: lowercase;
+    line-height: 1.154;
+}
+
+.bio {
+    color: #2b2f33;
+    font-size: 15px;
+    line-height: 22.5px;
+    letter-spacing: -0.1px;
+    margin-top: 16px;
+    padding-top: 10px;
+    text-decoration: none!important;
+    display: block;
+    white-space: pre-line;
+}

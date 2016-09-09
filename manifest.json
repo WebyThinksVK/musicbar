@@ -1,0 +1,79 @@
+{
+  "background": {
+    "page": "background.html"
+  },
+  "content_scripts": [
+    {
+      "css": [
+        "styles/style.css"
+      ],
+      "js": [
+        "main.js"
+      ],
+      "matches": [
+        "http://vk.com/*",
+        "http://*.vk.com/*",
+        "https://vk.com/*",
+        "https://*.vk.com/*",
+        "http://*.lastfm.ru/*"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "description": "Дополнительный функционал аудиозаписей ВКонтакте. ",
+  "icons": {
+    "128": "icons/icon_128.png",
+    "16": "icons/icon_16.png",
+    "48": "icons/icon_48.png",
+    "64": "icons/icon_64.png"
+  },
+  "browser_action": {
+    "default_icon": "icons/icon_48.png"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuuyumuWL9DTWuJ0CZ29rxEtvmT7jFg5v1C9A16+ttLrY5TtlUBL3dLKpGWK6dcmArH48uWegYetAjQWFPkyK8GLeGvm3Yz2272w2Y/3lIzupB+NmPlZ37+hT7LWpIMCxTR5iLS2OsojmRFLPxtD80pQzGkrQTJxM6iDQadVFz5GBIhX3cP/Oaq0Hr1QtkWYlpPju7TcKuxoCnxz+dI53WqDWao7P0djbjWUcWsTqJrJrWOnHL7vbRzXN4xh/8bvt1dwDW3nSJWCGoQyLpSf965NH/G3XGN3Bm3OHQskAE5azIeALj6l+G1uiG0OUVH5MndYUg55S9HAz0AoP/5Hg+QIDAQAB",
+  "manifest_version": 2,
+  "minimum_chrome_version": "18",
+  "name": "Music Bar",
+  "permissions": [
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "downloads",
+    "https://cs1-27v4.vk-cdn.net/*",
+    "http://amdm.ru/*",
+    "http://www.e-chords.com/*",
+    "https://*.ultimate-guitar.com/*",
+    "https://www.ultimate-guitar.com/*",
+    "http://*.vk.me/",
+    "https://*.vk.me/",
+    "https://*.vk-cdn.net/",
+    "http://*.vk-cdn.net/",
+    "http://vk-cdn.net/",
+    "https://vk-cdn.net/",
+    "tabs",
+    "http://vk.com/*",
+    "https://vk.com/*",
+    "http://*.vk.com/*",
+    "http://*.lastfm.ru/*"
+  ],
+  "update_url": "https://clients2.google.com/service/update2/crx",
+  "version": "4.1.1",
+  "externally_connectable": {
+    "matches": [
+      "http://vk.com/*",
+      "http://*.vk.com/*",
+      "https://vk.com/*",
+      "https://*.vk.com/*",
+      "http://*.lastfm.ru/*"
+    ]
+  },
+  "web_accessible_resources": [
+    "style.css",
+    "modals/form_equalizer.html",
+    "modals/performer.html",
+    "scripts/AudioPlayer.js",
+    "panel.html"
+  ]
+}
+
+

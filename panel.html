@@ -1,0 +1,58 @@
+<div class="page_block">
+    <div id="ui_rmenu_audio_albums" class="ui_rmenu_item _ui_item_audio_equalizers _ui_rmenu_audio_equalizers_toggle" role="listitem" data-on-toggle="" onclick="return uiRightMenu.toggleSubmenu('audio_equalizers', this);">
+        <span>Эквалайзер: <span class="equalizer_name"></span><span class="ui_rmenu_item_arrow"></span></span>
+    </div>
+
+    <div class="_ui_rmenu_sublist _ui_rmenu_audio_equalizers_list unshown" data-sublist-id="audio_equalizers">
+
+
+        <div id="ui_rmenu_audio_album_add" class="ui_rmenu_subitem _ui_rmenu_subitem add_equalizer_item" role="listitem" onclick="">
+            <span>
+                <div onclick="">
+                    <div class="audio_album_btns">
+                        <div class="audio_album_btn audio_album_add_btn">
+                            <div class="audio_album_btn_icon"></div>
+                        </div>
+                    </div>
+                    <div class="audio_album_title">Добавить эквалайзер</div>
+                </div>
+            </span>
+        </div>
+
+        <div class="equalizers_list">
+
+        </div>
+
+        <a class="ui_rmenu_subitem _ui_rmenu_subitem _ui_rmenu _audio_equalizer_item unshown equalizer_template" role="listitem" >
+            <span>
+                <div class="audio_album_btns _audio_album_btns clear_fix">
+                    <div class="audio_equalizer_del_btn audio_album_btn" onclick="" onmouseover="showTooltip(this, {text: 'Удалить эквалайзер', black: 1, shift: [10, 6, 0], needLeft: 1, appendParentCls: '_ui_rmenu_sublist'})">
+                        <div class="audio_equalizer_btn_icon"></div>
+                    </div>
+                    <div class="audio_equalizer_edit_btn audio_album_btn" onclick="" onmouseover="showTooltip(this, {text: 'Редактировать эквалайзер', black: 1, shift: [10, 6, 0], appendParentCls: '_ui_rmenu_sublist'})">
+                        <div class="audio_equalizer_btn_icon"></div>
+                    </div>
+                </div>
+                <div class="audio_equalizer_title">Шаблон</div>
+            </span>
+        </a>
+
+    </div>
+
+    <div class="ui_toggler_wrap surround_toggle" onclick="getAudioPlayer()._impl.musicBar.toggleSurround(this)">
+        <div class="_ui_toggler ui_toggler"></div>
+        <div class="ui_toggler_label">Объемный звук 5.1</div>
+    </div>
+
+    <div class="ui_toggler_wrap visualization_toggle" onclick="getAudioPlayer()._impl.musicBar.toggleVisualization(this)">
+        <div class="_ui_toggler ui_toggler"></div>
+        <div class="ui_toggler_label">Визуализация</div>
+    </div>
+
+
+
+
+
+
+
+</div>
