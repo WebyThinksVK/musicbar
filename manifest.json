@@ -37,6 +37,7 @@
   "permissions": [
     "storage",
     "webRequest",
+    "fileSystem",
     "webRequestBlocking",
     "downloads",
     "https://cs1-27v4.vk-cdn.net/*",

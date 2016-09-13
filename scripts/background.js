@@ -7,7 +7,7 @@ var AudioSource; // Audio source from <audio> element
 var connections = []; // Connections from pages
 var activeConnection = null;
 var frequencies = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]; // Frequencies for Equalizer
-
+var ZipFile = new Zip();
 
 var params = {
     surround: false,
@@ -342,8 +342,25 @@ function parseMessageFromPage(message, port) {
         case "download":
             chrome.downloads.download({
                 url: message.url,
-                filename: message.name
+                filename: encode(message.name).replace(/\\/, "")
             });
+            break;
+
+        case "downloadPlaylist":
+            ZipFile.createFile(message.title+".zip", function() {
+                port.postMessage({type: "downloadNextSong"});
+            });
+
+            break;
+
+        case "downloadNextSong":
+            downloadNextSong(message, function() {
+                port.postMessage({type: "downloadNextSong"});
+            });
+            break;
+
+        case "downloadZip":
+            ZipFile.download(message.title+".zip");
             break;
 
         case "findVideo":
@@ -623,4 +640,14 @@ function findChordsUltimateGuitar(artist, song, callback) {
         })
 
     });
+}
+
+function downloadNextSong(info, callback) {
+    ajax(info.url, function() {
+        blob = new Blob([this], {type: "audio/mpeg"});
+
+        ZipFile.addFile(encode(info.name).replace("/","") + ".mp3", blob, function() {
+            callback && callback();
+        });
+    })
 }

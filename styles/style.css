@@ -43,6 +43,8 @@
     margin-right: 4px;
 }
 
+
+
 .ui_rmenu_item:hover .audio_equalizer_btn,
 .ui_rmenu_subitem:hover .audio_equalizer_btn {
     opacity: 0.75;
@@ -348,4 +350,167 @@
     text-decoration: none!important;
     display: block;
     white-space: pre-line;
+}
+
+/* DOWNLOAD PLAYLIST */
+.download-playlist {
+    padding: 10px 15px;
+    height: 20px;
+    overflow: visible;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.download-playlist.download {
+    overflow: hidden;
+}
+
+.download_actions_wrap {
+    position: absolute;
+    width: 198px;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    border: 1px solid #c5d0db;
+    font-size: 12.5px;
+    z-index: 20;
+    top: 10px;
+}
+
+.download_actions_inner {
+    padding: 4px 0;
+    line-height: 140%;
+    border-top: 1px solid #c5d0db;
+}
+
+.download_actions_item, .download_actions_item span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.download_actions_dd_label, .download_actions_header_inner {
+    color: #55677d;
+    padding-right: 13px;
+    background: url(/images/icons/profile_arrow.png) no-repeat;
+    background-position: right 6px;
+}
+
+.download_actions_item {
+    position: relative;
+    padding: 0 13px;
+    height: 28px;
+    line-height: 28px;
+    color: #2a5885;
+    white-space: nowrap;
+    outline: none;
+}
+
+.download_actions_item:hover {
+    background-color: #e7edf2;
+    text-decoration: none;
+}
+
+.download_actions_header {
+    text-align: center;
+    line-height: 15px;
+    background: #dce1e6;
+    padding: 6px 0 7px;
+    cursor: pointer;
+}
+
+.audio_download_playlist_btn {
+    width: 100%;
+}
+
+.download-playlist .playlist-wrapper{
+    margin-top: 0;
+    -webkit-transition: all 0.2s;
+    -moz-transition: all 0.2s;
+    -ms-transition: all 0.2s;
+    -o-transition: all 0.2s;
+    transition: all 0.2s;
+}
+
+.download-playlist.download .playlist-wrapper {
+    margin-top: -40px;
+}
+
+.playlist_download_progress {
+    height: 30px;
+    border: 1px solid #cfdae6;
+    border-radius: 2px;
+    background-color: #fafcfc;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+    margin-top: 10px;
+    display: none;
+}
+
+.download-playlist.download .playlist_download_progress {
+    display: block;
+}
+
+.playlist_download_progress .playlist_download_progress_bar {
+    height: 100%;
+    -o-transition: width 30ms linear;
+    transition: width 30ms linear;
+    background-image: url(/images/line_progress.png);
+    background-position-x: 0;
+    background-position-y: 0;
+    -webkit-animation: playlistDownloadProgressAnimation 1s linear infinite;
+    -o-animation: playlistDownloadProgressAnimation 1s linear infinite;
+    animation: playlistDownloadProgressAnimation 1s linear infinite;
+}
+
+.playlist_download_progress .playlist_download_progress_text {
+    position: absolute;
+    top: 6px;
+    width: 100%;
+    text-align: center;
+    color: #597da3;
+    font-weight: 500;
+}
+
+.playlist_download_progress .playlist_download_progress_cancel {
+    height: 12px;
+    width: 12px;
+    background-image: url(/images/video_progress_cancel.png);
+    position: absolute;
+    right: 6px;
+    top: 8px;
+    cursor: pointer;
+    opacity: 0.75;
+}
+
+/*.audio_hq_label {
+    background: #c4d1de !important;
+    opacity: 1 !important;
+    border-radius: 2px;
+    color: white;
+    font-size: 10px;
+    width: auto !important;
+    padding: 0 4px;
+    height: auto !important;
+    margin-top: -1px !important;
+}*/
+
+@-webkit-keyframes playlistDownloadProgressAnimation {
+    0% {background-position-x: 0}
+
+    to {background-position-x: 40px }
+}
+
+@-o-keyframes playlistDownloadProgressAnimation {
+    0% { background-position-x: 0 }
+
+    to { background-position-x: 40px }
+}
+
+@keyframes playlistDownloadProgressAnimation {
+    0% { background-position-x: 0 }
+
+    to { background-position-x: 40px }
 }

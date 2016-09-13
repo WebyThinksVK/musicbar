@@ -17,6 +17,8 @@ var MusicBar = function() {
     this.events = {};
     this.url = "";
     this.youtube = null;
+    this.playlist = [];
+    this.playlistCount = 0;
     this.params = {
         surround : false,
         visualization: true
@@ -49,7 +51,6 @@ var MusicBar = function() {
             case "initialize":
                 this.params = message.params;
                 this.equalizers = message.equalizers;
-
                 this.isActive = message.active;
                 break;
             case "visualization":
@@ -63,6 +64,9 @@ var MusicBar = function() {
                 break;
             case "findChords":
                 this.appendChordsBlock(message);
+                break;
+            case "downloadNextSong":
+                this.downloadNextSong();
                 break;
         }
     };
@@ -114,7 +118,6 @@ var MusicBar = function() {
             type: "pause"
         }, callback);
     };
-
 
     this.seek = function(time) {
         this.postMessage({
@@ -210,6 +213,101 @@ var MusicBar = function() {
         })
     };
 
+    this.downloadPlaylist = function(playlist) {
+        this.playlist = clone(playlist.getAudiosList());
+        this.playlistCount =  this.playlist.length;
+
+        var fn = function() {
+            var playlistPanel = geByClass1("download-playlist");
+            if (playlistPanel) {
+                geByClass1("playlist_download_progress_bar", playlistPanel).style.width = "0%";
+                geByClass1("playlist_download_progress_text", playlistPanel).innerText = "Загружено 0%";
+            }
+
+            toggleClass(playlistPanel, "download", true);
+            var name = document.querySelector(".ui_rmenu_pr .ui_rmenu_item_sel span");
+            self.postMessage({
+                type: "downloadPlaylist",
+                title: name? name.innerText.trim() : "Музыка"
+            })
+        }
+
+        if (this.playlistCount > 50) {
+            var songsMorphy = "песен";
+            switch(this.playlistCount%10) {
+                case 1: songsMorphy = "песню"; break;
+                case 2:
+                case 3:
+                case 4:songsMorphy = "песни"; break;
+            }
+
+            var modal = showFastBox({
+                title: "Скачивание музыки",
+                dark: 1
+            }, "Вы уверены, что хотите скачать <b>"+this.playlistCount+"</b> "+songsMorphy+"? Это может занять продолжительное время.", "Продолжить", function(a) {
+                fn()
+                modal.hide();
+            }, "Отмена", function() {
+                self.playlist = [];
+                self.playlistCount = 0;
+                modal.hide();
+            })
+
+        } else {
+            fn();
+        }
+    }
+
+    this.stopDownloadPlaylist = function() {
+        this.playlist = [];
+        this.playlistCount =  -1;
+        var playlistPanel = geByClass1("download-playlist");
+        toggleClass(playlistPanel, "download", false);
+    }
+
+    this.downloadNextSong = function() {
+        var playlistPanel = geByClass1("download-playlist");
+        var songData = this.playlist.pop();
+
+        // If there is no more song is queue
+        if (!songData) {
+            toggleClass(playlistPanel, "download", false);
+
+            // If we didn't prevent downloading
+            if (this.playlistCount != -1) {
+                this.postMessage({
+                    type: "downloadZip"
+                })
+            }
+            return false;
+        }
+
+        if (playlistPanel) {
+            var percent = 100 - this.playlist.length / (this.playlistCount / 100);
+            geByClass1("playlist_download_progress_bar", playlistPanel).style.width = percent.toFixed(4)+"%";
+            geByClass1("playlist_download_progress_text", playlistPanel).innerText = "Загружено "+percent.toFixed(0)+"%";
+        }
+
+        var song = AudioUtils.asObject(songData);
+
+        if (!song.url.length) {
+            getAudioPlayer()._ensureHasURL(songData, function(response) {
+                var data = AudioUtils.asObject(response);
+                self.postMessage({
+                    type: "downloadNextSong",
+                    url: data.url,
+                    name: song.performer + " – " + song.title
+
+                })
+            })
+        } else {
+            self.postMessage({
+                type: "downloadNextSong",
+                url: song.url,
+                name: song.performer + " – " + song.title
+            })
+        }
+    }
 
     // Request music video
     this.findVideo = function(element) {
@@ -403,6 +501,15 @@ var MusicBar = function() {
     this.initPanel = function() {
         toggleClass(geByClass1("ui_toggler", geByClass1("surround_toggle")), "on", this.params.surround);
         toggleClass(geByClass1("ui_toggler", geByClass1("visualization_toggle")), "on", this.params.visualization);
+
+        if (this.playlist.length) {
+            var percent = 100 - this.playlist.length / (this.playlistCount / 100);
+            geByClass1("playlist_download_progress_bar").style.width = percent.toFixed(4)+"%";
+            geByClass1("playlist_download_progress_text").innerText = "Загружено "+percent.toFixed(0)+"%";
+            toggleClass(geByClass1("download-playlist"), "download", true);
+        }
+
+        geByClass1("blind_label", geByClass1("ui_rmenu_pr")).remove(); // Remove hidden button titile
 
         // Create new equalizer
         geByClass1("add_equalizer_item").addEventListener("click", function() {
@@ -1770,6 +1877,11 @@ AudioPlayer.tabIcons = {
                 this.playNext()
         }
     },
+
+    AudioPlayer.prototype.downloadPlaylist = function() {
+        var playlist = this.getCurrentPlaylist();
+        this._impl.musicBar.downloadPlaylist(playlist);
+    }
     AudioPlayer.prototype.deletePlaylist = function(t) {
         for (var i = 0; i < this._playlists.length; i++)
             this._playlists[i] == t && this._playlists.splice(i, 1);

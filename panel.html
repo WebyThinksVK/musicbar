@@ -49,8 +49,36 @@
         <div class="ui_toggler_label">Визуализация</div>
     </div>
 
+    <div class="download-playlist">
+        <div class="playlist-wrapper">
+            <button class="flat_button secondary audio_download_playlist_btn" onclick="toggle(ge('download_actions_wrap'))">
+                <span class="download_actions_dd_label">Скачать музыку</span>
+            </button>
 
+            <div class="playlist_download_progress">
+                <div class="playlist_download_progress_bar" style="width: 0;"></div>
+                <div class="playlist_download_progress_text">Загрузка</div>
+                <div class="playlist_download_progress_cancel" onclick= "getAudioPlayer()._impl.musicBar.stopDownloadPlaylist()" onmouseover="showTooltip(this, {black: 1, text: 'Прервать загрузку', forcetoup: 1, shift: [16, 12, 3]});"></div>
+            </div>
+        </div>
 
+        <div class="download_actions_wrap"
+
+             onmouseout="clearTimeout(cur.actDdHide); cur.actDdHide = setTimeout(function() { fadeOut(ge('download_actions_wrap'), 200); }, 150);"
+             onmouseup="setTimeout(clearInterval(cur.actDdHide), 5)"
+             onmouseover="clearInterval(cur.actDdHide)"
+
+             id="download_actions_wrap" style="opacity: 1; display: none">
+            <div class="download_actions_header" onclick="toggle(ge('download_actions_wrap'))">
+                <span class="download_actions_header_inner">Скачать музыку</span>
+            </div>
+            <div class="download_actions_inner">
+                <a class="download_actions_item" onclick="toggle(ge('download_actions_wrap')); getAudioPlayer().downloadPlaylist()" tabindex="0" role="link">Текущий плейлист</a>
+                <!--<a  class="download_actions_item" onclick="" tabindex="0" role="link">Выборочно</a>-->
+            </div>
+        </div>
+
+    </div>
 
 
 
