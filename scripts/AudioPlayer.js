@@ -2214,6 +2214,7 @@ AudioPlayer.tabIcons = {
         this._impl && this._impl.seek(t)
     },
     AudioPlayer.prototype._implSeek = function(t) {
+
         var i = this;
         this._implClearTask("seek"),
             this._implNewTask("seek", function(e) {
@@ -2575,11 +2576,15 @@ AudioPlayer.tabIcons = {
         }
     },
     AudioPlayer.prototype.seekCurrentAudio = function(t) {
-        var i = AudioUtils.asObject(this.getCurrentAudio()),
-            e = 10 / i.duration,
-            o = this.getCurrentProgress() + (t ? e : -e);
-        o = Math.max(0, Math.min(1, o)),
-            this.seek(o)
+        var player = this;
+        this._impl.musicBar.getPlayedTime(function() {
+            var i = AudioUtils.asObject(player.getCurrentAudio());
+            var e = 10 / i.duration;
+            var o = this + (t ? e : -e);
+            o = Math.max(0, Math.min(1, o));
+            player.seek(o);
+        });
+
     },
     AudioPlayer.prototype._lsGet = function(t) {
         return ls.get(AudioPlayer.LS_PREFIX + t)
