@@ -1,14 +1,6 @@
-var audioElement = new Audio(); // Main Audio Element
-var context = new AudioContext(); // Audio context to work with sound
-var analyser = context.createAnalyser();
-var events = []; // Events from pages
-var filters = []; // Filters for Equalizer
-var AudioSource; // Audio source from <audio> element
 var connections = []; // Connections from pages
 var activeConnection = null;
-var frequencies = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]; // Frequencies for Equalizer
 var ZipFile = new Zip();
-
 var params = {
     surround: false,
     visualization: true,
@@ -111,7 +103,6 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         type: "initialize",
         params: params,
         equalizers: equalizers,
-        active: port == activeConnection
     });
 	port.onMessage.addListener(function(msg) {
 		port.postMessage(parseMessageFromPage(msg, port));
@@ -119,48 +110,16 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
 
 	port.onDisconnect.addListener(function() {
 		removeConnection(port);
-		if(!connections.length) {
-            audioElement.pause();
-            activeConnection = null;
-        }
 	})
 });
 
 (function init() {
 
-	// Create Audio source from media element (<audio> element on background page)
-	AudioSource = context.createMediaElementSource(audioElement);
-
-	// Init filters for Equalizer
-	for (var i = 0; i < frequencies.length; i++ ) {
-		filters[i] = context.createBiquadFilter();
-		filters[i].type = "peaking";
-		filters[i].frequency.value = frequencies[i];
-		filters[i].frequency.Q = 20;
-
-		if (filters[i-1]) {
-			filters[i-1].connect(filters[i]);
-		}
-	}
-
-	// Connect audio source to the first filter
-	AudioSource.connect(filters[0]);
-
-	// Connect the last filter to the AudioContext's destination
-	filters[filters.length-1].connect(context.destination);
-
     // Get Equalizers and set active one
 	chrome.storage.sync.get(["equalizers", "params"], function(items) {
         if (items.params) params = items.params;
-
         if (items.equalizers) equalizers = items.equalizers;
-        equalizers.forEach(function(item) {
-            if (item.active) setEqualizer(item);
-        });
 	});
-
-    createAnalyzer();
-
 })();
 
 /**
@@ -178,43 +137,12 @@ function ajax(url, callback) {
         }
     };
 }
-/**
- * Sets new equalizer params
- * @param gains array Gains for frequencies
- */
+
 function setEqualizer(equalizer) {
-
-    if (!equalizer) {
-        equalizers.forEach(function(item) {
-            if (item.active) equalizer = item;
-        });
-    }
-
-	AudioSource.disconnect();
-	filters[filters.length-1].disconnect();
-
-	for (var i = 0; i < filters.length; i++ ) {
-
-		filters[i].disconnect();
-		filters[i].gain.value = equalizer.gains[i];
-
-		if (filters[i-1])
-			filters[i-1].connect(filters[i]);
-	}
-
-	AudioSource.connect(filters[0]);
-
-    var soundNode = params.surround ? splitToSurround(filters[filters.length-1]) : filters[filters.length-1];
-    if (params.visualization) {
-        soundNode.connect(analyser);
-    }
-
-    soundNode.connect(context.destination);
-
 
     // Set this equalizer active state
     equalizers.forEach(function(item, i) {
-       item.active = i == equalizers.indexOf(equalizer);
+        item.active = i == equalizers.indexOf(equalizer);
     });
 
     // Save equalizers
@@ -223,9 +151,8 @@ function setEqualizer(equalizer) {
         params: params
     });
 
-	console.log("Current equalizer: ", equalizer.gains.toString());
+    console.log("Current equalizer: ", equalizer.gains.toString());
 }
-
 /**
  * Create new connection
  * @param port
@@ -233,11 +160,6 @@ function setEqualizer(equalizer) {
  */
 function createConnection(port) {
 	connections.push(port);
-
-    console.log("connected");
-
-    if (!activeConnection) activeConnection = port;
-
 	return connections[port];
 }
 
@@ -246,17 +168,6 @@ function createConnection(port) {
  * @param port
  */
 function removeConnection(port) {
-	for (var i in events) {
-		var event = events[i];
-		if (event.port == connections.indexOf(port)) {
-			audioElement.removeEventListener(event.handler, event.callback);
-			events.splice(i, 1);
-		}
-	}
-
-    if (port == activeConnection) {
-        audioElement.pause();
-    }
 	connections.splice(connections.indexOf(port), 1);
 }
 
@@ -268,23 +179,6 @@ function removeConnection(port) {
  */
 function parseMessageFromPage(message, port) {
 	switch(message.type) {
-		case "setUrl":
-			audioElement.setAttribute("src", message.url);
-            if (port != activeConnection) {
-                activeConnection.postMessage({
-                    type:"pause"
-                });
-                activeConnection = port;
-            }
-			break;
-
-		case "play":
-			audioElement.play();
-			break;
-
-		case "setVolume":
-			audioElement.volume = message.volume;
-			break;
 
 		case "setEqualizer":
 			setEqualizer(equalizers[message.number]);
@@ -321,37 +215,9 @@ function parseMessageFromPage(message, port) {
             setEqualizer();
             break;
 
-        case "setVisualization":
-            this.params.visualization = message.state;
-            setEqualizer();
-            break;
-
-		case "seek":
-			audioElement.currentTime = audioElement.duration * message.time;
-			break;
-
-		case "pause":
-			audioElement.pause();
-			break;
-
-		case "getPlayedTime":
-			return isNaN(audioElement.duration) ? 0 : Math.max(0, Math.min(1, audioElement.currentTime / audioElement.duration));
-
-		case "getBuffered":
-			return audioElement.buffered.length ? Math.min(1, audioElement.buffered.end(0) / audioElement.duration) : 0;
-
-		case "getVolume":
-			return audioElement.volume;
-
         case "getEqualizers":
             return equalizers;
 
-		case "isActive":
-			return port == activeConnection;
-
-		case "addEvent":
-			addEvent(message, port);
-			break;
         case "download":
             chrome.downloads.download({
                 url: message.url,
@@ -404,99 +270,6 @@ function parseMessageFromPage(message, port) {
 	return {audio: message.type};
 }
 
-/**
- * Add event handler to AudioElement
- * @param message
- * @param port
- */
-function addEvent(message, port) {
-	var fn = function() {
-
-        if (port == activeConnection) {
-            try {
-                port.postMessage({ type: "runEvent", handler: message.handler})
-            } catch(e) {};
-        }
-	};
-
-	// Check is this event already exists
-	for (var i in events) {
-		var event = events[i];
-
-		// If it is, release it
-		if (event.handler == message.handler && event.port == port) {
-			audioElement.removeEventListener(message.handler, event.callback);
-			events.splice(i, 1);
-		}
-	}
-
-	events.push({handler: message.handler, callback: fn,  port: port});
-	audioElement.addEventListener(message.handler,fn);
-}
-
-/**
- * Split 2 channels for 6 and merge them
- * @param node
- * @returns {*}
- */
-function splitToSurround(node) {
-    context.destination.channelCount = context.destination.maxChannelCount;
-
-    // Create audio nodes for 5.1
-    var splitter = context.createChannelSplitter(2);
-    var merger = context.createChannelMerger(6);
-
-    var center = context.createChannelMerger(1);
-    var sub = context.createChannelMerger(1);
-
-    splitter.connect(center,0,0);
-    splitter.connect(center,1,0);
-
-    // В сабвуфер
-    splitter.connect(sub,0,0);
-    splitter.connect(sub,1,0);
-
-    splitter.connect(merger,0,0); // передний левый
-    splitter.connect(merger,1,1); // передний правый
-    center.connect(merger,0,2); // центр
-    sub.connect(merger,0,3); // бас
-
-
-    splitter.connect(merger,0,4); // задний левый
-    splitter.connect(merger,1,5); // задний правый
-
-    node.connect(splitter);
-
-    return merger;
-}
-
-function createAnalyzer() {
-
-    analyser.smoothingTimeConstant = 0.3;
-    analyser.fftSize = 32;
-    var bands = new Uint8Array(analyser.frequencyBinCount);
-
-    var analyserNode = context.createScriptProcessor(256, 1, 1);
-    analyser.connect(analyserNode);
-
-    analyserNode.onaudioprocess = function () {
-        analyser.getByteFrequencyData(bands);
-    };
-
-    window.setInterval(function(){
-        if (params.visualization && !audioElement.paused) {
-            activeConnection.postMessage({
-                type: "visualization",
-                bands: bands
-            });
-        }
-    }, 100);
-
-
-    analyserNode.connect(context.destination);
-
-    return analyserNode;
-}
 
 function findVideo(message, port) {
     var youtube = {

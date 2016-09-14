@@ -37,7 +37,6 @@
   "permissions": [
     "storage",
     "webRequest",
-    "fileSystem",
     "webRequestBlocking",
     "downloads",
     "https://cs1-27v4.vk-cdn.net/*",
@@ -58,7 +57,7 @@
     "http://*.lastfm.ru/*"
   ],
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "4.2.2",
+  "version": "4.3.1",
   "externally_connectable": {
     "matches": [
       "http://vk.com/*",
