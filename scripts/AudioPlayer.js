@@ -23,6 +23,7 @@ var MusicBar = function() {
     this.youtube = null;
     this.playlist = [];
     this.playlistCount = 0;
+    this.reloadAudioQueue = [];
     this.params = {
         surround : false,
         visualization: true,
@@ -636,25 +637,6 @@ var MusicBar = function() {
         });
     };
 
-    this.toggleBitrate = function(element, state) {
-        if (element) {
-            checkbox(element);
-            this.params.bitrate = !!isChecked(element);
-            AudioUtils.toggleAudioHQBodyClass(this.params.bitrate);
-            toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS,  this.params.bitrate);
-        } else if (state) {
-            this.params.bitrate = state;
-        }
-
-        if (state) this.updateBitrate();
-
-        this.postMessage({
-            type: "setBitrateState",
-            state:  this.params.bitrate
-        })
-
-    }
-
     this.updateBitrate = function() {
         var countPerRequest = 10;
         var queue = [];
@@ -668,29 +650,55 @@ var MusicBar = function() {
         for (var i = 0; i < queue.length / countPerRequest; i++) {
             var part = queue.slice(i * countPerRequest, i * countPerRequest + countPerRequest).join(",");
 
-            ajax.post("al_audio.php", {
-                act: "reload_audio",
-                ids: part
-            }, {
-                onDone: function(e, a) {
-                    var data = [];
-                    each(e, function(i, e) {
-                        e = AudioUtils.asObject(e);
+            this.reloadAudio(part, function(e, a) {
 
-                        data.push({
-                            id: e.fullId,
-                            url: e.url,
-                            duration: e.duration,
-                        });
-                    })
-
-                    self.postMessage({
-                        type: "calcBitrate",
-                        data: data
-                    });
+                if (a !== false) {
+                    console.error("server is busy");
                 }
+                var data = [];
+                each(e, function(i, e) {
+                    e = AudioUtils.asObject(e);
+
+                    var a = {};
+                    a[AudioUtils.AUDIO_ITEM_INDEX_URL] = e.url;
+                    getAudioPlayer().updateAudio(e.fullId, a);
+
+
+                    data.push({
+                        id: e.fullId,
+                        url: e.url,
+                        duration: e.duration,
+                    });
+                })
+
+                self.postMessage({
+                    type: "calcBitrate",
+                    data: data
+                });
             })
         }
+    }
+
+    this.reloadAudio = function(ids, callback) {
+        var timer = window.setTimeout(function() {
+            ajax.post("al_audio.php", {
+                act: "reload_audio",
+                ids: ids
+            }, {
+                onDone: callback
+            })
+
+            self.reloadAudioQueue.splice(self.reloadAudioQueue.indexOf(timer), 1);
+        }, 500 * this.reloadAudioQueue.length + 1);
+
+        this.reloadAudioQueue.push(timer);
+    }
+
+    this.eraceReloadAudio = function() {
+        this.reloadAudioQueue.forEach(function(timer) {
+            clearTimeout(timer);
+        })
+        this.reloadAudioQueue = [];
     }
 
     this.setBitrate = function(song, bitrate) {
@@ -698,6 +706,14 @@ var MusicBar = function() {
         rows.forEach(function(row) {
             if (row) {
                 if (!geByClass1("audio_hq_label", row).innerText.length) {
+
+                    var dataAudio = JSON.parse(row.getAttribute("data-audio"));
+                    var e = AudioUtils.asObject(dataAudio);
+
+                    var a = {};
+                    a[AudioUtils.AUDIO_ITEM_INDEX_BITRATE] = bitrate;
+                    getAudioPlayer().updateAudio(e.fullId, a);
+
                     geByClass1("audio_hq_label", row).innerText = bitrate;
                 }
             }
@@ -833,6 +849,24 @@ var MusicBar = function() {
             state: this.params.surround
         });
     };
+
+    this.toggleBitrate = function(element, state) {
+        if (element) {
+            checkbox(element);
+            this.params.bitrate = !!isChecked(element);
+            AudioUtils.toggleAudioHQBodyClass(this.params.bitrate);
+            toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS,  this.params.bitrate);
+        } else {
+            this.params.bitrate = state;
+        }
+
+        if (state) this.updateBitrate();
+
+        this.postMessage({
+            type: "setBitrateState",
+            state:  this.params.bitrate
+        })
+    }
 };
 MusicBar.EXTENSION_ID = "mienmjdbnnpaigifneeiifdbjkdgelha";
 
@@ -960,6 +994,7 @@ var AudioUtils = {
     AUDIO_ITEM_INDEX_CONTEXT: 11,
     AUDIO_ITEM_INDEX_EXTRA: 12,
     AUDIO_ITEM_INDEX_ACT_HASH: 13,
+    AUDIO_ITEM_INDEX_BITRATE: 14,
     AUDIO_ITEM_INLINED_BIT: 1,
     AUDIO_ITEM_CLAIMED_BIT: 16,
     AUDIO_ITEM_RECOMS_BIT: 64,
@@ -1707,6 +1742,7 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
         return i >= 0 && i + e < this.getAudiosCount() ? this.getAudioAt(i + e) : !1
     },
     AudioPlaylist.prototype.load = function(t, i) {
+
         var e = void 0 === t,
             o = this;
         if (t = intval(t), this.getType() == AudioPlaylist.TYPE_SEARCH && void 0 === this.getLocalFoundCount()) {
@@ -1721,11 +1757,20 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
             })
         }
         var l = this.getType() == AudioPlaylist.TYPE_FEED ? this.getItemsCount() : this.getAudiosCount();
+
         if (!e && this.hasMore() && 0 == t && l > 0) return i && i(this);
+
         if (!this.hasMore()) return i && i(this);
-        if (this.getType() == AudioPlaylist.TYPE_ALBUM) return this.loadSilent(i);
+        if (this.getType() == AudioPlaylist.TYPE_ALBUM) {
+
+            return this.loadSilent(i);
+        }
         if (l - 20 > t) return i && i(this);
+
+
+
         if (this._onDoneLoading = this._onDoneLoading || [], this._onDoneLoading.push(i), !this._loading) {
+
             this._loading = !0;
             var s = this.getSearchParams();
             ajax.post("al_audio.php", {
@@ -1746,6 +1791,7 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                 wall_type: this.getWallType()
             }, {
                 onDone: function(t) {
+
                     getAudioPlayer().mergePlaylistData(o, t),
                         o._audioToFirstPos && (o.addAudio(o._audioToFirstPos, 0), delete o._audioToFirstPos),
                         delete o._loading;
@@ -1901,7 +1947,9 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
     AudioPlaylist.prototype.loadSilent = function(t, i) {
         var e = this;
         if (this.hasMore() && this.getType() == AudioPlaylist.TYPE_ALBUM) {
+
             if (this._onDoneLoading = this._onDoneLoading || [], this._onDoneLoading.push(t), this._silentLoading) return;
+
             this._silentLoading = !0,
                 ajax.post("al_audio.php", {
                     act: "load_silent",
@@ -1919,6 +1967,14 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                             each(i || [], function(t, i) {
                                 i && i(e)
                             })
+
+
+                        // clear loading queue
+                        if (e._impl) {
+                            e._impl.musicBar.eraceReloadAudio();
+                            e._impl.musicBar.updateBitrate();
+                        }
+
                     }
                 })
         } else t && t(this)
@@ -2807,6 +2863,32 @@ AudioPlayer.tabIcons = {
                 ids: e.join(",")
             }, {
                 onDone: function(e, a) {
+
+                   if (typeof (a) === "undefined") {
+
+                       if (u._impl.musicBar.params.bitrate) {
+
+                           var modal = showFastBox({
+                               title: "Ошибка",
+                               dark: 1
+                           }, "Сервер перегружен. Отключите отображение битрейта песен для избежания подобной ситуации.", "Закрыть", function(a) {
+                               modal.hide();
+                           }, 'Отключить битрейт', function() {
+                               AudioUtils.toggleAudioHQBodyClass(0);
+                               modal.hide();
+                           })
+                       } else {
+                           var modal = showFastBox({
+                               title: "Ошибка",
+                               dark: 1
+                           }, "Сервер перегружен. Подождите немного.", "Закрыть", function(a) {
+                               modal.hide();
+                           })
+                       }
+
+                       return false;
+                   }
+
                     getAudioPlayer().setStatusExportInfo(a),
                         each(e, function(i, e) {
                             e = AudioUtils.asObject(e);
