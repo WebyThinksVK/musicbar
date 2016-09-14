@@ -485,7 +485,9 @@
     opacity: 0.75;
 }
 
-/*.audio_hq_label {
+
+
+.audio_hq_label {
     background: #c4d1de !important;
     opacity: 1 !important;
     border-radius: 2px;
@@ -494,8 +496,23 @@
     width: auto !important;
     padding: 0 4px;
     height: auto !important;
-    margin-top: -1px !important;
-}*/
+    margin-right: 4px !important;
+    position: relative;
+    display: none;
+    top: -1px;
+}
+
+.audio_hq_label_show div.audio_hq_label {
+    display: inline-block !important;
+}
+
+.audio_hq_label_show .audio_row.audio_row_playing div.audio_hq_label {
+    display: inline-block !important;
+}
+
+.bitrate_narrow_row {
+    padding: 5px 20px;
+}
 
 @-webkit-keyframes playlistDownloadProgressAnimation {
     0% {background-position-x: 0}

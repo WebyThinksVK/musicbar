@@ -1,3 +1,4 @@
+var counter = 0;
 
 
 /*
@@ -21,7 +22,8 @@ var MusicBar = function() {
     this.playlistCount = 0;
     this.params = {
         surround : false,
-        visualization: true
+        visualization: true,
+        bitrate: true
     };
 
     this.equalizers = [];
@@ -67,6 +69,9 @@ var MusicBar = function() {
                 break;
             case "downloadNextSong":
                 this.downloadNextSong();
+                break;
+            case "calcBitrate":
+                this.setBitrate(message.song, message.bitrate);
                 break;
         }
     };
@@ -374,7 +379,8 @@ var MusicBar = function() {
         }
 
         var chordsBlock = ce("div");
-        chordsBlock.setAttribute("class", "audio_row_chords_block")
+        chordsBlock.setAttribute("class", "audio_row_chords_block");
+        chordsBlock.setAttribute("data-nodrag", "1");
         chordsBlock.innerHTML = message.html;
         row.appendChild(chordsBlock);
     }
@@ -459,7 +465,7 @@ var MusicBar = function() {
             <div class="audio_play_wrap" data-nodrag="1"><button class="audio_play _audio_play" id="play_%1%_%0%" aria-label="Воспроизвести "></button></div> \
             <div class="audio_info"> \
                 <div class="audio_duration_wrap _audio_duration_wrap"> \
-                    <div class="audio_hq_label"></div> \
+                    <div class="audio_hq_label">%bitrate%</div> \
                     <div class="audio_duration _audio_duration">%duration%</div> \
                     <div class="audio_acts"  >  \
                         <div class="audio_act" id="actions" onclick="tooltips.hideAll(); fadeToggle(geByClass1(\'audio_row_dropdown\', this), 200); " onmouseover="showTooltip(this, {text: \'Действия\', black: 1, shift: [10, 6, 0], appendParentCls: \'audio_acts\'})" onclick="">\
@@ -501,6 +507,9 @@ var MusicBar = function() {
     this.initPanel = function() {
         toggleClass(geByClass1("ui_toggler", geByClass1("surround_toggle")), "on", this.params.surround);
         toggleClass(geByClass1("ui_toggler", geByClass1("visualization_toggle")), "on", this.params.visualization);
+        toggleClass(ge("show_bitrate_checkbox"), "on", this.params.bitrate)
+        toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS,  this.params.bitrate);
+
 
         if (this.playlist.length) {
             var percent = 100 - this.playlist.length / (this.playlistCount / 100);
@@ -574,6 +583,75 @@ var MusicBar = function() {
             });
         });
     };
+
+    this.toggleBitrate = function(element, state) {
+        if (element) {
+            checkbox(element);
+            this.params.bitrate = !!isChecked(element);
+            AudioUtils.toggleAudioHQBodyClass(this.params.bitrate);
+            toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS,  this.params.bitrate);
+        } else if (state) {
+            this.params.bitrate = state;
+        }
+
+        if (state) this.updateBitrate();
+
+        this.postMessage({
+            type: "setBitrateState",
+            state:  this.params.bitrate
+        })
+
+    }
+
+    this.updateBitrate = function() {
+        console.log("update bitrate");
+        var countPerRequest = 10;
+        var queue = [];
+
+        each(geByClass("audio_row"), function() {
+            if (!domClosest("audio_rows", this) && !domClosest("wall_audio_rows", this)) return;
+            var bitrate = geByClass1("audio_hq_label", this).innerText;
+            if (!bitrate.length) queue.push(this.getAttribute("data-full-id"));
+        })
+
+        for (var i = 0; i < queue.length / countPerRequest; i++) {
+            var part = queue.slice(i * countPerRequest, i * countPerRequest + countPerRequest).join(",");
+
+            ajax.post("al_audio.php", {
+                act: "reload_audio",
+                ids: part
+            }, {
+                onDone: function(e, a) {
+                    var data = [];
+                    each(e, function(i, e) {
+                        e = AudioUtils.asObject(e);
+
+                        data.push({
+                            id: e.fullId,
+                            url: e.url,
+                            duration: e.duration,
+                        });
+                    })
+
+                    self.postMessage({
+                        type: "calcBitrate",
+                        data: data
+                    });
+                }
+            })
+        }
+    }
+
+    this.setBitrate = function(song, bitrate) {
+        var rows = domQuery("[data-full-id='"+song+"']");
+        rows.forEach(function(row) {
+            if (row) {
+                if (!geByClass1("audio_hq_label", row).innerText.length) {
+                    geByClass1("audio_hq_label", row).innerText = bitrate;
+                }
+            }
+        })
+    }
 
     // Create new equalizer
     this.createEqualizer = function(info, template, index) {
@@ -800,6 +878,7 @@ var AudioUtils = {
     AUDIO_ITEM_INDEX_CONTEXT: 11,
     AUDIO_ITEM_INDEX_EXTRA: 12,
     AUDIO_ITEM_INDEX_ACT_HASH: 13,
+    AUDIO_ITEM_INDEX_BITRATE: 14,
     AUDIO_ITEM_INLINED_BIT: 1,
     AUDIO_ITEM_CLAIMED_BIT: 16,
     AUDIO_ITEM_RECOMS_BIT: 64,
@@ -811,8 +890,11 @@ var AudioUtils = {
     AUDIO_LAYER_MIN_WIDTH: 400,
     AUDIO_LAYER_MAX_WIDTH: 1e3,
     AUDIO_HQ_LABEL_CLS: "audio_hq_label_show",
-    toggleAudioHQBodyClass: function() {
-        var t = getAudioPlayer().showHQLabel();
+    updateBitrateTimer: null,
+    toggleAudioHQBodyClass: function(state) {
+        var t = getAudioPlayer().showHQLabel(state);
+        getAudioPlayer()._impl.musicBar.toggleBitrate(null, t);
+
         toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS, t)
     },
     hasAudioHQBodyClass: function() {
@@ -988,12 +1070,21 @@ var AudioUtils = {
 
         if (i) a.push(i);
 
+
+        clearTimeout(this.updateBitrateTimer);
+        this.updateBitrateTimer = window.setTimeout(function() {
+            if (getAudioPlayer()._impl.musicBar.params.bitrate)
+                getAudioPlayer()._impl.musicBar.updateBitrate();
+        }, 100)
+
         var r = formatTime(t[AudioUtils.AUDIO_ITEM_INDEX_DURATION]);
         var u = clean(JSON.stringify(t)).split("$").join("$$");
         var n = getTemplate("audio_row_advanced", t);
+
         n = n.replace(/%cls%/, a.join(" "));
         n = n.replace(/%duration%/, r);
         n = n.replace(/%serialized%/, u);
+        n = n.replace(/%bitrate%/, "");
         return n;
 
     },
@@ -1170,7 +1261,8 @@ var AudioUtils = {
             context: t[AudioUtils.AUDIO_ITEM_INDEX_CONTEXT],
             extra: t[AudioUtils.AUDIO_ITEM_INDEX_EXTRA],
             isTop: t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_TOP_BIT,
-            actHash: t[AudioUtils.AUDIO_ITEM_INDEX_ACT_HASH]
+            actHash: t[AudioUtils.AUDIO_ITEM_INDEX_ACT_HASH],
+            bitrate: t[AudioUtils.AUDIO_ITEM_INDEX_BITRATE],
         } : null
     },
     initDomPlaylist: function(t, i) {
@@ -2142,7 +2234,6 @@ AudioPlayer.tabIcons = {
 
             var audioPlayer = this;
 
-            console.log(this._impl.musicBar.isActive);
             if(this._impl.musicBar.isActive) {
                 if (!this) return false;
                 audioPlayer._implSetUrl(audioPlayer._currentAudio, true);
@@ -2641,7 +2732,7 @@ AudioPlayer.tabIcons = {
     AudioPlayer.prototype.toggleAudio = function(t, i) {
 
         var e = domClosest("_audio_row", t),
-            o = cur.cancelClick || i && (hasClass(i.target, "audio_lyrics") || domClosest("_audio_duration_wrap", i.target) || domClosest("_audio_inline_player", i.target) || domClosest("audio_performer", i.target));
+            o = cur.cancelClick || i && hasClass(i.target, "audio_row_chords_block") || i && (hasClass(i.target, "audio_lyrics") || domClosest("_audio_duration_wrap", i.target) || domClosest("_audio_inline_player", i.target) || domClosest("audio_performer", i.target));
         if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", e) && (o = !0), delete cur.cancelClick, delete cur._sliderMouseUpNowEl, o) return !0;
         var a = AudioUtils.getAudioFromEl(e, !0);
         if (AudioUtils.isClaimedAudio(a)) {

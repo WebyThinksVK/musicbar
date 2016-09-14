@@ -11,7 +11,8 @@ var ZipFile = new Zip();
 
 var params = {
     surround: false,
-    visualization: true
+    visualization: true,
+    bitrate: true
 };
 
 var defaultEqualizers = [
@@ -85,8 +86,15 @@ chrome.runtime.onInstalled.addListener(function(details){
         setEqualizer(defaultEqualizers[0]);
 
     }else if(details.reason == "update"){
-        //var thisVersion = chrome.runtime.getManifest().version;
-        //console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
+        console.log("update");
+
+        chrome.storage.sync.set({
+            params: {
+                surround: false,
+                visualization: true,
+                bitrate: true
+            }
+        });
     }
 });
 
@@ -287,6 +295,11 @@ function parseMessageFromPage(message, port) {
             chrome.storage.sync.set({equalizers: equalizers});
             break;
 
+        case "setBitrateState":
+            params.bitrate = message.state;
+            chrome.storage.sync.set({params: params});
+            break;
+
         case "saveEqualizer":
             var newEqualizer = {
                 name: message.info.name,
@@ -342,7 +355,7 @@ function parseMessageFromPage(message, port) {
         case "download":
             chrome.downloads.download({
                 url: message.url,
-                filename: encode(message.name).replace(/\\/, "")
+                filename: encode(message.name).replace(/[\\'"/]/g,"")
             });
             break;
 
@@ -373,6 +386,18 @@ function parseMessageFromPage(message, port) {
 
         case "findChords":
             findChords(message, port);
+            break;
+
+        case "calcBitrate":
+            message.data.forEach(function(item) {
+                calculateBitrate(item, function() {
+                    port.postMessage({
+                        type: "calcBitrate",
+                        bitrate: this,
+                        song: item.id
+                    })
+                })
+            });
             break;
 	}
 
@@ -650,4 +675,20 @@ function downloadNextSong(info, callback) {
             callback && callback();
         });
     })
+}
+
+function calculateBitrate(data, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('HEAD', data.url, true);
+    xhr.send();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+            var size = xhr.getResponseHeader('Content-Length')*1;
+            var bitrate = Math.floor(size/data.duration*8/1000);
+            if (bitrate > 320) bitrate = 320;
+            bitrate = bitrate / 32;
+            bitrate = bitrate = bitrate.toFixed(0)*32;
+            callback.apply(bitrate);
+        }
+    };
 }
