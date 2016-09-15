@@ -515,6 +515,7 @@ var MusicBar = function() {
         addTemplates({
             audio_row_advanced: '' +
             '<div class="audio_row _audio_row _audio_row_%1%_%0% %cls% clear_fix" onmouseleave="fadeOut(geByClass1(\'audio_row_dropdown\', this), 200)"  onclick="return getAudioPlayer().toggleAudio(this, event)" data-audio="%serialized%" data-full-id="%1%_%0%" id="audio_%1%_%0%"> \
+            <div class="select-check"> </div> \
             <div class="audio_play_wrap" data-nodrag="1"><button class="audio_play _audio_play" id="play_%1%_%0%" aria-label="Воспроизвести "></button></div> \
             <div class="audio_info"> \
                 <div class="audio_duration_wrap _audio_duration_wrap"> \
@@ -2905,8 +2906,10 @@ AudioPlayer.tabIcons = {
         }
     },
     AudioPlayer.prototype.toggleAudio = function(t, i) {
-        var e = domClosest("_audio_row", t)
-            , o = cur.cancelClick || i && hasClass(i.target, "audio_row_chords_block") || i && (hasClass(i.target, "audio_lyrics") || domClosest("_audio_duration_wrap", i.target) || domClosest("_audio_inline_player", i.target) || domClosest("audio_performer", i.target));
+        var e = domClosest("_audio_row", t);
+
+
+        var o = cur.cancelClick  || i && hasClass(i.target, "select-check") || i && hasClass(i.target, "audio_row_chords_block") || i && (hasClass(i.target, "audio_lyrics") || domClosest("_audio_duration_wrap", i.target) || domClosest("_audio_inline_player", i.target) || domClosest("audio_performer", i.target));
         if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", e) && (o = !0),
                 delete cur.cancelClick,
                 delete cur._sliderMouseUpNowEl,

@@ -32,6 +32,29 @@
     z-index: 1;
 }
 
+.audio_playlist_wrap .audio_row.selected{
+    background-color: #d6e0ef;
+}
+
+.audio_playlist_wrap .audio_row .select-check {
+    width: 17px;
+    height: 17px;
+    display: block;
+    margin: 5px 10px 0 0;
+    background: url(/images/icons/msg_check.png) no-repeat;
+    float: left;
+    opacity: 0;
+    z-index: 10;
+}
+
+.audio_playlist_wrap .audio_row:hover .select-check {
+    opacity: 0.5;
+}
+
+.audio_playlist_wrap .audio_row.selected .select-check {
+    opacity: 1;
+}
+
 .audio_equalizer_del_btn {
     float: right;
     -o-transition: opacity 60ms linear;
