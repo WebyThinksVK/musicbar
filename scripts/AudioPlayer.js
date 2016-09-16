@@ -316,6 +316,20 @@ var MusicBar = function() {
         }
     }
 
+    this.downloadSelected = function() {
+        var playlist = new AudioPlaylist();
+
+        domQuery(".audio_row.selected").forEach(function(row) {
+            removeClass(row, "selected");
+            var data = JSON.parse(row.getAttribute("data-audio"));
+            playlist.addAudio(data);
+        })
+
+        this.downloadPlaylist(playlist);
+
+        this.toggleSelect(false);
+    }
+
     this.stopDownloadPlaylist = function() {
         this.playlist = [];
         this.playlistCount =  -1;
@@ -874,25 +888,45 @@ var MusicBar = function() {
     this.toggleSelect = function(state) {
         var playlist = geByClass1('audio_playlist_wrap');
 
-        if (state)
-            state = toggleClass(playlist,'select-download', state);
-        else
-            state = toggleClass(geByClass1('audio_playlist_wrap'),'select-download');
-
         if (state === true) {
+            state = toggleClass(playlist,'select-download', state);
+
+            if (ge("download-panel")) return false;
+
             this.ajax(MusicBar.selectHtmlUrl, function() {
                 var selectPanel = ce("div", {
                     id: "download-panel"
                 })
 
                 selectPanel.innerHTML = this;
-
                 playlist.appendChild(selectPanel);
 
+                var rows = geByClass1("audio_rows");
+
+                var size = getSize(rows);
+                var pos = getXY(rows);
+                var edge = size[1] + pos[1];
+
+                if (window.innerHeight - 50 > edge) {
+                    addClass(ge("download-panel"), "absolute");
+                }
+
+                // If panel is under audio_rows, attach it to bottom
+                toggleClass(ge("download-panel"), "absolute", window.scrollY - 50 > edge - window.innerHeight)
+                window.addEventListener("scroll", function() {
+                    toggleClass(ge("download-panel"), "absolute", window.scrollY - 50 > edge - window.innerHeight)
+                })
 
             })
+        } else {
+            var selectPanel = ge("download-panel");
+            if (selectPanel) selectPanel.remove();
+            toggleClass(geByClass1('audio_playlist_wrap'),'select-download', false);
         }
     }
+
+
+
 };
 MusicBar.EXTENSION_ID = "mienmjdbnnpaigifneeiifdbjkdgelha";
 
@@ -1786,7 +1820,7 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
         }
 
         if (t === 0) {
-            getAudioPlayer()._impl.musicBar.toggleVisualization(false);
+            getAudioPlayer()._impl.musicBar.toggleSelect(false);
         }
 
         var l = this.getType() == AudioPlaylist.TYPE_FEED ? this.getItemsCount() : this.getAudiosCount();
@@ -2229,11 +2263,13 @@ AudioPlayer.tabIcons = {
     },
 
     AudioPlayer.prototype.toggleSelect = function(element) {
-
         var row = domClosest("audio_row", element);
-
         toggleClass(row, "selected");
+        var count = domQuery(".audio_row.selected").length;
+
+        domQuery("#download-panel .count")[0].innerText = count;
     },
+
     AudioPlayer.prototype.toggleCurrentAudioRow = function(t, i, e) {
         function o() {
             if (s && (i ? r._addRowPlayer(t, e) : r._removeRowPlayer(t)), i) r.on(t, AudioPlayer.EVENT_PLAY, function(i) {

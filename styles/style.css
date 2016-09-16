@@ -544,7 +544,7 @@
 
 #download-panel {
     height: 50px;
-    z-index: 1000;
+    z-index: 500;
     margin: 0 0 -14px -9px;
     border-radius: 2px;
     width: 550px;
@@ -555,14 +555,33 @@
     position: fixed;
     bottom: 14px;
     box-sizing: border-box;
+    box-shadow: 0px -2px 3px -1px rgba(0,0,0,.12);
+}
+
+#download-panel.absolute {
+    position: absolute;
+    bottom: -45px;
+    box-shadow: 0 1px 1px 0 #d7d8db;
+}
+
+.audio_playlist_wrap.ui_gridsorter_cont #download-panel {
+    display: none;
 }
 
 #download-panel > * {
     float: left;
 }
 
+
+
 #download-panel .selected-count {
-    padding: 15px;
+    padding: 16px 15px;
+}
+
+#download-panel .buttons {
+    float: right;
+    padding: 10px 23px 10px 25px;
+    border: none;
 }
 
 @-webkit-keyframes playlistDownloadProgressAnimation {

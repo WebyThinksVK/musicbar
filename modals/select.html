@@ -1,7 +1,8 @@
 <div class="selected-count">
-    Выбрано песен: <b>50</b>
+    Выбрано аудиозаписей: <b class="count">0</b>
 </div>
 
 <div class="buttons box_controls">
-    <button class="flat_button secondary">Отмена</button>
+    <button class="flat_button secondary" onclick="getAudioPlayer()._impl.musicBar.toggleSelect(false)">Отмена</button>
+    <button class="flat_button" onclick="getAudioPlayer()._impl.musicBar.downloadSelected()">Скачать</button>
 </div>
