@@ -46,7 +46,7 @@
     width: 17px;
     display: block;
     background: url(/images/icons/msg_check.png) no-repeat;
-    opacity: 0;
+    opacity: 0.2;
     margin: 8px;
     height: 18px;
     background-position: center 1px;
@@ -197,6 +197,10 @@
 
 .audio_playlist_wrap .audio_row .audio_acts #actions {
     display: block;
+}
+
+.audio_rows {
+    margin-bottom: 100px;
 }
 
 .audio_row .audio_acts #actions > div:first-child, .gear-icon {
@@ -572,32 +576,27 @@
     float: left;
 }
 
-
-
 #download-panel .selected-count {
-    padding: 16px 15px;
+    padding: 16px 20px;
 }
 
 #download-panel .buttons {
     float: right;
-    padding: 10px 23px 10px 25px;
+    padding: 10px 20px;
     border: none;
 }
 
 @-webkit-keyframes playlistDownloadProgressAnimation {
     0% {background-position-x: 0}
-
     to {background-position-x: 40px }
 }
 
 @-o-keyframes playlistDownloadProgressAnimation {
     0% { background-position-x: 0 }
-
     to { background-position-x: 40px }
 }
 
 @keyframes playlistDownloadProgressAnimation {
     0% { background-position-x: 0 }
-
     to { background-position-x: 40px }
 }

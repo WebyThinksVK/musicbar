@@ -150,8 +150,6 @@ function setEqualizer(equalizer) {
         equalizers: equalizers,
         params: params
     });
-
-    console.log("Current equalizer: ", equalizer.gains.toString());
 }
 /**
  * Create new connection
@@ -269,7 +267,6 @@ function parseMessageFromPage(message, port) {
 
 	return {audio: message.type};
 }
-
 
 function findVideo(message, port) {
     var youtube = {
@@ -451,6 +448,12 @@ function downloadNextSong(info, callback) {
 }
 
 function calculateBitrate(data, callback) {
+
+    if (data.bitrate) {
+        callback.apply(data.bitrate);
+        return true;
+    }
+
     var xhr = new XMLHttpRequest();
     xhr.open('HEAD', data.url, true);
     xhr.send();

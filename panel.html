@@ -52,7 +52,7 @@
     <div class="download-playlist">
         <div class="playlist-wrapper">
             <button class="flat_button secondary audio_download_playlist_btn" onclick="toggle(ge('download_actions_wrap'))">
-                <span class="download_actions_dd_label">Скачать музыку</span>
+                <span class="download_actions_dd_label">Скачать аудиозаписи</span>
             </button>
 
             <div class="playlist_download_progress">
@@ -70,11 +70,11 @@
 
              id="download_actions_wrap" style="opacity: 1; display: none">
             <div class="download_actions_header" onclick="toggle(ge('download_actions_wrap'))">
-                <span class="download_actions_header_inner">Скачать музыку</span>
+                <span class="download_actions_header_inner">Скачать аудоизаписи</span>
             </div>
             <div class="download_actions_inner">
                 <a class="download_actions_item" onclick="toggle(ge('download_actions_wrap')); getAudioPlayer().downloadPlaylist()" tabindex="0" role="link">Текущий плейлист</a>
-                <a class="download_actions_item" onclick="toggle(ge('download_actions_wrap')); getAudioPlayer()._impl.musicBar.toggleSelect(true)" tabindex="0" role="link">Выбрать нужные песни</a>
+                <a class="download_actions_item" onclick="toggle(ge('download_actions_wrap')); getAudioPlayer()._impl.musicBar.toggleSelect(true)" tabindex="0" role="link">Выбрать из списка</a>
             </div>
         </div>
     </div>

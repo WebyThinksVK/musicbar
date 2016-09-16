@@ -10,6 +10,7 @@
 
 var MusicBar = function() {
     var self = this;
+    this.db;
 
     this.context;
     this.source;
@@ -199,6 +200,13 @@ var MusicBar = function() {
         this.equalizers.forEach(function(item) {
             if (item.active) self.setEqualizer(item);
         });
+
+        this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024);
+        this.db.transaction(function (tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS bitrates (song varchar(30) UNIQUE, value)');
+            //tx.executeSql('INSERT INTO bitrates (song, value) VALUES (?, ?)', ["40928941_456239079", 320]);
+
+        });
     }
 
     // Send messsage to bacgkround without answer
@@ -299,17 +307,22 @@ var MusicBar = function() {
                 case 4:songsMorphy = "песни"; break;
             }
 
-            var modal = showFastBox({
-                title: "Скачивание аудиозаписей",
-                dark: 1
-            }, "Вы уверены, что хотите скачать <b>"+this.playlistCount+"</b> "+songsMorphy+"? Это может занять продолжительное время.", "Продолжить", function(a) {
+            var box = new MessageBox({title: "Скачивание аудиозаписей", dark: 1});
+            box.content("Вы уверены, что хотите скачать <b>"+this.playlistCount+"</b> "+songsMorphy+"? Это может занять продолжительное время. <br> <br> Вы также можете <a onclick='boxQueue.hideLast(); getAudioPlayer()._impl.musicBar.toggleSelect(true)'> выбрать нужные песни</a>.");
+
+            box.addButton("Продолжить", function() {
                 fn()
-                modal.hide();
-            }, "Отмена", function() {
+                box.hide();
+            });
+
+            box.addButton("Отмена", function() {
                 self.playlist = [];
                 self.playlistCount = 0;
-                modal.hide();
-            })
+                box.hide();
+            }, "no");
+
+            box.show();
+
 
         } else {
             fn();
@@ -663,13 +676,14 @@ var MusicBar = function() {
         })
 
         for (var i = 0; i < queue.length / countPerRequest; i++) {
-            var part = queue.slice(i * countPerRequest, i * countPerRequest + countPerRequest).join(",");
+            var part = queue.slice(i * countPerRequest, i * countPerRequest + countPerRequest);
 
-            this.reloadAudio(part, function(e, a) {
+            self.reloadAudio(part, function(e, a) {
 
                 if (a !== false) {
-                    console.error("server is busy");
+                    topMsg("Сервер перегружен. Подождите немного.", 2 * 60 * 100, '#FFB4A3');
                 }
+
                 var data = [];
                 each(e, function(i, e) {
                     e = AudioUtils.asObject(e);
@@ -678,10 +692,10 @@ var MusicBar = function() {
                     a[AudioUtils.AUDIO_ITEM_INDEX_URL] = e.url;
                     getAudioPlayer().updateAudio(e.fullId, a);
 
-
                     data.push({
                         id: e.fullId,
                         url: e.url,
+                        bitrate: e.bitrate,
                         duration: e.duration,
                     });
                 })
@@ -696,24 +710,64 @@ var MusicBar = function() {
 
     this.reloadAudio = function(ids, callback) {
         var timer = window.setTimeout(function() {
-            ajax.post("al_audio.php", {
-                act: "reload_audio",
-                ids: ids
-            }, {
-                onDone: callback
-            })
+            // Song, whose bitrate we know
+            var knownBitrates = [];
 
-            self.reloadAudioQueue.splice(self.reloadAudioQueue.indexOf(timer), 1);
-        }, 500 * this.reloadAudioQueue.length + 1);
+            self.db.transaction(function (tx) { // Get requested id's in BD
+                tx.executeSql('SELECT * FROM bitrates WHERE song IN (' +'"' + ids.join('", "') + '"'+ ')', [], function (tx, results) {
 
+                    // Loop for results
+                    for( i in results.rows) {
+                        var row = results.rows[i];
+                        if (typeof(row) === "object") {
+                            ids.splice(ids.indexOf(row.song), 1);
+                            knownBitrates.push(row);
+                        }
+                    }
+
+                    // Done function. e = array of audio datas, a - status (false, undefined)
+                    var onDone = function(e, a) {
+                        // Get audio data, set bitrate and push it to array
+                        knownBitrates.forEach(function(song) {
+                            if (ge("audio_" + song.song)) {
+                                var data = JSON.parse(ge("audio_" + song.song).getAttribute("data-audio"));
+                                data[AudioUtils.AUDIO_ITEM_INDEX_BITRATE] = song.value;
+                                e.push(data);
+                            }
+                        })
+                        callback(e, a);
+                    };
+
+                    // If we have songs, that bitrate we still don't know, request in from VK
+                    if (ids.length) {
+                        ajax.post("al_audio.php", {
+                            act: "reload_audio",
+                            ids: ids.join(",")
+                        }, {
+                            onDone: onDone
+                        })
+
+                        // If we know all songs
+                    } else {
+                        onDone([], false);
+                    }
+
+                    self.reloadAudioQueue.splice(self.reloadAudioQueue.indexOf(timer), 1);
+
+                });
+            });
+
+        }, 300 * this.reloadAudioQueue.length + 1);
         this.reloadAudioQueue.push(timer);
     }
 
-    this.eraceReloadAudio = function() {
+    this.eraceReloadAudio = function(callback) {
         this.reloadAudioQueue.forEach(function(timer) {
             clearTimeout(timer);
         })
         this.reloadAudioQueue = [];
+
+        callback && callback();
     }
 
     this.setBitrate = function(song, bitrate) {
@@ -730,6 +784,10 @@ var MusicBar = function() {
                     getAudioPlayer().updateAudio(e.fullId, a);
 
                     geByClass1("audio_hq_label", row).innerText = bitrate;
+
+                    self.db.transaction(function (tx) {
+                        tx.executeSql('INSERT INTO bitrates (song, value) VALUES (?, ?)', [e.fullId, bitrate]);
+                    });
                 }
             }
         })
@@ -883,8 +941,6 @@ var MusicBar = function() {
         })
     }
 
-    //topMsg("Текст", 10000, '#FFB4A3');
-
     this.toggleSelect = function(state) {
         var playlist = geByClass1('audio_playlist_wrap');
 
@@ -914,6 +970,9 @@ var MusicBar = function() {
                 // If panel is under audio_rows, attach it to bottom
                 toggleClass(ge("download-panel"), "absolute", window.scrollY - 50 > edge - window.innerHeight)
                 window.addEventListener("scroll", function() {
+                    size = getSize(rows);
+                    pos = getXY(rows);
+                    edge = size[1] + pos[1];
                     toggleClass(ge("download-panel"), "absolute", window.scrollY - 50 > edge - window.innerHeight)
                 })
 
@@ -922,6 +981,10 @@ var MusicBar = function() {
             var selectPanel = ge("download-panel");
             if (selectPanel) selectPanel.remove();
             toggleClass(geByClass1('audio_playlist_wrap'),'select-download', false);
+
+            domQuery(".audio_row.selected").forEach(function(row){
+                removeClass(row, "selected");
+            })
         }
     }
 
@@ -1821,6 +1884,7 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
 
         if (t === 0) {
             getAudioPlayer()._impl.musicBar.toggleSelect(false);
+            getAudioPlayer()._impl.musicBar.eraceReloadAudio(getAudioPlayer()._impl.musicBar.updateBitrate);
         }
 
         var l = this.getType() == AudioPlaylist.TYPE_FEED ? this.getItemsCount() : this.getAudiosCount();
@@ -2037,16 +2101,6 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                             each(i || [], function(t, i) {
                                 i && i(e)
                             })
-
-
-
-                        // clear loading queue
-                        if (e._impl) {
-
-                            e._impl.musicBar.eraceReloadAudio();
-                            e._impl.musicBar.updateBitrate();
-                        }
-
                     }
                 })
         } else t && t(this)
@@ -2952,7 +3006,7 @@ AudioPlayer.tabIcons = {
                            var modal = showFastBox({
                                title: "Ошибка",
                                dark: 1
-                           }, "К сожалению, сервер временно недоступен. Отключите отображение битрейта песен для избежания подобной ситуации.", "Закрыть", function(a) {
+                           }, "К сожалению, сервер временно недоступен. Вы можете отключить отображение битрейта песен для избежания подобной ситуации.", "Закрыть", function(a) {
                                modal.hide();
                            }, 'Отключить битрейт', function() {
                                AudioUtils.toggleAudioHQBodyClass(0);
