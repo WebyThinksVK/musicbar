@@ -515,7 +515,7 @@ var MusicBar = function() {
         addTemplates({
             audio_row_advanced: '' +
             '<div class="audio_row _audio_row _audio_row_%1%_%0% %cls% clear_fix" onmouseleave="fadeOut(geByClass1(\'audio_row_dropdown\', this), 200)"  onclick="return getAudioPlayer().toggleAudio(this, event)" data-audio="%serialized%" data-full-id="%1%_%0%" id="audio_%1%_%0%"> \
-            <div class="select-check"> </div> \
+            <div class="select-check-wrapper" onclick="getAudioPlayer().toggleSelect(this)"> <div class="select-check" ></div> </div>\
             <div class="audio_play_wrap" data-nodrag="1"><button class="audio_play _audio_play" id="play_%1%_%0%" aria-label="Воспроизвести "></button></div> \
             <div class="audio_info"> \
                 <div class="audio_duration_wrap _audio_duration_wrap"> \
@@ -868,10 +868,36 @@ var MusicBar = function() {
             state:  this.params.bitrate
         })
     }
+
+    //topMsg("Текст", 10000, '#FFB4A3');
+
+    this.toggleSelect = function(state) {
+        var playlist = geByClass1('audio_playlist_wrap');
+
+        if (state)
+            state = toggleClass(playlist,'select-download', state);
+        else
+            state = toggleClass(geByClass1('audio_playlist_wrap'),'select-download');
+
+        if (state === true) {
+            this.ajax(MusicBar.selectHtmlUrl, function() {
+                var selectPanel = ce("div", {
+                    id: "download-panel"
+                })
+
+                selectPanel.innerHTML = this;
+
+                playlist.appendChild(selectPanel);
+
+
+            })
+        }
+    }
 };
 MusicBar.EXTENSION_ID = "mienmjdbnnpaigifneeiifdbjkdgelha";
 
 MusicBar.panelHtmlUrl = "chrome-extension://" + MusicBar.EXTENSION_ID + "/panel.html";
+MusicBar.selectHtmlUrl = "chrome-extension://" + MusicBar.EXTENSION_ID + "/modals/select.html";
 MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID + "/modals/form_equalizer.html";
 
 
@@ -1450,6 +1476,7 @@ var AudioUtils = {
             var h = geByClass1("post_fixed");
             h && o.unshift(geByClass1("wall_text", h))
         } else(r = gpeByClass("_module", t)) ? (e = a.getPlaylist(AudioPlaylist.TYPE_ALBUM, cur.oid, AudioPlaylist.ALBUM_ALL), o = [r]) : o = [domPN(t)];
+
         return e || (e = a.getPlaylist(AudioPlaylist.TYPE_TEMP, vk.id, l)),
             e = AudioUtils.initDomPlaylist(e, o), -1 == e.indexOfAudio(s) && (e = new AudioPlaylist(AudioPlaylist.TYPE_TEMP, vk.id, irand(999, 99999)), e = AudioUtils.initDomPlaylist(e, [domPN(t)])),
             e.load(),
@@ -1757,18 +1784,26 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                 })
             })
         }
+
+        if (t === 0) {
+            getAudioPlayer()._impl.musicBar.toggleVisualization(false);
+        }
+
         var l = this.getType() == AudioPlaylist.TYPE_FEED ? this.getItemsCount() : this.getAudiosCount();
 
-        if (!e && this.hasMore() && 0 == t && l > 0) return i && i(this);
+        if (!e && this.hasMore() && 0 == t && l > 0) {
+            return i && i(this);
+        }
 
-        if (!this.hasMore()) return i && i(this);
+        if (!this.hasMore()) {
+            return i && i(this);
+        }
+
         if (this.getType() == AudioPlaylist.TYPE_ALBUM) {
-
             return this.loadSilent(i);
         }
+
         if (l - 20 > t) return i && i(this);
-
-
 
         if (this._onDoneLoading = this._onDoneLoading || [], this._onDoneLoading.push(i), !this._loading) {
 
@@ -1970,8 +2005,10 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                             })
 
 
+
                         // clear loading queue
                         if (e._impl) {
+
                             e._impl.musicBar.eraceReloadAudio();
                             e._impl.musicBar.updateBitrate();
                         }
@@ -2189,6 +2226,13 @@ AudioPlayer.tabIcons = {
         if (e.length) {
             this._impl.musicBar.setCurrentRow(e[0]) ;
         }
+    },
+
+    AudioPlayer.prototype.toggleSelect = function(element) {
+
+        var row = domClosest("audio_row", element);
+
+        toggleClass(row, "selected");
     },
     AudioPlayer.prototype.toggleCurrentAudioRow = function(t, i, e) {
         function o() {
@@ -2872,7 +2916,7 @@ AudioPlayer.tabIcons = {
                            var modal = showFastBox({
                                title: "Ошибка",
                                dark: 1
-                           }, "Сервер перегружен. Отключите отображение битрейта песен для избежания подобной ситуации.", "Закрыть", function(a) {
+                           }, "К сожалению, сервер временно недоступен. Отключите отображение битрейта песен для избежания подобной ситуации.", "Закрыть", function(a) {
                                modal.hide();
                            }, 'Отключить битрейт', function() {
                                AudioUtils.toggleAudioHQBodyClass(0);
@@ -2882,7 +2926,7 @@ AudioPlayer.tabIcons = {
                            var modal = showFastBox({
                                title: "Ошибка",
                                dark: 1
-                           }, "Сервер перегружен. Подождите немного.", "Закрыть", function(a) {
+                           }, "К сожалению, сервер временно недоступен. Попробуйте повторить действие чуть позже.", "Закрыть", function(a) {
                                modal.hide();
                            })
                        }
@@ -2909,7 +2953,7 @@ AudioPlayer.tabIcons = {
         var e = domClosest("_audio_row", t);
 
 
-        var o = cur.cancelClick  || i && hasClass(i.target, "select-check") || i && hasClass(i.target, "audio_row_chords_block") || i && (hasClass(i.target, "audio_lyrics") || domClosest("_audio_duration_wrap", i.target) || domClosest("_audio_inline_player", i.target) || domClosest("audio_performer", i.target));
+        var o = cur.cancelClick  || i && hasClass(i.target, "select-check") || i && hasClass(i.target, "select-check-wrapper") || i && hasClass(i.target, "audio_row_chords_block") || i && (hasClass(i.target, "audio_lyrics") || domClosest("_audio_duration_wrap", i.target) || domClosest("_audio_inline_player", i.target) || domClosest("audio_performer", i.target));
         if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", e) && (o = !0),
                 delete cur.cancelClick,
                 delete cur._sliderMouseUpNowEl,

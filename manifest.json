@@ -71,6 +71,7 @@
     "style.css",
     "modals/form_equalizer.html",
     "modals/performer.html",
+    "modals/select.html",
     "scripts/AudioPlayer.js",
     "panel.html"
   ]
