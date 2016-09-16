@@ -140,8 +140,11 @@ function ajax(url, callback) {
 
 function setEqualizer(equalizer) {
 
+    if (!equalizer) return false;
+
     // Set this equalizer active state
     equalizers.forEach(function(item, i) {
+
         item.active = i == equalizers.indexOf(equalizer);
     });
 
@@ -189,6 +192,11 @@ function parseMessageFromPage(message, port) {
 
         case "setBitrateState":
             params.bitrate = message.state;
+            chrome.storage.sync.set({params: params});
+            break;
+
+        case "setVisualization":
+            params.visualization = message.state;
             chrome.storage.sync.set({params: params});
             break;
 
@@ -438,13 +446,21 @@ function findChordsUltimateGuitar(artist, song, callback) {
 }
 
 function downloadNextSong(info, callback) {
-    ajax(info.url, function() {
-        blob = new Blob([this], {type: "audio/mpeg"});
 
-        ZipFile.addFile(encode(info.name).replace("/","") + ".mp3", blob, function() {
-            callback && callback();
-        });
-    })
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', info.url, true);
+    xhr.responseType = "blob";
+    xhr.overrideMimeType("application/octet-stream");
+    xhr.send();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+            var blob = new Blob([xhr.response], {type: "application/octet-stream"});
+
+            ZipFile.addFile(encode(info.name).replace("/","") + ".mp3", blob, function() {
+                callback && callback();
+            });
+        }
+    };
 }
 
 function calculateBitrate(data, callback) {

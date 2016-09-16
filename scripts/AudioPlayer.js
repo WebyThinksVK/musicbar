@@ -160,6 +160,8 @@ var MusicBar = function() {
             item.active = i == self.equalizers.indexOf(equalizer);
         });
 
+        console.log(self.equalizers.indexOf(equalizer));
+
         this.postMessage({
             type: "setEqualizer",
             number: self.equalizers.indexOf(equalizer)
