@@ -668,10 +668,13 @@ var MusicBar = function() {
     };
 
     this.updateBitrate = function() {
+
+        console.log("updateBitrate");
+
         var countPerRequest = 10;
         var queue = [];
 
-        each(geByClass("audio_row"), function() {
+        each(domQuery(".page_block .audio_row"), function() {
             if (!domClosest("audio_rows", this) && !domClosest("wall_audio_rows", this)) return;
             var bitrate = geByClass1("audio_hq_label", this).innerText;
             if (!bitrate.length) queue.push(this.getAttribute("data-full-id"));
@@ -711,6 +714,9 @@ var MusicBar = function() {
     }
 
     this.reloadAudio = function(ids, callback) {
+
+        console.log(ids);
+
         var timer = window.setTimeout(function() {
             // Song, whose bitrate we know
             var knownBitrates = [];
@@ -926,6 +932,9 @@ var MusicBar = function() {
     };
 
     this.toggleBitrate = function(element, state) {
+
+        if (state && this.params.bitrate != state) this.updateBitrate();
+
         if (element) {
             checkbox(element);
             this.params.bitrate = !!isChecked(element);
@@ -934,8 +943,6 @@ var MusicBar = function() {
         } else {
             this.params.bitrate = state;
         }
-
-        if (state) this.updateBitrate();
 
         this.postMessage({
             type: "setBitrateState",
@@ -989,12 +996,9 @@ var MusicBar = function() {
             })
         }
     }
-
-
-
 };
-MusicBar.EXTENSION_ID = "mienmjdbnnpaigifneeiifdbjkdgelha";
 
+MusicBar.EXTENSION_ID = "mienmjdbnnpaigifneeiifdbjkdgelha";
 MusicBar.panelHtmlUrl = "chrome-extension://" + MusicBar.EXTENSION_ID + "/panel.html";
 MusicBar.selectHtmlUrl = "chrome-extension://" + MusicBar.EXTENSION_ID + "/modals/select.html";
 MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID + "/modals/form_equalizer.html";
@@ -1080,6 +1084,7 @@ function AudioPlayer() {
             this._statusExport = {},
             this._currentPlayingRows = [],
             this._allowPrefetchNext = !1,
+            this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024),
             !vk.isBanned) {
         AudioUtils.debugLog("Player creation"),
             this._initImpl(),
@@ -1133,6 +1138,7 @@ var AudioUtils = {
     AUDIO_LAYER_MAX_WIDTH: 1e3,
     AUDIO_HQ_LABEL_CLS: "audio_hq_label_show",
     updateBitrateTimer: null,
+    idsToQuery : [],
     toggleAudioHQBodyClass: function(state) {
         var t = getAudioPlayer().showHQLabel(state);
         getAudioPlayer()._impl.musicBar.toggleBitrate(null, t);
@@ -1314,7 +1320,6 @@ var AudioUtils = {
         window.event = void 0
     },
     drawAudio: function(t, i) {
-
         var params  = JSON.parse(getTemplate("audio_bits_to_cls"));
         var indexFlag = t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS];
         var a = [];
@@ -1327,12 +1332,33 @@ var AudioUtils = {
 
         if (i) a.push(i);
 
+        var mb = getAudioPlayer()._impl.musicBar;
+        var fullId = t[1] + "_" +t[0];
+        this.idsToQuery.push(fullId);
 
-        clearTimeout(this.updateBitrateTimer);
-        this.updateBitrateTimer = window.setTimeout(function() {
-            if (getAudioPlayer()._impl.musicBar.params.bitrate)
-                getAudioPlayer()._impl.musicBar.updateBitrate();
-        }, 100)
+        if (mb) {
+            var au = this;
+
+            clearTimeout(this.updateBitrateTimer);
+            this.updateBitrateTimer = window.setTimeout(function() {
+                getAudioPlayer().db.transaction(function(tr) {
+                    tr.executeSql('SELECT * FROM bitrates WHERE song IN (' +'"' + au.idsToQuery.join('", "') + '"'+ ')', [], function (tx, results) {
+
+                        // Loop for results
+                        for( i in results.rows) {
+                            var data = results.rows.item(i);
+
+                            var row = domQuery(".page_block #audio_"+data.song+" .audio_hq_label");
+                            if (results.rows.length && row.length)
+                                row[0].innerText = data.value;
+                        }
+
+                        if (mb.params.bitrate) mb.updateBitrate();
+                    })
+                    this.idsToQuery = [];
+                })
+            }, 100)
+        }
 
         var r = formatTime(t[AudioUtils.AUDIO_ITEM_INDEX_DURATION]);
         var u = clean(JSON.stringify(t)).split("$").join("$$");
@@ -1886,7 +1912,9 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
 
         if (t === 0) {
             getAudioPlayer()._impl.musicBar.toggleSelect(false);
-            getAudioPlayer()._impl.musicBar.eraceReloadAudio(getAudioPlayer()._impl.musicBar.updateBitrate);
+
+            if (getAudioPlayer()._impl.musicBar.reloadAudioQueue.length)
+                getAudioPlayer()._impl.musicBar.eraceReloadAudio(getAudioPlayer()._impl.musicBar.updateBitrate);
         }
 
         var l = this.getType() == AudioPlaylist.TYPE_FEED ? this.getItemsCount() : this.getAudiosCount();
@@ -3136,7 +3164,7 @@ AudioPlayer.tabIcons = {
 
     },
     AudioPlayer.prototype.getCurrentPlaylist = function() {
-        return this._currentPlaylist
+        return this._currentPlaylist || new AudioPlaylist();
     },
     AudioPlayer.prototype.getPlaylists = function() {
         return clone(this._playlists)
