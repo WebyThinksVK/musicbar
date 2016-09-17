@@ -56,7 +56,7 @@
     "http://*.lastfm.ru/*"
   ],
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "externally_connectable": {
     "matches": [
       "http://vk.com/*",
