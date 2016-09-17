@@ -206,7 +206,15 @@ var MusicBar = function() {
         this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024);
         this.db.transaction(function (tx) {
             tx.executeSql('CREATE TABLE IF NOT EXISTS bitrates (song varchar(30) UNIQUE, value)');
-            //tx.executeSql('INSERT INTO bitrates (song, value) VALUES (?, ?)', ["40928941_456239079", 320]);
+            //tx.executeSql("DROP TABLE bitrates");
+
+            tx.executeSql("SELECT * FROM bitrates", [], function(tr, results) {
+
+                if (results.rows.length > 100000) {
+                    tx.executeSql("DELETE FROM bitrates");
+                }
+
+            })
 
         });
     }
@@ -668,9 +676,6 @@ var MusicBar = function() {
     };
 
     this.updateBitrate = function() {
-
-        console.log("updateBitrate");
-
         var countPerRequest = 10;
         var queue = [];
 
@@ -714,8 +719,6 @@ var MusicBar = function() {
     }
 
     this.reloadAudio = function(ids, callback) {
-
-        console.log(ids);
 
         var timer = window.setTimeout(function() {
             // Song, whose bitrate we know
@@ -1344,14 +1347,17 @@ var AudioUtils = {
                 getAudioPlayer().db.transaction(function(tr) {
                     tr.executeSql('SELECT * FROM bitrates WHERE song IN (' +'"' + au.idsToQuery.join('", "') + '"'+ ')', [], function (tx, results) {
 
-                        // Loop for results
-                        for( i in results.rows) {
-                            var data = results.rows.item(i);
+                        if (results.rows.length) {
+                            // Loop for results
+                            for( i in results.rows) {
+                                var data = results.rows.item(i);
 
-                            var row = domQuery(".page_block #audio_"+data.song+" .audio_hq_label");
-                            if (results.rows.length && row.length)
-                                row[0].innerText = data.value;
+                                var row = domQuery(".page_block #audio_"+data.song+" .audio_hq_label");
+                                if (results.rows.length && row.length)
+                                    row[0].innerText = data.value;
+                            }
                         }
+
 
                         if (mb.params.bitrate) mb.updateBitrate();
                     })
