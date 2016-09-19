@@ -123,7 +123,7 @@ var MusicBar = function() {
         node.connect(splitter);
 
         return merger;
-    }
+    };
 
     this.setEqualizer = function(equalizer) {
 
@@ -133,8 +133,13 @@ var MusicBar = function() {
             });
         }
 
+        if (!equalizer) {
+            equalizer = this.equalizers[this.equalizers.length-1];
+        }
+
         this.source.disconnect();
         this.filters[this.filters.length-1].disconnect();
+
 
         for (var i = 0; i < this.filters.length; i++ ) {
 
