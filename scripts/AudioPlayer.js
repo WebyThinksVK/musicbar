@@ -294,6 +294,23 @@ var MusicBar = function() {
         })
     };
 
+    this.shareSong = function(song) {
+        var row = domClosest("_audio_row", song);
+        var id = row.getAttribute("data-full-id");
+        showBox("like.php", {
+            act: "publish_box",
+            object: "audio" + id,
+
+
+        }, {
+            stat: ["page.js", "page.css", "wide_dd.js", "wide_dd.css", "sharebox.js"],
+            onFail: function(t) {
+                showDoneBox(t);
+                return false;
+            }
+        })
+    };
+
     this.downloadPlaylist = function(playlist) {
         this.playlist = clone(playlist.getAudiosList());
         this.playlistCount =  this.playlist.length;
@@ -568,12 +585,13 @@ var MusicBar = function() {
                             <div class="gear-icon"></div>\
                             <div id="audio_row_dropdown" class="audio_row_dropdown" >\
                                 <div class="rows" style="font-size: 13px;">\
-                                    <div class="header"><div id="privacy_header" class="header_label"><div class="gear-icon"></div>Действия</div></div>\
+                                    <div class="header"><div id="privacy_header" class="header_label"><div class="gear-icon"></div>&nbsp;&nbsp; Действия</div></div>\
                                     <div class="body">\
                                         <div class="item" onclick="getAudioPlayer()._impl.musicBar.downloadSong(this)">Скачать на ПК</div>\
                                         <div class="item" onclick="getAudioPlayer()._impl.musicBar.findPerformer(this)">Об исполнителе</div>\
-                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.findVideo(this)">Найти клип песни</div>\
-                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.findChords(this)">Найти аккорды песни</div>\
+                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.findVideo(this)">Найти клип </div>\
+                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.findChords(this)">Найти аккорды </div>\
+                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.shareSong(this)">Отправить другу</div>\
                                     </div>\
                                 </div>\
                             </div>\
@@ -696,7 +714,7 @@ var MusicBar = function() {
             self.reloadAudio(part, function(e, a) {
 
                 if (a !== false) {
-                    topMsg("Сервер перегружен. Подождите немного.", 2 * 60 * 100, '#FFB4A3');
+                    topMsg("Сервер перегружен. Подождите немного.", 30, '#FFB4A3');
                 }
 
                 var data = [];
