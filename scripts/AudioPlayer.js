@@ -300,13 +300,17 @@ var MusicBar = function() {
         showBox("like.php", {
             act: "publish_box",
             object: "audio" + id,
-
-
         }, {
             stat: ["page.js", "page.css", "wide_dd.js", "wide_dd.css", "sharebox.js"],
             onFail: function(t) {
                 showDoneBox(t);
                 return false;
+            },
+            onDone: function(box) {
+
+                var check = ge("like_share_mail", box);
+
+                if (!hasClass(check, 'disabled')) ShareBox.rbChanged(check, 2);
             }
         })
     };
@@ -604,7 +608,7 @@ var MusicBar = function() {
                     </div> \
                 </div> \
                 <div class="audio_title_wrap"> \
-                <a href="%search_href%" onmouseover="setTitle(this)" nodrag="1" onclick="return audioSearchPerformer(this, event)" class="audio_performer">%4%</a \
+                <a href="%search_href%" onmouseover="setTitle(this)" nodrag="1" onclick="return audioSearchPerformeraudioSearchPerformer(this, event)" class="audio_performer">%4%</a \
                 ><span class="audio_info_divider">&ndash;</span\
                 ><span class="audio_title _audio_title" onmouseover="setTitle(this, domPN(this))"\
                 ><span class="audio_title_inner" tabindex="0" nodrag="1" aria-label="%3%" onclick="return toggleAudioLyrics(event, this, \'%1%_%0%\', \'%9%\')">%3%</span\

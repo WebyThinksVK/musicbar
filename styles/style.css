@@ -338,27 +338,48 @@
     border-radius: 50%;
 }
 
-.band_info {
+.performer-info .similar-title {
+    font-weight: 500;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    margin-bottom: 5px;
+    font-size: 16px;
+    color: #2b2f33;
+    margin-top: 20px;
+}
+
+.performer-info .similar-band {
+
+    border-bottom: 1px dashed #a7b7c9;
+    color: #2a5885;
+    text-decoration: none;
+    cursor: pointer;
+    margin-bottom: 3px;
+    display: inline-block;
+    line-height: 1;
+}
+
+.performer-info .band_info {
     float: left;
     margin-left: 20px;
     max-width: calc(100% - 120px);
 }
 
-.band_info .name {
+.performer-info .band_info .name {
     font-size: 24px;
     font-weight: 700;
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: subpixel-antialiased;
     line-height: 33px;
-    color: #000;
+    color: #2b2f33;
     margin-top: 15px;
 }
 
-.band_info .tags {
+.performer-info .band_info .tags {
     overflow: hidden;
     margin-top: 5px;
 }
 
-.band_info .tag {
+.performer-info .band_info .tag {
     float: left;
     margin: 0 5px 5px 0;
     background-color: #dae2ea;
@@ -372,16 +393,17 @@
     line-height: 1.154;
 }
 
-.bio {
+.performer-info .bio {
+    margin-top: 16px;
+    text-decoration: none!important;
+    display: block;
+    white-space: pre-line;
+    clear: both;
     color: #2b2f33;
     font-size: 15px;
     line-height: 22.5px;
     letter-spacing: -0.1px;
-    margin-top: 16px;
-    padding-top: 10px;
-    text-decoration: none!important;
-    display: block;
-    white-space: pre-line;
+    padding-top: 12px;
 }
 
 /* DOWNLOAD PLAYLIST */

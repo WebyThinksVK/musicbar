@@ -324,19 +324,29 @@ function findPerformer(message, port) {
                     type: "findPerformer",
                     html: false
                 });
+                return false;
             }
 
             var html = this;
 
             var tags = "";
+            var similar = "";
+
             artist.tags.tag.forEach(function(item) {
                 tags += "<div class='tag'>"+item.name+"</div>";
             });
+
+            artist.similar.artist.forEach(function(artist) {
+                similar += "<a class=\"similar-band\" onclick=\" nav.change({ q: '"+artist.name+"', performer: 1 }, window, { searchPerformer: true }); curBox().hide();\">"+artist.name+"</a><br>";
+            });
+
+
 
             html = html.replace(/%image_url%/, artist.image[2]["#text"]);
             html = html.replace(/%last_fm_url%/, artist.url);
             html = html.replace(/%band_name%/, artist.name);
             html = html.replace(/%tags%/, tags);
+            html = html.replace(/%similar%/, similar);
             html = html.replace(/%bio%/, artist.bio.content.trim().replace(/<a (.*)/g, ""));
 
             port.postMessage({
