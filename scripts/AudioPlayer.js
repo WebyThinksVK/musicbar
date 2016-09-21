@@ -158,21 +158,15 @@ var MusicBar = function() {
         }
 
         soundNode.connect(this.context.destination);
-
-
         // Set this equalizer active state
         this.equalizers.forEach(function(item, i) {
             item.active = i == self.equalizers.indexOf(equalizer);
         });
 
-        console.log(self.equalizers.indexOf(equalizer));
-
         this.postMessage({
             type: "setEqualizer",
             number: self.equalizers.indexOf(equalizer)
         });
-
-        console.log("Current equalizer: ", equalizer.gains.toString());
     }
 
     // Init extension
@@ -511,7 +505,7 @@ var MusicBar = function() {
             type: "findPerformer",
             performer: data.performer,
         })
-    }
+    };
 
     this.showPerformer = function(message) {
         var box = new MessageBox({width: 600});
@@ -525,7 +519,7 @@ var MusicBar = function() {
 
         box.addButton("Закрыть");
         box.show();
-    }
+    };
 
     this.findChords = function(element) {
         var row = domClosest("_audio_row", element);
@@ -542,7 +536,7 @@ var MusicBar = function() {
             song: data.title,
             id: row.getAttribute("id")
         })
-    }
+    };
 
     this.setCurrentRow = function(element) {
         this.currentRow = element;
@@ -619,7 +613,7 @@ var MusicBar = function() {
                 <div class="_audio_lyrics_wrap audio_lyrics" data-nodrag="1"></div> \
             </div>'
         });
-    }
+    };
     this.addRowTemplate();
 
     this.initPanel = function() {

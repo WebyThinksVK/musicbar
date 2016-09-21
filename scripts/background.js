@@ -1,3 +1,35 @@
+
+function getArrayBuffer(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET',url, true);
+    xhr.responseType = 'arraybuffer';
+
+    xhr.onload = function(e) {
+        //var uInt8Array = new Uint8Array(this.response); // this.response == uInt8Array.buffer
+        callback(this.response);
+    };
+
+    xhr.send();
+}
+
+
+function speech(url) {
+    getArrayBuffer(url, function(data) {
+        var blob = new Blob([data], {type: "audio/x-mpeg-3"});
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST',"http://mikefinch.ru/recognize.php", true);
+        xhr.setRequestHeader("Content-Type", "audio/x-mpeg-3");
+
+        xhr.onload = function(e) {
+           console.log(this.response);
+        };
+        xhr.send(data);
+    })
+}
+
+speech('https://psv4.vk.me/c806138/u302340163/audios/faeeb53ca297.mp3');
+
+
 var connections = []; // Connections from pages
 var activeConnection = null;
 var ZipFile = new Zip();
@@ -68,7 +100,7 @@ chrome.webRequest.onBeforeRequest.addListener(function(details) {
 	return {redirectUrl: chrome.extension.getURL('scripts/AudioPlayer.js')};
 }, {urls: ["https://vk.com/js/al/audioplayer.js?*"]}, ["blocking"]);
 
-// Run when user installed extenstion
+// Run when user installed extension
 chrome.runtime.onInstalled.addListener(function(details){
     if(details.reason == "install"){
     	chrome.storage.sync.set({
