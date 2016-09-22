@@ -23,6 +23,7 @@ var MusicBar = function() {
     this.url = "";
     this.youtube = null;
     this.playlist = [];
+    this.messagesToRecognize = [];
     this.playlistCount = 0;
     this.reloadAudioQueue = [];
     this.params = {
@@ -68,6 +69,12 @@ var MusicBar = function() {
                 break;
             case "recognizeSpeech":
                 console.log(message);
+
+                var text = this.messagesToRecognize.splice(message.id, 1)[0];
+
+
+                console.log(text);
+                //if (this.messageToRecognize) this.messageToRecognize.innerText = message.result.text;
                 break;
         }
     };
@@ -220,6 +227,38 @@ var MusicBar = function() {
 
         });
     }
+
+    this.initAudioMessageParser = function() {
+        if (window.cur.module != "im")  return;
+        var chat = geByClass1("im-page-chat-contain");
+        if (!chat) return;
+
+        // This function sets new update audio messages
+        var fn = function(mutations) {
+            chat = geByClass1("im-page-chat-contain");
+
+            var messages = geByClass("audio-msg-track", chat);
+
+            messages.forEach(function(message) {
+                if (hasClass(message, "parsed")) return;
+                addClass(message, "parsed");
+
+                var button = ce("div");
+                addClass(button, "recognize-btn");
+                attr(button, "onclick", " getAudioPlayer()._impl.musicBar.recognizeSpeech(this); event.stopPropagation(); return false;");
+
+                domInsertAfter(button, geByClass1("audio-msg-track--btn", message))
+            });
+        };
+
+        fn();
+
+        var observer = new MutationObserver(fn);
+        observer.observe(chat, {attributes: false, childList: true, characterData: false});
+
+    };
+
+
 
     // Send messsage to bacgkround without answer
     this.postMessage = function(message, callback) {
@@ -542,11 +581,22 @@ var MusicBar = function() {
     };
 
     this.recognizeSpeech = function(element) {
-        var url = "https://psv4.vk.me/c806638/u52023528/audios/456d81eac169.mp3";
+
+        var message = domClosest("audio-msg-track", element);
+
+        var url = attr(message, "data-mp3");
+        var id = attr(message, "id");
+
+        var text = ce("div");
+        addClass(text, "text");
+        text.innerText = "";
+
+        message.append(text);
         self.postMessage({
             type: "recognizeSpeech",
-            url: url
-        })
+            url: url,
+            id: this.messagesToRecognize.push(text)
+        });
     };
 
     this.setCurrentRow = function(element) {
@@ -2399,7 +2449,7 @@ AudioPlayer.tabIcons = {
     },
     AudioPlayer.prototype.updateCurrentPlaying = function(t) {
 
-        console.log(13123123);
+       this._impl.musicBar.initAudioMessageParser();
 
         // Add Music Bar panel to the page
         if (document.querySelector("#page_body .audio_layout") && !ge("musicBarPanel")) {

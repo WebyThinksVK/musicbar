@@ -270,7 +270,7 @@ function parseMessageFromPage(message, port) {
 
         case "recognizeSpeech":
             recognizeSpeech(message.url, function(result) {
-                port.postMessage({type: "recognizeSpeech", result: result});
+                port.postMessage({type: "recognizeSpeech", result: result, id: message.id});
             });
             break;
 
@@ -547,7 +547,10 @@ function recognizeSpeech (url, callback) {
                 return false;
             }
 
-            callback &&callback({result: true, text: encode(variants[0].innerHTML)});
+            var text = encode(variants[0].innerHTML);
+            text = text[0].toUpperCase() + text.substring(1);
+
+            callback &&callback({result: true, text: text});
         };
 
         xhr.onerror = function() {
