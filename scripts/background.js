@@ -1,33 +1,6 @@
 
-function getArrayBuffer(url, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET',url, true);
-    xhr.responseType = 'arraybuffer';
-
-    xhr.onload = function(e) {
-        //var uInt8Array = new Uint8Array(this.response); // this.response == uInt8Array.buffer
-        callback(this.response);
-    };
-
-    xhr.send();
-}
 
 
-function speech(url) {
-    getArrayBuffer(url, function(data) {
-        var blob = new Blob([data], {type: "audio/x-mpeg-3"});
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST',"http://mikefinch.ru/recognize.php", true);
-        xhr.setRequestHeader("Content-Type", "audio/x-mpeg-3");
-
-        xhr.onload = function(e) {
-           console.log(this.response);
-        };
-        xhr.send(data);
-    })
-}
-
-speech('https://psv4.vk.me/c806138/u302340163/audios/faeeb53ca297.mp3');
 
 
 var connections = []; // Connections from pages
@@ -97,7 +70,10 @@ var equalizers = defaultEqualizers;
 
 // Override Audio PLayer
 chrome.webRequest.onBeforeRequest.addListener(function(details) {
-	return {redirectUrl: chrome.extension.getURL('scripts/AudioPlayer.js')};
+
+    if (details.url.match("audioplayer.js"))
+        return {redirectUrl: chrome.extension.getURL('scripts/AudioPlayer.js')};
+
 }, {urls: ["https://vk.com/js/al/audioplayer.js?*"]}, ["blocking"]);
 
 // Run when user installed extension
@@ -290,6 +266,12 @@ function parseMessageFromPage(message, port) {
 
         case "findChords":
             findChords(message, port);
+            break;
+
+        case "recognizeSpeech":
+            recognizeSpeech(message.url, function(result) {
+                port.postMessage({type: "recognizeSpeech", result: result});
+            });
             break;
 
         case "calcBitrate":
@@ -525,4 +507,53 @@ function calculateBitrate(data, callback) {
             callback.apply(bitrate);
         }
     };
+}
+
+function getArrayBufferFromFile(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET',url, true);
+    xhr.responseType = 'arraybuffer';
+
+    xhr.onload = function(e) {
+        callback(this.response);
+    };
+    xhr.send();
+}
+
+function recognizeSpeech (url, callback) {
+    getArrayBufferFromFile(url, function(data) {
+        var blob = new Blob([data], {type: "audio/x-mpeg-3"});
+        var xhr = new XMLHttpRequest();
+
+        var key = 'f4e25547-6e68-413e-81f9-86483a8f420b';
+        var uuid = "41ac64df7361345d3f51a3432ff35a3a";
+        var url = "https://asr.yandex.net/asr_xml?key=" + key +"&uuid=" + uuid+"&topic=queries"
+
+        xhr.open('POST',url, true);
+        xhr.setRequestHeader("Content-Type", "audio/x-mpeg-3");
+
+        xhr.onload = function(e) {
+            var parser = new DOMParser();
+            var dom = parser.parseFromString(this.responseText, "text/xml");
+
+            if (!dom) {
+                callback &&callback({result: false, text: "Ошибка обработки ответа сервера"});
+                return false;
+            }
+            var variants = Array.prototype.slice.call(dom.getElementsByTagName("variant"));
+
+            if (!variants.length) {
+                callback && callback({result: false, text: "Не удалось распознать речь"});
+                return false;
+            }
+
+            callback &&callback({result: true, text: encode(variants[0].innerHTML)});
+        };
+
+        xhr.onerror = function() {
+            callback &&callback({result: false, text: "Не удалось выполнить запрос к серверу"});
+            return false;
+        };
+        xhr.send(data);
+    })
 }

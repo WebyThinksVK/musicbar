@@ -66,6 +66,9 @@ var MusicBar = function() {
             case "calcBitrate":
                 this.setBitrate(message.song, message.bitrate);
                 break;
+            case "recognizeSpeech":
+                console.log(message);
+                break;
         }
     };
 
@@ -535,6 +538,14 @@ var MusicBar = function() {
             artist: data.performer,
             song: data.title,
             id: row.getAttribute("id")
+        })
+    };
+
+    this.recognizeSpeech = function(element) {
+        var url = "https://psv4.vk.me/c806638/u52023528/audios/456d81eac169.mp3";
+        self.postMessage({
+            type: "recognizeSpeech",
+            url: url
         })
     };
 
@@ -1121,6 +1132,9 @@ function AudioPlayer() {
                 t.updateCurrentPlaying()
         })
     }
+
+
+
 }
 
 function AudioPlayerFlash(t) {
@@ -1327,7 +1341,7 @@ var AudioUtils = {
                         domReplaceEl(t, '<span class="choose_link audio_choose_added_label">' + s + "</span>");
                     else
                         for (; __bq.count();) __bq.hideLast();
-                    nav.go("audios" + u)
+                    nav.nav.go("audios" + u)
                 }
             })
     },
@@ -1381,13 +1395,15 @@ var AudioUtils = {
 
 
                         if (mb.params.bitrate) mb.updateBitrate();
-                    })
+                    });
+
                     this.idsToQuery = [];
                 })
             }, 100)
         }
 
         var r = formatTime(t[AudioUtils.AUDIO_ITEM_INDEX_DURATION]);
+        var performer = t[AudioUtils.AUDIO_ITEM_INDEX_PERFORMER].replace(/<\/?em>/g, "")
         var u = clean(JSON.stringify(t)).split("$").join("$$");
         var n = getTemplate("audio_row_advanced", t);
 
@@ -1395,6 +1411,7 @@ var AudioUtils = {
         n = n.replace(/%duration%/, r);
         n = n.replace(/%serialized%/, u);
         n = n.replace(/%bitrate%/, "");
+        n = n.replace(/%search_href%/, "/search?c[q]=" + encodeURIComponent(performer) + "&c[section]=audio&c[performer]=1")
         return n;
 
     },
@@ -1411,21 +1428,22 @@ var AudioUtils = {
             JSON.parse(t.extra || "{}")
     },
     getAudioFromEl: function(t, i) {
+        t = domClosest("_audio_row", t);
         var e = data(t, "audio");
         return e || (e = JSON.parse(domData(t, "audio"))),
             i ? AudioUtils.asObject(e) : e
     },
     showAudioLayer: function(btn) {
         function initLayer(html, playlist, options, firstSong, script) {
-            eval(script);
             var telContent = ap.layer.getContent();
             addClass(telContent, "no_transition"),
                 removeClass(telContent, "top_audio_loading"),
-                telContent.innerHTML = html;
+                telContent.innerHTML = html,
+                eval(script);
             var layerScrollNode = geByClass1("audio_layer_rows_wrap", telContent);
             setStyle(layerScrollNode, "height", AudioUtils.AUDIO_LAYER_HEIGHT),
                 options.layer = ap.layer,
-                options.layer.sb = new Scrollbar(layerScrollNode, {
+                options.layer.sb = new Scrollbar(layerScrollNode,{
                     nomargin: !0,
                     right: vk.rtl ? "auto" : 0,
                     left: vk.rtl ? 0 : "auto",
@@ -1434,7 +1452,7 @@ var AudioUtils = {
                     scrollElements: [geByClass1("audio_layer_menu_wrap", telContent)]
                 }),
                 data(layerScrollNode, "sb", options.layerScrollbar);
-            var audioPage = new AudioPage(geByClass1("_audio_layout", telContent), playlist, options, firstSong);
+            var audioPage = new AudioPage(geByClass1("_audio_layout", telContent),playlist,options,firstSong);
             data(ap.layer, "audio-page", audioPage),
                 setTimeout(function() {
                     removeClass(telContent, "no_transition")
@@ -1644,13 +1662,61 @@ var AudioUtils = {
         i.length > e && i.splice(0, i.length - e),
             ls.set(AudioUtils.LOG_LS_KEY, i)
     },
+
     renderAudioDiag: function() {
-        var t = ge("audio_diag_log"),
-            i = ls.get(AudioUtils.LOG_LS_KEY) || [];
+        var t = ge("audio_diag_log")
+            , i = ls.get(AudioUtils.LOG_LS_KEY) || [];
         t && each(i, function(i, e) {
             var o = new Date(e.shift()).toUTCString();
             e = e.join(", "),
                 t.appendChild(se('<div class="audio_diag_log_row"><span class="audio_diag_log_time">' + o + "</span>" + e + "</div>"))
+        })
+    },
+    claim: function(t) {
+        var i = AudioUtils.getAudioFromEl(t, !0)
+            , e = AudioUtils.getAudioExtra(i);
+        ajax.post("al_claims.php", {
+            act: "a_claim",
+            claim_id: e.moder_claim.claim,
+            type: "audio",
+            id: i.id,
+            owner_id: i.owner_id,
+            hash: i.actHash
+        }, {
+            onDone: function(i) {
+                var e = gpeByClass("audio_row", t);
+                addClass(e, "claimed claim_hidden")
+            }
+        })
+    },
+    unclaim: function(t) {
+        var i = AudioUtils.getAudioFromEl(t, !0)
+            , e = AudioUtils.getAudioExtra(i)
+            , i = AudioUtils.getAudioFromEl(t, !0)
+            , e = AudioUtils.getAudioExtra(i);
+        ajax.post("al_claims.php", {
+            act: "a_unclaim",
+            claim_id: e.moder_claim.claim,
+            type: "audio",
+            id: i.id,
+            owner_id: i.owner_id,
+            hash: i.actHash
+        }, {
+            onDone: function(i) {
+                var e = gpeByClass("audio_row", t);
+                removeClass(e, "claimed"),
+                    removeClass(e, "claim_hidden")
+            }
+        })
+    },
+    getUMAInfo: function(t) {
+        var i = AudioUtils.getAudioFromEl(t, !0);
+        AudioUtils.getAudioExtra(i);
+        showBox("al_claims.php", {
+            act: "getUMARestrictions",
+            id: i.id,
+            owner_id: i.owner_id,
+            hash: i.actHash
         })
     }
 };
@@ -1682,7 +1748,9 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
     TopAudioPlayer.prototype.onPlay = function(t, i, e) {
         function o() {
             var i = getAudioPlayer();
-            i.layer && i.layer.isShown() && i.layer.updatePosition(),
+            setTimeout(function() {
+                i.layer && i.layer.isShown() && i.layer.updatePosition()
+            }, 1),
                 addClass(s._el, a),
                 toggleClass(s._el, "top_audio_player_playing", i.isPlaying());
             var o = geByClass1("_top_audio_player_play_blind_label");
@@ -1693,9 +1761,9 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
             re(l);
             var r = geByClass1("top_audio_player_title", s._el);
             if (0 != e) {
-                var u = 0 > e ? -10 : 10,
-                    n = r.offsetLeft,
-                    d = se('<div class="top_audio_player_title top_audio_player_title_next" style="opacity: 0; top:' + u + "px; left: " + n + 'px">' + t.performer + " &ndash; " + t.title + "</div>");
+                var u = 0 > e ? -10 : 10
+                    , n = r.offsetLeft
+                    , d = se('<div class="top_audio_player_title top_audio_player_title_next" style="opacity: 0; top:' + u + "px; left: " + n + 'px">' + t.performer + " &ndash; " + t.title + "</div>");
                 d.setAttribute("onmouseover", "setTitle(this)"),
                     e > 0 ? domInsertAfter(d, r) : domInsertBefore(d, r),
                     addClass(r, "top_audio_player_title_out"),
@@ -1708,15 +1776,16 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                             top: 0,
                             opacity: 1
                         })
-                    }, 1),
+                    }, 10),
                     clearTimeout(s._currTitleReTO),
                     s._currTitleReTO = setTimeout(function() {
                         re(r),
                             removeClass(d, "top_audio_player_title_next")
                     }, TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED)
-            } else r.innerHTML = t.performer + " &ndash; " + t.title,
-                r.titleSet = 0,
-                r.setAttribute("onmouseover", "setTitle(this)")
+            } else
+                r.innerHTML = t.performer + " &ndash; " + t.title,
+                    r.titleSet = 0,
+                    r.setAttribute("onmouseover", "setTitle(this)")
         }
         var a = "top_audio_player_enabled";
         if (!t) {
@@ -1725,14 +1794,15 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                 removeClass(this._el, "top_audio_player_playing"),
                 show(this._playIconBtn);
             var l = getAudioPlayer();
-            return void(l.layer && l.layer.isShown() && l.layer.updatePosition())
+            return void (l.layer && l.layer.isShown() && l.layer.updatePosition())
         }
         var s = this;
         e = intval(e),
-            hasClass(this._playIconBtn, a) ? o() : (addClass(this._playIconBtn, a), setTimeout(function() {
-                hide(s._playIconBtn),
-                    o()
-            }, 150))
+            hasClass(this._playIconBtn, a) ? o() : (addClass(this._playIconBtn, a),
+                setTimeout(function() {
+                    hide(s._playIconBtn),
+                        o()
+                }, 150))
     },
     TopAudioPlayer.prototype.onPause = function() {
         removeClass(this._el, "top_audio_player_playing");
@@ -1979,7 +2049,8 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                 shuffle: this.getShuffle(),
                 post_id: this.getPostId(),
                 wall_query: this.getWallQuery(),
-                wall_type: this.getWallType()
+                wall_type: this.getWallType(),
+                claim: intval(nav.objLoc.claim)
             }, {
                 onDone: function(t) {
 
@@ -2217,7 +2288,7 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
             AudioUtils.debugLog("param browser.flash", browser.flash),
             AudioUtils.debugLog("param force HTML5", !!t),
             AudioPlayerHTML5.isSupported() || t ? (AudioUtils.debugLog("Initializing HTML5 impl"), this._impl = new AudioPlayerHTML5(a)) : browser.flash && (AudioUtils.debugLog("Initializing Flash impl"), this._impl = new AudioPlayerFlash(a));
-            //this._implSetVolume(0)
+            this._implSetVolume(0)
     },
     AudioPlayer.EVENT_PLAY = "start",
     AudioPlayer.EVENT_PAUSE = "pause",
@@ -2327,6 +2398,9 @@ AudioPlayer.tabIcons = {
             this.notify(AudioPlayer.EVENT_PLAYLIST_CHANGED)
     },
     AudioPlayer.prototype.updateCurrentPlaying = function(t) {
+
+        console.log(13123123);
+
         // Add Music Bar panel to the page
         if (document.querySelector("#page_body .audio_layout") && !ge("musicBarPanel")) {
             var panel = ce("div");
@@ -2381,47 +2455,52 @@ AudioPlayer.tabIcons = {
         domQuery("#download-panel .count")[0].innerText = count;
     },
 
-    AudioPlayer.prototype.toggleCurrentAudioRow = function(t, i, e) {
-        function o() {
-            if (s && (i ? r._addRowPlayer(t, e) : r._removeRowPlayer(t)), i) r.on(t, AudioPlayer.EVENT_PLAY, function(i) {
-                    AudioUtils.asObject(i).fullId == AudioUtils.getAudioFromEl(t, !0).fullId && (addClass(t, AudioUtils.AUDIO_PLAYING_CLS), attr(l, "aria-label", getLang("global_audio_pause")), attr(geByClass1("_audio_title", t), "role", "heading"))
-                }),
-                r.on(t, AudioPlayer.EVENT_PROGRESS, function(i, e) {
-                    i = AudioUtils.asObject(i);
-                    var o, a = intval(i.duration);
-                    o = r.getDurationType() ? "-" + formatTime(Math.round(a - e * a)) : formatTime(Math.round(e * a)),
-                        geByClass1("audio_duration", t).innerHTML = o
-                }),
-                r.on(t, [AudioPlayer.EVENT_PAUSE, AudioPlayer.EVENT_ENDED], function(i) {
-                    removeClass(t, AudioUtils.AUDIO_PLAYING_CLS),
-                        attr(l, "aria-label", getLang("global_audio_play")),
-                        attr(geByClass1("_audio_title", t), "role", "")
-                }),
-                toggleClass(t, AudioUtils.AUDIO_PLAYING_CLS, r.isPlaying());
-            else {
-                r.off(t),
-                    removeClass(t, AudioUtils.AUDIO_PLAYING_CLS);
-                var o = geByClass1("audio_duration", t);
-                o && (o.innerHTML = formatTime(AudioUtils.getAudioFromEl(t, !0).duration)),
-                    attr(l, "aria-label", getLang("global_audio_play")),
-                    attr(geByClass1("_audio_title", t), "role", "")
+        AudioPlayer.prototype.toggleCurrentAudioRow = function(t, i, e) {
+            function o() {
+                if (r && (i ? u._addRowPlayer(t, e) : u._removeRowPlayer(t)),
+                        i)
+                    u.on(t, AudioPlayer.EVENT_PLAY, function(i) {
+                        AudioUtils.asObject(i).fullId == AudioUtils.getAudioFromEl(t, !0).fullId && (addClass(t, AudioUtils.AUDIO_PLAYING_CLS),
+                        l && attr(l, "aria-label", getLang("global_audio_pause")),
+                        s && attr(s, "role", "heading"))
+                    }),
+                        u.on(t, AudioPlayer.EVENT_PROGRESS, function(i, e) {
+                            i = AudioUtils.asObject(i);
+                            var o, a = intval(i.duration);
+                            o = u.getDurationType() ? "-" + formatTime(Math.round(a - e * a)) : formatTime(Math.round(e * a)),
+                                geByClass1("audio_duration", t).innerHTML = o
+                        }),
+                        u.on(t, [AudioPlayer.EVENT_PAUSE, AudioPlayer.EVENT_ENDED], function(i) {
+                            removeClass(t, AudioUtils.AUDIO_PLAYING_CLS),
+                            l && attr(l, "aria-label", getLang("global_audio_play")),
+                            s && attr(s, "role", "")
+                        }),
+                        toggleClass(t, AudioUtils.AUDIO_PLAYING_CLS, u.isPlaying());
+                else {
+                    u.off(t),
+                        removeClass(t, AudioUtils.AUDIO_PLAYING_CLS);
+                    var o = geByClass1("audio_duration", t);
+                    o && (o.innerHTML = formatTime(AudioUtils.getAudioFromEl(t, !0).duration)),
+                    l && attr(l, "aria-label", getLang("global_audio_play")),
+                    s && attr(s, "role", "")
+                }
+                e ? setTimeout(function() {
+                    var i = intval(domData(t, "is-current"));
+                    toggleClass(t, AudioUtils.AUDIO_CURRENT_CLS, !!i)
+                }) : toggleClass(t, AudioUtils.AUDIO_CURRENT_CLS, i)
             }
-            e ? setTimeout(function() {
-                var i = intval(domData(t, "is-current"));
-                toggleClass(t, AudioUtils.AUDIO_CURRENT_CLS, !!i)
-            }) : toggleClass(t, AudioUtils.AUDIO_CURRENT_CLS, i)
-        }
-        var a = !!intval(domData(t, "is-current"));
-        if (a != i) {
-            domData(t, "is-current", intval(i));
-            var l = geByClass1("_audio_play", t),
-                s = hasClass(t, "inlined");
-            s && toggleClass(t, "audio_with_transition", e),
-                e = s ? e : !1;
-            var r = this;
-            e ? setTimeout(o) : o()
-        }
-    },
+            var a = !!intval(domData(t, "is-current"));
+            if (a != i) {
+                domData(t, "is-current", intval(i));
+                var l = geByClass1("_audio_play", t)
+                    , s = geByClass1("_audio_title", t)
+                    , r = hasClass(t, "inlined");
+                r && toggleClass(t, "audio_with_transition", e),
+                    e = r ? e : !1;
+                var u = this;
+                e ? setTimeout(o) : o()
+            }
+        },
     AudioPlayer.prototype._removeRowPlayer = function(t) {
         removeClass(t, AudioUtils.AUDIO_CURRENT_CLS);
         var i = data(t, "player_inited");
@@ -2838,7 +2917,6 @@ AudioPlayer.tabIcons = {
         })
     },
     AudioPlayer.prototype.notify = function(t, i, e) {
-
         var o = this.getCurrentAudio();
         if (this._impl && (!this._muteProgressEvents || !inArray(t, [AudioPlayer.EVENT_BUFFERED, AudioPlayer.EVENT_PROGRESS])))
             switch (inArray(t, [AudioPlayer.EVENT_PLAY, AudioPlayer.EVENT_PAUSE]) && (this.subscribers = this.subscribers.filter(function(t) {
@@ -3099,8 +3177,8 @@ AudioPlayer.tabIcons = {
     AudioPlayer.prototype.toggleAudio = function(t, i) {
         var e = domClosest("_audio_row", t);
 
-
         var o = cur.cancelClick  || i && hasClass(i.target, "select-check") || i && hasClass(i.target, "select-check-wrapper") || i && hasClass(i.target, "audio_row_chords_block") || i && (hasClass(i.target, "audio_lyrics") || domClosest("_audio_duration_wrap", i.target) || domClosest("_audio_inline_player", i.target) || domClosest("audio_performer", i.target));
+
         if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", e) && (o = !0),
                 delete cur.cancelClick,
                 delete cur._sliderMouseUpNowEl,
