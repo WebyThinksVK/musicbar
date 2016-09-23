@@ -57,7 +57,7 @@
     "https://asr.yandex.net/*"
   ],
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "4.4.6",
+  "version": "4.5.0",
   "externally_connectable": {
     "matches": [
       "http://vk.com/*",
