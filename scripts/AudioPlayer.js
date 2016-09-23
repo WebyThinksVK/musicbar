@@ -68,13 +68,8 @@ var MusicBar = function() {
                 this.setBitrate(message.song, message.bitrate);
                 break;
             case "recognizeSpeech":
-                console.log(message);
-
-                var text = this.messagesToRecognize.splice(message.id, 1)[0];
-
-
-                console.log(text);
-                //if (this.messageToRecognize) this.messageToRecognize.innerText = message.result.text;
+                var text = this.messagesToRecognize[message.id];
+                if (text) text.innerText = message.result.text;
                 break;
         }
     };
@@ -584,18 +579,26 @@ var MusicBar = function() {
 
         var message = domClosest("audio-msg-track", element);
 
+        if (!attr(message, "data-mp3")) {
+            message = domPS(message);
+        }
+
         var url = attr(message, "data-mp3");
         var id = attr(message, "id");
 
-        var text = ce("div");
+        var text = geByClass1("text", message.parentNode);
+        if (text) text.remove();
+
+        text = ce("div");
         addClass(text, "text");
         text.innerText = "";
 
-        message.append(text);
+        message.parentNode.appendChild(text);
+        this.messagesToRecognize.push(text);
         self.postMessage({
             type: "recognizeSpeech",
             url: url,
-            id: this.messagesToRecognize.push(text)
+            id:  id =  this.messagesToRecognize.indexOf(text)
         });
     };
 
@@ -676,6 +679,10 @@ var MusicBar = function() {
         });
     };
     this.addRowTemplate();
+
+    this.getVoiceMessageTemplate = function() {
+        return '<div class="audio-msg-player audio-msg-track"><button class="audio-msg-track--btn"></button><div class="recognize-btn" onclick=" getAudioPlayer()._impl.musicBar.recognizeSpeech(this); event.stopPropagation(); return false;"></div><div class="audio-msg-track--duration"></div><div class="audio-msg-track--wave-wrapper"><div class="audio-msg-track--slider"></div></div></div>';
+    };
 
     this.initPanel = function() {
         toggleClass(geByClass1("ui_toggler", geByClass1("surround_toggle")), "on", this.params.surround);

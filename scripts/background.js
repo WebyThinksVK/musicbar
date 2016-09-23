@@ -74,7 +74,10 @@ chrome.webRequest.onBeforeRequest.addListener(function(details) {
     if (details.url.match("audioplayer.js"))
         return {redirectUrl: chrome.extension.getURL('scripts/AudioPlayer.js')};
 
-}, {urls: ["https://vk.com/js/al/audioplayer.js?*"]}, ["blocking"]);
+    if (details.url.match("voice_message_player.js"))
+        return {redirectUrl: chrome.extension.getURL('scripts/VoiceMessagePlayer.js')};
+
+}, {urls: ["https://vk.com/js/al/audioplayer.js?*", "https://vk.com/js/al/voice_message_player.js?*"]}, ["blocking"]);
 
 // Run when user installed extension
 chrome.runtime.onInstalled.addListener(function(details){

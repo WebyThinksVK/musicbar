@@ -73,6 +73,7 @@
     "modals/performer.html",
     "modals/select.html",
     "scripts/AudioPlayer.js",
+    "scripts/VoiceMessagePlayer.js",
     "scripts/speech_settings.js",
     "panel.html"
   ]

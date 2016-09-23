@@ -622,20 +622,18 @@
     background-size: 55%;
     background-position: 5px 5px;
     background-repeat: no-repeat;
-
 }
 
 .audio-msg-track {
     height: auto !important;
 }
 
-.audio-msg-track .text {
-    float: left;
+.im_msg_audiomsg .text {
     margin-top: 5px;
-    width: 100%;
+    padding: 0 10px;
 }
 
-.audio-msg-track .text:empty {
+.im_msg_audiomsg .text:empty {
     height: 20px;
     background: url('https://vk.com/images/c_upload.gif');
     background-repeat: no-repeat;
