@@ -529,7 +529,7 @@ function recognizeSpeech (url, callback) {
         var xhr = new XMLHttpRequest();
 
         var key = 'f4e25547-6e68-413e-81f9-86483a8f420b';
-        var uuid = "41ac64df7361345d3f51a3432ff35a3a";
+        var uuid = createUUID();
         var url = "https://asr.yandex.net/asr_xml?key=" + key +"&uuid=" + uuid+"&topic=queries"
 
         xhr.open('POST',url, true);
@@ -562,4 +562,18 @@ function recognizeSpeech (url, callback) {
         };
         xhr.send(data);
     })
+}
+
+function createUUID() {
+    // http://www.ietf.org/rfc/rfc4122.txt
+    var s = [];
+    var hexDigits = "0123456789ABCDEF";
+    for (var i = 0; i < 32; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+    }
+    s[12] = "4";  // bits 12-15 of the time_hi_and_version field to 0010
+    s[16] = hexDigits.substr((s[16] & 0x3) | 0x8, 1);  // bits 6-7 of the clock_seq_hi_and_reserved to 01
+
+    var uuid = s.join("");
+    return uuid;
 }

@@ -138,10 +138,6 @@ var MusicBar = function() {
             });
         }
 
-        if (!equalizer) {
-            equalizer = this.equalizers[this.equalizers.length-1];
-        }
-
         this.source.disconnect();
         this.filters[this.filters.length-1].disconnect();
 
@@ -163,16 +159,21 @@ var MusicBar = function() {
         }
 
         soundNode.connect(this.context.destination);
-        // Set this equalizer active state
-        this.equalizers.forEach(function(item, i) {
-            item.active = i == self.equalizers.indexOf(equalizer);
-        });
 
-        this.postMessage({
-            type: "setEqualizer",
-            number: self.equalizers.indexOf(equalizer)
-        });
-    }
+
+        if (self.equalizers.indexOf(equalizer) > 0) {
+            // Set this equalizer active state
+            this.equalizers.forEach(function(item, i) {
+                item.active = i == self.equalizers.indexOf(equalizer);
+            });
+
+            this.postMessage({
+                type: "setEqualizer",
+                number: self.equalizers.indexOf(equalizer)
+            });
+        }
+
+    };
 
     // Init extension
     this.init = function(message) {
@@ -252,8 +253,6 @@ var MusicBar = function() {
         observer.observe(chat, {attributes: false, childList: true, characterData: false});
 
     };
-
-
 
     // Send messsage to bacgkround without answer
     this.postMessage = function(message, callback) {
@@ -666,7 +665,7 @@ var MusicBar = function() {
                     </div> \
                 </div> \
                 <div class="audio_title_wrap"> \
-                <a href="%search_href%" onmouseover="setTitle(this)" nodrag="1" onclick="return audioSearchPerformeraudioSearchPerformer(this, event)" class="audio_performer">%4%</a \
+                <a href="%search_href%" onmouseover="setTitle(this)" nodrag="1" onclick="return audioSearchPerformer(this, event)" class="audio_performer">%4%</a \
                 ><span class="audio_info_divider">&ndash;</span\
                 ><span class="audio_title _audio_title" onmouseover="setTitle(this, domPN(this))"\
                 ><span class="audio_title_inner" tabindex="0" nodrag="1" aria-label="%3%" onclick="return toggleAudioLyrics(event, this, \'%1%_%0%\', \'%9%\')">%3%</span\
@@ -717,6 +716,8 @@ var MusicBar = function() {
                         gains: gains,
                     });
 
+
+
                     var index = geByClass("_audio_equalizer_item").length - 1;
                     var equalizer = self.createEqualizer({
                         name: ge("equalizer_title_edit", box.bodyNode).value,
@@ -732,6 +733,8 @@ var MusicBar = function() {
                     each(geByClass("_audio_equalizer_item"), function() {
                         toggleClass(this, "ui_rmenu_item_sel", this.getAttribute("data-index") == equalizer.getAttribute("data-index"));
                     });
+
+                    self.setEqualizer(equalizer);
 
                     // Hide the modal
                     box.hide();
@@ -937,6 +940,15 @@ var MusicBar = function() {
                     var box = new MessageBox({dark: 1, title: "Редактировать эквалайзер", bodyStyle: "padding: 20px; background-color: #fafbfc;"});
                     box.content(this);
 
+                    geByClass("gain_range", box.bodyNode).forEach(function(input) {
+                        input.addEventListener("change", function() {
+                            var gains = [];
+                            each(geByClass("gain_range", box.bodyNode), function(i) {gains.push(this.value);});
+
+                            self.setEqualizer({gains: gains});
+                        });
+                    });
+
                     // Set name to input field
                     ge("equalizer_title_edit", box.bodyNode).value = equalizer.name;
 
@@ -954,6 +966,8 @@ var MusicBar = function() {
                             index: element.getAttribute("data-index")
                         });
 
+                        self.setEqualizer(self.equalizers[element.getAttribute("data-index")]);
+
                         // Set new name to panel
                         geByClass1("audio_equalizer_title", element).innerText = ge("equalizer_title_edit", box.bodyNode).value;
                         geByClass1("equalizer_name").innerText = ge("equalizer_title_edit", box.bodyNode).value;
@@ -967,7 +981,13 @@ var MusicBar = function() {
                         box.hide();
                     });
 
-                    box.addButton("Отмена", function() { box.hide(); }, "no");
+                    box.addButton("Отмена", function() {
+
+                        self.setEqualizer();
+                        box.hide();
+                        console.log("ww");
+
+                    }, "no");
                     box.show();
                 });
 
