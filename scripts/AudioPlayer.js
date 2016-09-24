@@ -705,6 +705,21 @@ var MusicBar = function() {
                 var box = new MessageBox({dark: 1, title: "Добавить эквалайзер", bodyStyle: "padding: 20px; background-color: #fafbfc;"});
                 box.content(this);
 
+                // Update equalizer
+                geByClass("gain_range", box.bodyNode).forEach(function(input) {
+                    input.addEventListener("change", function() {
+                        var gains = [];
+                        each(geByClass("gain_range", box.bodyNode), function(i) {gains.push(this.value);});
+
+                        self.setEqualizer({gains: gains});
+                    });
+                });
+
+                // Set default preset
+                var gains = [];
+                each(geByClass("gain_range", box.bodyNode), function(i) {gains.push(this.value);});
+                self.setEqualizer({gains: gains});
+
                 // Save the Equalizer
                 box.addButton("Сохранить", function() {
                     var gains = [];
@@ -715,8 +730,6 @@ var MusicBar = function() {
                         name: ge("equalizer_title_edit", box.bodyNode).value,
                         gains: gains,
                     });
-
-
 
                     var index = geByClass("_audio_equalizer_item").length - 1;
                     var equalizer = self.createEqualizer({
@@ -734,13 +747,16 @@ var MusicBar = function() {
                         toggleClass(this, "ui_rmenu_item_sel", this.getAttribute("data-index") == equalizer.getAttribute("data-index"));
                     });
 
-                    self.setEqualizer(equalizer);
+                    self.setEqualizer(self.equalizers[equalizer.getAttribute("data-index")]);
 
                     // Hide the modal
                     box.hide();
                 });
 
-                box.addButton("Отмена", function() { box.hide(); }, "no");
+                box.addButton("Отмена", function() {
+                    self.setEqualizer();
+                    box.hide();
+                }, "no");
                 box.show();
             })
         });
@@ -924,13 +940,13 @@ var MusicBar = function() {
                     self.removeEqualizer(equalizer.getAttribute("data-index"));
                     modal.hide();
                     equalizer.remove();
-                }, "Отмена")
+                }, "Отмена");
 
                 e.stopPropagation();
                 return false;
             });
 
-            // Click on eidt button
+            // Click on edit button
             geByClass1("audio_equalizer_edit_btn", equalizer).addEventListener("click", function(e) {
 
                 var element = domClosest("_audio_equalizer_item", this);
@@ -982,11 +998,8 @@ var MusicBar = function() {
                     });
 
                     box.addButton("Отмена", function() {
-
                         self.setEqualizer();
                         box.hide();
-                        console.log("ww");
-
                     }, "no");
                     box.show();
                 });
