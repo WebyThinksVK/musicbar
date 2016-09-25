@@ -292,6 +292,7 @@
 .audio_row_chords_block {
     white-space: pre-wrap;
     padding-left: 30px;
+    font-family: monospace;
 }
 
 .audio_row_video_block .close, .audio_row_chords_block .close {
