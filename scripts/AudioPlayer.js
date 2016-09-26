@@ -407,7 +407,8 @@ var MusicBar = function() {
     this.downloadSelected = function() {
         var playlist = new AudioPlaylist();
 
-        domQuery(".audio_row.selected").forEach(function(row) {
+
+        [].slice.call(domQuery(".audio_row.selected")).forEach(function(row) {
             removeClass(row, "selected");
             var data = JSON.parse(row.getAttribute("data-audio"));
             playlist.addAudio(data);
@@ -1126,9 +1127,9 @@ var MusicBar = function() {
             if (selectPanel) selectPanel.remove();
             toggleClass(geByClass1('audio_playlist_wrap'),'select-download', false);
 
-          /*  domQuery(".audio_row.selected").forEach(function(row){
+            [].slice.call(domQuery(".audio_row.selected")).forEach(function(row){
                 removeClass(row, "selected");
-            })*/
+            })
         }
     }
 };
