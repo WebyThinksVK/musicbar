@@ -1,3 +1,12 @@
+
+if (typeof Array.prototype.forEach != 'function') {
+    Array.prototype.forEach = function(callback){
+        for (var i = 0; i < this.length; i++){
+            callback.apply(this, [this[i], i, this]);
+        }
+    };
+}
+
 /*
  ___  ___          _     ______
  |  \/  |         (_)    | ___ \
@@ -697,7 +706,8 @@ var MusicBar = function() {
             toggleClass(geByClass1("download-playlist"), "download", true);
         }
 
-        geByClass1("blind_label", geByClass1("ui_rmenu_pr")).remove(); // Remove hidden button titile
+        if (geByClass1("blind_label", geByClass1("ui_rmenu_pr")))
+            geByClass1("blind_label", geByClass1("ui_rmenu_pr")).remove(); // Remove hidden button titile
 
         // Create new equalizer
         geByClass1("add_equalizer_item").addEventListener("click", function() {
@@ -1116,9 +1126,9 @@ var MusicBar = function() {
             if (selectPanel) selectPanel.remove();
             toggleClass(geByClass1('audio_playlist_wrap'),'select-download', false);
 
-            domQuery(".audio_row.selected").forEach(function(row){
+          /*  domQuery(".audio_row.selected").forEach(function(row){
                 removeClass(row, "selected");
-            })
+            })*/
         }
     }
 };
@@ -3656,14 +3666,28 @@ AudioPlayer.tabIcons = {
         var i = this._currentAudioEl;
         if (i.src)
             try {
-                i.play().then(function() {
+
+                var promise = i.play();
+
+                if (typeof (promise) !== "undefined") {
+                    promise.then(function() {
+                        if (!i.isEqualNode(mb.source.mediaElement)) {
+                            mb.source = mb.context.createMediaElementSource(i);
+                        }
+                        mb.source.connect(mb.filters[0]);
+                    })
+                } else {
                     if (!i.isEqualNode(mb.source.mediaElement)) {
                         mb.source = mb.context.createMediaElementSource(i);
                     }
                     mb.source.connect(mb.filters[0]);
-                })
+                }
+
+
             } catch (e) {
-                debugLog("Audio: url set failed (html5 impl)")
+                debugLog("Audio: url set failed (html5 impl)");
+
+                console.log(e);
             }
     }
     ,
