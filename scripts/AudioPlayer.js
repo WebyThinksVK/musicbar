@@ -2404,6 +2404,10 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
     AudioPlayer.EVENT_PLAYLIST_CHANGED = "plchange",
     AudioPlayer.EVENT_ADDED = "added",
     AudioPlayer.EVENT_REMOVED = "removed",
+    AudioPlayer.EVENT_AD_READY = "ad_ready",
+    AudioPlayer.EVENT_AD_DEINITED = "ad_deinit",
+    AudioPlayer.EVENT_AD_STARTED = "ad_started",
+    AudioPlayer.EVENT_AD_COMPLETED = "ad_completed",
     AudioPlayer.EVENT_START_LOADING = "start_load",
     AudioPlayer.EVENT_CAN_PLAY = "actual_start",
     AudioPlayer.LS_VER = "v10",
@@ -3413,6 +3417,154 @@ AudioPlayer.tabIcons = {
                 0 > s ? this.seek(0) : this.play(o.getAudioAt(s), o, -1, i)
             }
     },
+
+    AudioPlayer.prototype._adsPlayAdTask = function(t) {
+        this._adsStillNeedToPlayNext = !0,
+            this._implNewTask("ads", function(i) {
+                this._adsPlayAd(function() {
+                    this._repeatCurrent ? (this._implSeekImmediate(0),
+                        this.play()) : this._adsStillNeedToPlayNext ? this._playNext(1, t) : this.play()
+                }
+                    .bind(this)),
+                    i()
+            }
+                .bind(this))
+    }
+    ,
+    AudioPlayer.prototype._adsPlayAd = function(t) {
+        this._adsIsAdReady() && (this._adman.onCompleted(function() {
+            this._adsReadyInfo = !1,
+                this._adman = !1,
+                this._adsSetCurrentDelay(0),
+                this.notify(AudioPlayer.EVENT_PROGRESS, 0),
+                this.notify(AudioPlayer.EVENT_AD_COMPLETED),
+                this._adPlaying = this._isPlaying = !1,
+                t(),
+                this._adsSendAdEvent("completed")
+        }
+            .bind(this)),
+            this._adman.onStarted(function() {
+                this.notify(AudioPlayer.EVENT_PROGRESS, 0),
+                    this.notify(AudioPlayer.EVENT_AD_STARTED),
+                    this._adman.setVolume(this.getVolume()),
+                    this._adsSendAdEvent("started")
+            }
+                .bind(this)),
+            this._adman.onTimeRemained(function(t) {
+                this._adsCurrentProgress = t.percent / 100,
+                    this.notify(AudioPlayer.EVENT_PROGRESS, t.percent / 100, t.duration)
+            }
+                .bind(this)),
+            this._isPlaying = !0,
+            this._adPlaying = !0,
+            this._adPaused = !1,
+            this._adman.start("postroll"),
+            this.notify(AudioPlayer.EVENT_PLAY),
+            this.notify(AudioPlayer.EVENT_PROGRESS, 0))
+    }
+    ,
+    AudioPlayer.prototype._adsUpdateVolume = function() {
+        this._adman && this._adman.setVolume(this.getVolume())
+    }
+    ,
+    AudioPlayer.prototype._adsSendAdEvent = function(t) {
+        ajax.post("al_audio.php", {
+            act: "ad_event",
+            event: t,
+            section: this._adsSection
+        })
+    }
+    ,
+    AudioPlayer.prototype._adsPauseAd = function() {
+        this._adPaused = !0,
+            this._isPlaying = !1,
+            this._adman.pause(),
+            this.notify(AudioPlayer.EVENT_PAUSE)
+    }
+    ,
+    AudioPlayer.prototype.adsGetCurrentProgress = function() {
+        return this._adsCurrentProgress || 0
+    }
+    ,
+    AudioPlayer.prototype._adsResumeAd = function() {
+        this._adPaused = !1,
+            this._isPlaying = !0,
+            this._adman.resume(),
+            this.notify(AudioPlayer.EVENT_PLAY)
+    }
+    ,
+    AudioPlayer.prototype._adsIsAdReady = function() {
+        return !!this._adsReadyInfo
+    }
+    ,
+    AudioPlayer.prototype._adsIsAdPlaying = function() {
+        return !!this._adPlaying
+    }
+    ,
+    AudioPlayer.prototype.isAdPlaying = function() {
+        return this._adsIsAdPlaying()
+    }
+    ,
+    AudioPlayer.prototype._adsIsAdPaused = function() {
+        return !!this._adPaused
+    }
+    ,
+    AudioPlayer.prototype._adsPrepareAd = function(t, i) {
+        function e(t) {
+            this._adsReadyInfo = t,
+                this._adsSection = i,
+                this.notify(AudioPlayer.EVENT_AD_READY),
+                this._adsSendAdEvent("received")
+        }
+        this._adsInitAdman(t, e.bind(this))
+    }
+    ,
+    AudioPlayer.prototype._adsDeinit = function() {
+        this._adman = null,
+            this._adsReadyInfo = null,
+            this._adsCurrentProgress = 0,
+            this.notify(AudioPlayer.EVENT_AD_DEINITED)
+    }
+    ,
+    AudioPlayer.prototype._adsInitAdman = function(t, i) {
+        t = AudioUtils.asObject(t),
+            this._loadAdman(function() {
+                this._adman = new AdmanHTML,
+                    this._adman.init({
+                        slot: 3514,
+                        wrapper: se("<div></div>"),
+                        params: {
+                            _SITEID: 276,
+                            vk_id: vk.id,
+                            duration: t.duration,
+                            content_id: t.id,
+                            preview: 1
+                        },
+                        browser: {
+                            adBlock: !1,
+                            mobile: !1
+                        }
+                    }),
+                    this._adman.setDebug(!!__dev),
+                    this._adman.onReady(function() {
+                        var t = this._adman.getBannersForSection("postroll");
+                        t && t.length && i(t)
+                    }
+                        .bind(this))
+            }
+                .bind(this))
+    },
+    AudioPlayer.prototype._loadAdman = function(t, i, e) {
+        return this._admadLoaded ? t && t() : void loadScript("//ad.mail.ru/static/admanhtml/rbadman-html5.min.js", {
+            onLoad: function() {
+                this._admadLoaded = !0,
+                t && t()
+            }
+                .bind(this)
+        })
+    },
+
+
     AudioPlayerFlash.onAudioFinishCallback = function() {
         var t = window._flashAudioInstance;
         t.opts.onEnd && t.opts.onEnd()
