@@ -2092,18 +2092,16 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
         var e = 1;
         return i >= 0 && i + e < this.getAudiosCount() ? this.getAudioAt(i + e) : !1
     },
-    AudioPlaylist.prototype.load = function(t, i) {
 
+    AudioPlaylist.prototype.load = function(t, i) {
         var e = void 0 === t,
             o = this;
         if (t = intval(t), this.getType() == AudioPlaylist.TYPE_SEARCH && void 0 === this.getLocalFoundCount()) {
             var a = getAudioPlayer().getPlaylist(AudioPlaylist.TYPE_ALBUM, this.getOwnerId(), AudioPlaylist.ALBUM_ALL);
-            return void a.loadSilent(function() {
+            return void a.loadSilent(function () {
                 var e = o.getSearchParams();
-                a.search(e.q, function(e) {
-                    o.setLocalFoundCount(e.length),
-                        o.addAudio(e),
-                        o.load(t, i)
+                a.search(e.q, function (e) {
+                    o.setLocalFoundCount(e.length), o.addAudio(e), o.load(t, i)
                 })
             })
         }
@@ -2115,36 +2113,25 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                 getAudioPlayer()._impl.musicBar.eraceReloadAudio(getAudioPlayer()._impl.musicBar.updateBitrate);
         }
 
-        var l = this.getType() == AudioPlaylist.TYPE_FEED ? this.getItemsCount() : this.getAudiosCount();
 
-        if (!e && this.hasMore() && 0 == t && l > 0) {
-            return i && i(this);
-        }
-
-        if (!this.hasMore()) {
-            return i && i(this);
-        }
-
-        if (this.getType() == AudioPlaylist.TYPE_ALBUM) {
-            return this.loadSilent(i);
-        }
-
-        if (l - 20 > t) return i && i(this);
-
+        var s = this.getType() == AudioPlaylist.TYPE_FEED ? this.getItemsCount() : this.getAudiosCount();
+        if (!e && this.hasMore() && 0 == t && s > 0) return i && i(this);
+        if (!this.hasMore()) return i && i(this);
+        if (this.getType() == AudioPlaylist.TYPE_ALBUM) return this.loadSilent(i);
+        if (s - 20 > t) return i && i(this);
         if (this._onDoneLoading = this._onDoneLoading || [], this._onDoneLoading.push(i), !this._loading) {
-
             this._loading = !0;
-            var s = this.getSearchParams();
+            var l = this.getSearchParams();
             ajax.post("al_audio.php", {
                 act: "a_load_section",
                 type: this.getType(),
                 owner_id: this.getOwnerId(),
                 album_id: this.getAlbumId(),
                 offset: this.getNextOffset(),
-                search_q: s ? s.q : null,
-                search_performer: s ? s.performer : null,
-                search_lyrics: s ? s.lyrics : null,
-                search_sort: s ? s.sort : null,
+                search_q: l ? l.q : null,
+                search_performer: l ? l.performer : null,
+                search_lyrics: l ? l.lyrics : null,
+                search_sort: l ? l.sort : null,
                 feed_from: this.getFeedFrom(),
                 feed_offset: this.getFeedOffset(),
                 shuffle: this.getShuffle(),
@@ -2153,17 +2140,12 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                 wall_type: this.getWallType(),
                 claim: intval(nav.objLoc.claim)
             }, {
-                onDone: function(t) {
-
-                    getAudioPlayer().mergePlaylistData(o, t),
-                        o._audioToFirstPos && (o.addAudio(o._audioToFirstPos, 0), delete o._audioToFirstPos),
-                        delete o._loading;
+                onDone: function (t) {
+                    getAudioPlayer().mergePlaylistData(o, t), o._audioToFirstPos && (o.addAudio(o._audioToFirstPos, 0), delete o._audioToFirstPos), delete o._loading;
                     var i = o._onDoneLoading;
-                    delete o._onDoneLoading,
-                        each(i || [], function(t, i) {
-                            i && i(o)
-                        }),
-                        getAudioPlayer().saveStateCurrentPlaylist()
+                    delete o._onDoneLoading, each(i || [], function (t, i) {
+                        i && i(o)
+                    }), getAudioPlayer().saveStateCurrentPlaylist()
                 }
             })
         }
