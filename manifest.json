@@ -11,11 +11,7 @@
         "main.js"
       ],
       "matches": [
-        "http://vk.com/*",
-        "http://*.vk.com/*",
-        "https://vk.com/*",
-        "https://*.vk.com/*",
-        "http://*.lastfm.ru/*"
+        "<all_urls>"
       ],
       "run_at": "document_idle"
     }
@@ -27,6 +23,7 @@
     "48": "icons/icon_48.png",
     "64": "icons/icon_64.png"
   },
+
   "browser_action": {
     "default_icon": "icons/icon_48.png"
   },
@@ -39,25 +36,10 @@
     "webRequest",
     "webRequestBlocking",
     "downloads",
-    "https://cs1-27v4.vk-cdn.net/*",
-    "http://amdm.ru/*",
-    "http://www.e-chords.com/*",
-    "https://*.ultimate-guitar.com/*",
-    "https://www.ultimate-guitar.com/*",
-    "http://*.vk.me/",
-    "https://*.vk.me/",
-    "https://*.vk-cdn.net/",
-    "http://*.vk-cdn.net/",
-    "http://vk-cdn.net/",
-    "https://vk-cdn.net/",
-    "http://vk.com/*",
-    "https://vk.com/*",
-    "http://*.vk.com/*",
-    "http://*.lastfm.ru/*",
-    "https://asr.yandex.net/*"
+    "<all_urls>"
   ],
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "4.5.6",
+  "version": "4.5.8",
   "externally_connectable": {
     "matches": [
       "http://vk.com/*",

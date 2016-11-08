@@ -1921,11 +1921,12 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
     AudioPlaylist.TYPE_FEED = "feed",
     AudioPlaylist.TYPE_LIVE = "live",
     AudioPlaylist.TYPE_WALL = "wall",
+    AudioPlaylist.TYPE_RECENT = "recent",
     AudioPlaylist.ALBUM_ALL = -2,
     AudioPlaylist.prototype.serialize = function() {
-        var t = {},
-            i = getAudioPlayer().getCurrentAudio(),
-            e = Math.max(0, this.indexOfAudio(i));
+        var t = {}
+            , i = getAudioPlayer().getCurrentAudio()
+            , e = Math.max(0, this.indexOfAudio(i));
         return t.list = clone(this.getAudiosList().slice(Math.max(0, e - 300), e + 300), !0),
             each(t.list, function(t, i) {
                 i[AudioUtils.AUDIO_ITEM_INDEX_URL] = ""
@@ -1935,6 +1936,7 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
             t.albumId = irand(1, 999),
             t.hasMore = !1,
             t.title = this.getTitle(),
+            t.playbackParams = this.getPlaybackParams(),
             JSON.stringify(t)
     },
     AudioPlaylist.prototype.getId = function() {
@@ -2021,10 +2023,15 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
     AudioPlaylist.prototype.getShuffle = function() {
         return this.getSelf()._shuffle
     },
+    AudioPlaylist.prototype.getFriendId = function() {
+        return this.getSelf()._friend
+    },
     AudioPlaylist.prototype._moveCurrentAudioAtFirstPosition = function() {
         this._unref();
-        var t = getAudioPlayer().getCurrentAudio(),
-            i = this.indexOfAudio(t); - 1 != i && (this._list.splice(i, 1), this._list.unshift(t))
+        var t = getAudioPlayer().getCurrentAudio()
+            , i = this.indexOfAudio(t);
+        -1 != i && (this._list.splice(i, 1),
+            this._list.unshift(t))
     },
     AudioPlaylist.prototype.clean = function() {
         this._unref(),
@@ -2035,9 +2042,12 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
             this._nextOffset = 0
     },
     AudioPlaylist.prototype.shuffle = function(t) {
-        if (this._unref(), this._shuffle = t, this._shuffle)
+        if (this._unref(),
+                this._shuffle = t,
+                this._shuffle)
             if (this.hasMore()) {
-                if (this._needSilentLoading()) return !1;
+                if (this._needSilentLoading())
+                    return !1;
                 if (this.getType() == AudioPlaylist.TYPE_SEARCH) {
                     if (this.getLocalFoundCount() > 1) {
                         var i = this._list.splice(0, this.getLocalFoundCount());
@@ -2050,11 +2060,14 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                     this.indexOfAudio(e) >= 0 && (this._audioToFirstPos = e),
                         this.clean()
                 }
-            } else this._originalList = [].concat(this._list),
-                shuffle(this._list),
-                this._moveCurrentAudioAtFirstPosition();
+            } else
+                this._originalList = [].concat(this._list),
+                    shuffle(this._list),
+                    this._moveCurrentAudioAtFirstPosition();
         else {
-            if (this._originalList) this.getType() == AudioPlaylist.TYPE_SEARCH ? (this._list.splice(0, this.getLocalFoundCount()), this._list = this._originalList.concat(this._list)) : this._list = this._originalList;
+            if (this._originalList)
+                this.getType() == AudioPlaylist.TYPE_SEARCH ? (this._list.splice(0, this.getLocalFoundCount()),
+                    this._list = this._originalList.concat(this._list)) : this._list = this._originalList;
             else {
                 var e = getAudioPlayer().getCurrentAudio();
                 this.indexOfAudio(e) >= 0 && (this._audioToFirstPos = e),
@@ -2089,19 +2102,25 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
     AudioPlaylist.prototype.getNextAudio = function(t) {
         var i = this.indexOfAudio(t);
         this.load(i + 1);
-        var e = 1;
-        return i >= 0 && i + e < this.getAudiosCount() ? this.getAudioAt(i + e) : !1
-    },
+        var e = this.getSelf();
+        -1 == i && isNumeric(e._nextAfterRemovedIndex) && (i = Math.max(0, e._nextAfterRemovedIndex - 1),
+            delete e._nextAfterRemovedIndex);
+        var o = 1;
+        return i >= 0 && i + o < this.getAudiosCount() ? this.getAudioAt(i + o) : !1
+    }
 
     AudioPlaylist.prototype.load = function(t, i) {
-        var e = void 0 === t,
-            o = this;
-        if (t = intval(t), this.getType() == AudioPlaylist.TYPE_SEARCH && void 0 === this.getLocalFoundCount()) {
+        var e = void 0 === t
+            , o = this;
+        if (t = intval(t),
+            this.getType() == AudioPlaylist.TYPE_SEARCH && void 0 === this.getLocalFoundCount()) {
             var a = getAudioPlayer().getPlaylist(AudioPlaylist.TYPE_ALBUM, this.getOwnerId(), AudioPlaylist.ALBUM_ALL);
-            return void a.loadSilent(function () {
+            return void a.loadSilent(function() {
                 var e = o.getSearchParams();
-                a.search(e.q, function (e) {
-                    o.setLocalFoundCount(e.length), o.addAudio(e), o.load(t, i)
+                a.search(e.q, function(e) {
+                    o.setLocalFoundCount(e.length),
+                        o.addAudio(e),
+                        o.load(t, i)
                 })
             })
         }
@@ -2111,15 +2130,20 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
 
             if (getAudioPlayer()._impl.musicBar.reloadAudioQueue.length)
                 getAudioPlayer()._impl.musicBar.eraceReloadAudio(getAudioPlayer()._impl.musicBar.updateBitrate);
+
         }
-
-
         var s = this.getType() == AudioPlaylist.TYPE_FEED ? this.getItemsCount() : this.getAudiosCount();
-        if (!e && this.hasMore() && 0 == t && s > 0) return i && i(this);
-        if (!this.hasMore()) return i && i(this);
-        if (this.getType() == AudioPlaylist.TYPE_ALBUM) return this.loadSilent(i);
-        if (s - 20 > t) return i && i(this);
-        if (this._onDoneLoading = this._onDoneLoading || [], this._onDoneLoading.push(i), !this._loading) {
+        if (!e && this.hasMore() && 0 == t && s > 0)
+            return i && i(this);
+        if (!this.hasMore())
+            return i && i(this);
+        if (this.getType() == AudioPlaylist.TYPE_ALBUM)
+            return this.loadSilent(i);
+        if (s - 20 > t)
+            return i && i(this);
+        if (this._onDoneLoading = this._onDoneLoading || [],
+                this._onDoneLoading.push(i),
+                !this._loading) {
             this._loading = !0;
             var l = this.getSearchParams();
             ajax.post("al_audio.php", {
@@ -2140,16 +2164,21 @@ TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED = 190,
                 wall_type: this.getWallType(),
                 claim: intval(nav.objLoc.claim)
             }, {
-                onDone: function (t) {
-                    getAudioPlayer().mergePlaylistData(o, t), o._audioToFirstPos && (o.addAudio(o._audioToFirstPos, 0), delete o._audioToFirstPos), delete o._loading;
+                onDone: function(t) {
+                    getAudioPlayer().mergePlaylistData(o, t),
+                    o._audioToFirstPos && (o.addAudio(o._audioToFirstPos, 0),
+                        delete o._audioToFirstPos),
+                        delete o._loading;
                     var i = o._onDoneLoading;
-                    delete o._onDoneLoading, each(i || [], function (t, i) {
-                        i && i(o)
-                    }), getAudioPlayer().saveStateCurrentPlaylist()
+                    delete o._onDoneLoading,
+                        each(i || [], function(t, i) {
+                            i && i(o)
+                        }),
+                        getAudioPlayer().saveStateCurrentPlaylist()
                 }
             })
         }
-    },
+    }
     AudioPlaylist.prototype.getLiveInfo = function() {
         var t = this.getSelf()._live;
         return t ? (t = t.split(","), {
