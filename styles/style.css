@@ -280,7 +280,7 @@
     overflow: hidden
 }
 
-.item:hover {
+#page_wrap .item:hover {
     background-color: #e7edf2;
     color: #2a5885;
 }
@@ -329,17 +329,17 @@
     height: 16px;
 }
 
-.performer-info .photo {
+#page_wrap .performer-info .photo {
     float: left;
 }
 
-.performer-info .photo img {
+#page_wrap.performer-info .photo img {
     width: 100px;
     height: 100px;
     border-radius: 50%;
 }
 
-.performer-info .similar-title {
+#page_wrap.performer-info .similar-title {
     font-weight: 500;
     -webkit-font-smoothing: subpixel-antialiased;
     -moz-osx-font-smoothing: auto;
@@ -349,7 +349,7 @@
     margin-top: 20px;
 }
 
-.performer-info .similar-band {
+#page_wrap .performer-info .similar-band {
 
     border-bottom: 1px dashed #a7b7c9;
     color: #2a5885;
@@ -360,13 +360,13 @@
     line-height: 1;
 }
 
-.performer-info .band_info {
+#page_wrap .performer-info .band_info {
     float: left;
     margin-left: 20px;
     max-width: calc(100% - 120px);
 }
 
-.performer-info .band_info .name {
+#page_wrap .performer-info .band_info .name {
     font-size: 24px;
     font-weight: 700;
     -webkit-font-smoothing: subpixel-antialiased;
@@ -375,12 +375,12 @@
     margin-top: 15px;
 }
 
-.performer-info .band_info .tags {
+#page_wrap .performer-info .band_info .tags {
     overflow: hidden;
     margin-top: 5px;
 }
 
-.performer-info .band_info .tag {
+#page_wrap .performer-info .band_info .tag {
     float: left;
     margin: 0 5px 5px 0;
     background-color: #dae2ea;
@@ -394,7 +394,7 @@
     line-height: 1.154;
 }
 
-.performer-info .bio {
+#page_wrap .performer-info .bio {
     margin-top: 16px;
     text-decoration: none!important;
     display: block;
@@ -408,7 +408,7 @@
 }
 
 /* DOWNLOAD PLAYLIST */
-.download-playlist {
+#page_wrap .download-playlist {
     padding: 10px 15px;
     height: 20px;
     overflow: visible;
@@ -416,7 +416,7 @@
     margin-bottom: 10px;
 }
 
-.download-playlist.download {
+#page_wrap .download-playlist.download {
     overflow: hidden;
 }
 
@@ -569,7 +569,7 @@
     padding: 5px 20px;
 }
 
-#download-panel {
+#page_wrap #download-panel {
     height: 50px;
     z-index: 500;
     margin: 0 0 -14px -9px;
@@ -609,7 +609,7 @@
     border: none;
 }
 
-.recognize-btn {
+#page_wrap  .recognize-btn {
     border-radius: 50%;
     border: none;
     display: block;
@@ -625,16 +625,16 @@
     background-repeat: no-repeat;
 }
 
-.audio-msg-track {
+#page_wrap .audio-msg-track {
     height: auto !important;
 }
 
-.im_msg_audiomsg .text {
+#page_wrap .im_msg_audiomsg .text {
     margin-top: 5px;
     padding: 0 10px;
 }
 
-.im_msg_audiomsg .text:empty {
+#page_wrap .im_msg_audiomsg .text:empty {
     height: 20px;
     background: url('https://vk.com/images/c_upload.gif');
     background-repeat: no-repeat;
@@ -643,12 +643,12 @@
 
 
 
-.audio-msg-track .audio-msg-track--wave-wrapper .audio-msg-track--wave {
+#page_wrap  .audio-msg-track .audio-msg-track--wave-wrapper .audio-msg-track--wave {
     transform: scale(0.90, 1);
     margin: 0 -5px;
 }
 
-.audio-msg-track .audio-msg-track--wave-wrapper {
+#page_wrap  .audio-msg-track .audio-msg-track--wave-wrapper {
     padding: 2px 0 !important;
 }
 
