@@ -72,7 +72,7 @@ var equalizers = defaultEqualizers;
 chrome.webRequest.onBeforeRequest.addListener(function(details) {
 
     if (details.url.match("audioplayer.js"))
-        return {redirectUrl: chrome.extension.getURL('scripts/AudioPlayer.js')};
+        return {redirectUrl: chrome.extension.getURL('scripts/newAudioPlayer.js')};
 
     if (details.url.match("voice_message_player.js"))
         return {redirectUrl: chrome.extension.getURL('scripts/VoiceMessagePlayer.js')};

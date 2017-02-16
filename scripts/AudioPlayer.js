@@ -1250,7 +1250,7 @@ function AudioPlayerHTML5(t) {
         this._audioNodes = [],
         this._currentAudioEl = this._createAudioNode(),
         this._prefetchAudioEl = this._createAudioNode();
-    this.musicBar = new MusicBar();
+        this.musicBar = new MusicBar();
 }
 
 function loadScript(t, i) {
@@ -1806,7 +1806,7 @@ var AudioUtils = {
     },
     LOG_LS_KEY: "audiolog",
     debugLog: function() {
-       
+
     },
 
     renderAudioDiag: function() {
@@ -3102,7 +3102,7 @@ AudioPlayer.tabIcons = {
         delete t.shuffle,
             (t.original || AudioUtils.isPaginatedPlaylist(t)) && (t.has_more ? AudioUtils.getPlaylistType(t) == AudioPlaylist.TYPE_SEARCH && t.localFoundTotal ? (t.list.splice(0, t.localFoundTotal), t.list = t.original.concat(t.list)) : (t.list = [], t.offset = t.next_offset = 0) : t.list = t.original, delete t.original)
     },
-   
+
     AudioPlayer.prototype.getPlaylist = function(t, i, e) {
         if (t && !i && !e) {
             var o = t.split("_");
@@ -3473,8 +3473,12 @@ AudioPlayer.tabIcons = {
         }
     },
     AudioPlayer.prototype.toggleAudio = function(t, i) {
-        var e = domClosest("_audio_row", t)
-      , o = cur.cancelClick || i && (hasClass(i.target, "audio_lyrics") || domClosest("_audio_duration_wrap", i.target) || domClosest("_audio_inline_player", i.target) || domClosest("audio_performer", i.target));
+        var e = domClosest("_audio_row", t);
+
+        console.log(i);
+
+        var o = cur.cancelClick  || i && hasClass(i.target, "select-check") || i && hasClass(i.target, "select-check-wrapper") || i && hasClass(i.target, "audio_row_chords_block") || i && (hasClass(i.target, "audio_lyrics") || domClosest("_audio_duration_wrap", i.target) || domClosest("_audio_inline_player", i.target) || domClosest("audio_performer", i.target));
+
     if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", e) && (o = !0),
     delete cur.cancelClick,
     delete cur._sliderMouseUpNowEl,
@@ -3785,7 +3789,7 @@ AudioPlayer.tabIcons = {
         var e = window._flashAudioInstance;
         i && (e._total = i,
         e._currProgress = t / i,
-        e.opts.onProgressUpdate && e.opts.onProgressUpdate(e._currProgress, t))    
+        e.opts.onProgressUpdate && e.opts.onProgressUpdate(e._currProgress, t))
     },
     AudioPlayerFlash.onAudioLoadProgressCallback = function(t, i) {
         var e = window._flashAudioInstance;

@@ -329,11 +329,11 @@
     height: 16px;
 }
 
-#page_wrap .performer-info .photo {
+.performer-info .photo {
     float: left;
 }
 
-#page_wrap.performer-info .photo img {
+.performer-info .photo img {
     width: 100px;
     height: 100px;
     border-radius: 50%;
@@ -349,7 +349,7 @@
     margin-top: 20px;
 }
 
-#page_wrap .performer-info .similar-band {
+.similar-band {
 
     border-bottom: 1px dashed #a7b7c9;
     color: #2a5885;
@@ -360,13 +360,13 @@
     line-height: 1;
 }
 
-#page_wrap .performer-info .band_info {
+.band_info {
     float: left;
     margin-left: 20px;
     max-width: calc(100% - 120px);
 }
 
-#page_wrap .performer-info .band_info .name {
+.performer-info .band_info .name {
     font-size: 24px;
     font-weight: 700;
     -webkit-font-smoothing: subpixel-antialiased;
@@ -375,12 +375,12 @@
     margin-top: 15px;
 }
 
-#page_wrap .performer-info .band_info .tags {
+.performer-info .band_info .tags {
     overflow: hidden;
     margin-top: 5px;
 }
 
-#page_wrap .performer-info .band_info .tag {
+.performer-info .band_info .tag {
     float: left;
     margin: 0 5px 5px 0;
     background-color: #dae2ea;
@@ -394,7 +394,7 @@
     line-height: 1.154;
 }
 
-#page_wrap .performer-info .bio {
+.performer-info .bio {
     margin-top: 16px;
     text-decoration: none!important;
     display: block;

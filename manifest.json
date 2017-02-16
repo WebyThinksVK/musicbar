@@ -11,7 +11,10 @@
         "main.js"
       ],
       "matches": [
-        "<all_urls>"
+        "http://vk.com/*",
+        "http://*.vk.com/*",
+        "https://vk.com/*",
+        "https://*.vk.com/*"
       ],
       "run_at": "document_idle"
     }
@@ -39,7 +42,7 @@
     "<all_urls>"
   ],
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "4.6.2",
+  "version": "4.6.3",
   "externally_connectable": {
     "matches": [
       "http://vk.com/*",
@@ -50,11 +53,11 @@
     ]
   },
   "web_accessible_resources": [
-    "style.css",
+    "styles/style.css",
     "modals/form_equalizer.html",
     "modals/performer.html",
     "modals/select.html",
-    "scripts/AudioPlayer.js",
+    "scripts/newAudioPlayer.js",
     "scripts/VoiceMessagePlayer.js",
     "scripts/speech_settings.js",
     "panel.html"
