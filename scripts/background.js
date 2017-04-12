@@ -190,6 +190,7 @@ function removeConnection(port) {
  * @returns {*}
  */
 function parseMessageFromPage(message, port) {
+     console.log(params.bitrate);
 	switch(message.type) {
 
 		case "setEqualizer":
@@ -204,6 +205,7 @@ function parseMessageFromPage(message, port) {
         case "setBitrateState":
             params.bitrate = message.state;
             chrome.storage.sync.set({params: params});
+
             break;
 
         case "setVisualization":

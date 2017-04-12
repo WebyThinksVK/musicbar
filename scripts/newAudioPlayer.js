@@ -758,7 +758,7 @@ var MusicBar = function() {
     this.initPanel = function() {
         toggleClass(geByClass1("ui_toggler", geByClass1("surround_toggle")), "on", this.params.surround);
         toggleClass(geByClass1("ui_toggler", geByClass1("visualization_toggle")), "on", this.params.visualization);
-        toggleClass(ge("show_bitrate_checkbox"), "on", this.params.bitrate)
+        //toggleClass(ge("show_bitrate_checkbox"), "on", this.params.bitrate)
         toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS,  this.params.bitrate);
 
 
@@ -866,7 +866,6 @@ var MusicBar = function() {
             var bitrate = geByClass1("audio_hq_label", this).innerText;
             if (!bitrate.length) queue.push(this.getAttribute("data-full-id"));
         })
-
         for (var i = 0; i < queue.length / countPerRequest; i++) {
             var part = queue.slice(i * countPerRequest, i * countPerRequest + countPerRequest);
 
@@ -884,9 +883,11 @@ var MusicBar = function() {
                     a[AudioUtils.AUDIO_ITEM_INDEX_URL] = e.url;
                     getAudioPlayer().updateAudio(e.fullId, a);
 
+             
+
                     data.push({
                         id: e.fullId,
-                        url: e.url,
+                        url: getAudioPlayer().unmask(e.url),
                         bitrate: e.bitrate,
                         duration: e.duration,
                     });
@@ -902,6 +903,8 @@ var MusicBar = function() {
 
     this.reloadAudio = function(ids, callback) {
 
+    	console.log(1231);
+
         var timer = window.setTimeout(function() {
             // Song, whose bitrate we know
             var knownBitrates = [];
@@ -912,7 +915,7 @@ var MusicBar = function() {
                     // Loop for results
                     for( i in results.rows) {
                         var row = results.rows[i];
-                        if (typeof(row) === "object") {
+                        if (typeof(row) === "object" && row.value != 0) {
                             ids.splice(ids.indexOf(row.song), 1);
                             knownBitrates.push(row);
                         }
@@ -979,8 +982,20 @@ var MusicBar = function() {
                     geByClass1("audio_hq_label", row).innerText = bitrate;
 
                     self.db.transaction(function (tx) {
-                        tx.executeSql('INSERT INTO bitrates (song, value) VALUES (?, ?)', [e.fullId, bitrate]);
-                    });
+						tx.executeSql('SELECT * FROM bitrates WHERE song = "'+e.fullId+'"', [], function (tx, results) {
+
+	                        if (results.rows.length) {
+	                           self.db.transaction(function (tx) {
+			                        tx.executeSql('UPDATE bitrates SET bitrate = ? WHERE song = "?"', [bitrate, e.fullId]);
+			                    });
+	                        } else {
+	                        	 self.db.transaction(function (tx) {
+			                        tx.executeSql('INSERT INTO bitrates (song, value) VALUES (?, ?)', [e.fullId, bitrate]);
+			                    });
+	                        }
+	                                
+	                    });
+					});
                 }
             }
         })
@@ -1130,20 +1145,20 @@ var MusicBar = function() {
         });
     };
 
-    this.toggleBitrate = function(element, state) {
+    this.toggleBitrate = function(element, state, fromAudioPlayer) {
 
+    	console.log(state);
 
-
-        if (state && this.params.bitrate != state) this.updateBitrate();
-
-        if (element) {
-            checkbox(element);
-            this.params.bitrate = !!isChecked(element);
-            AudioUtils.toggleAudioHQBodyClass(this.params.bitrate);
-            toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS,  this.params.bitrate);
+        //if (state && this.params.bitrate != state) this.updateBitrate();
+       
+        if (fromAudioPlayer) {
+        	checkbox("show_bitrate_checkbox", state);
+        	this.params.bitrate = state;
         } else {
-            this.params.bitrate = state;
-        }
+        	this.params.bitrate = !this.params.bitrate;
+        	checkbox("show_bitrate_checkbox", this.params.bitrate);
+        	AudioUtils.toggleAudioHQBodyClass(this.params.bitrate, true);
+        } 
 
         this.postMessage({
             type: "setBitrateState",
@@ -1353,12 +1368,20 @@ var _audio_unmask_source = null;
                     domData(this, "new-post", "groups" == cur.module ? "wall" : "feed")
                 })
             },
-            toggleAudioHQBodyClass: function() {
-                var t = getAudioPlayer().showHQLabel();
-                getAudioPlayer()._impl.musicBar.toggleBitrate(null, t);
+            toggleAudioHQBodyClass: function(s, fromMusicBar) {
 
-                toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS, t)
-                toggleClass(ge("show_bitrate_checkbox"), "on", t);
+                var t;
+
+                if (typeof s != "undefined") {
+                	t = s;
+                	getAudioPlayer().showHQLabel(s);
+                } else {
+                	t = getAudioPlayer().showHQLabel();
+                }
+
+                toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS, t);
+                if (!fromMusicBar) getAudioPlayer()._impl.musicBar.toggleBitrate(null, t, true);
+                
             },
             hasAudioHQBodyClass: function() {
                 return hasClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS)
@@ -1559,7 +1582,7 @@ var _audio_unmask_source = null;
                                         var data = results.rows.item(i);
 
                                         var row = domQuery(".page_block #audio_"+data.song+" .audio_hq_label");
-                                        if (results.rows.length && row.length)
+                                        if (results.rows.length && row.length && data.value != 0)
                                             row[0].innerText = data.value;
                                     }
                                 }
