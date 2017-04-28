@@ -1,5 +1,16 @@
-#musicBarPanel .page_block {
-    padding: 6px 0;
+#musicBarPanel  {
+    margin-bottom: 20px;
+    margin-right: -15px;
+}
+
+#musicBarPanel h2 {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+#musicBarPanel .audio_page_separator {
+    margin-left: 20px;
+    margin-right: 15px;
 }
 
 ._ui_rmenu_audio_equalizers_list, ._audio_equalizer_item {
@@ -10,11 +21,11 @@
     font-weight: 500;
 }
 
-.surround_toggle, .visualization_toggle {
+#musicBarPanel .ui_toggler_wrap {
     padding: 8.5px 15px !important;
 }
 
-.surround_toggle .ui_toggler_label, .visualization_toggle .ui_toggler_label {
+#musicBarPanel .ui_toggler_wrap .ui_toggler_label{
     padding-left: 5px !important;
     font-size: 13px !important;
     color: #2a5885 !important;
@@ -422,7 +433,7 @@
 
 .download_actions_wrap {
     position: absolute;
-    width: 198px;
+    width: 204px;
     background: #fff;
     border-radius: 2px;
     box-shadow: 0 1px 3px rgba(0,0,0,.1);
@@ -667,3 +678,5 @@
     0% { background-position-x: 0 }
     to { background-position-x: 40px }
 }
+
+

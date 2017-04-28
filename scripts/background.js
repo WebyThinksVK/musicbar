@@ -9,7 +9,9 @@ var ZipFile = new Zip();
 var params = {
     surround: false,
     visualization: true,
-    bitrate: true
+    bitrate: true,
+    playlists: false
+
 };
 
 var defaultEqualizers = [
@@ -77,7 +79,7 @@ chrome.webRequest.onBeforeRequest.addListener(function(details) {
     if (details.url.match("voice_message_player.js"))
         return {redirectUrl: chrome.extension.getURL('scripts/VoiceMessagePlayer.js')};
 
-}, {urls: ["https://vk.com/js/al/audioplayer.js?*", "https://vk.com/js/al/voice_message_player.js?*"]}, ["blocking"]);
+}, {urls: ["https://vk.com/js/cmodules/web/audioplayer.js?*", "https://vk.com/js/al/voice_message_player.js?*"]}, ["blocking"]);
 
 // Run when user installed extension
 chrome.runtime.onInstalled.addListener(function(details){
@@ -95,7 +97,8 @@ chrome.runtime.onInstalled.addListener(function(details){
             params: {
                 surround: false,
                 visualization: true,
-                bitrate: true
+                bitrate: true,
+                playlists: false
             }
         });
     }
@@ -231,6 +234,11 @@ function parseMessageFromPage(message, port) {
 
         case "setSurround":
             this.params.surround = message.state;
+            setEqualizer();
+            break;
+
+        case "setPlaylists":
+            this.params.playlists = message.state;
             setEqualizer();
             break;
 

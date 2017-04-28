@@ -1,4 +1,6 @@
-<div class="page_block">
+<div class="">
+    <h2>Настройки</h2>
+
     <div id="ui_rmenu_audio_albums" class="ui_rmenu_item _ui_item_audio_equalizers _ui_rmenu_audio_equalizers_toggle" role="listitem" data-on-toggle="" onclick="return uiRightMenu.toggleSubmenu('audio_equalizers', this);">
         <span>Эквалайзер: <span class="equalizer_name"></span><span class="ui_rmenu_item_arrow"></span></span>
     </div>
@@ -49,6 +51,11 @@
         <div class="ui_toggler_label">Визуализация</div>
     </div>
 
+    <div class="ui_toggler_wrap playlists_toggle" onclick="getAudioPlayer()._impl.musicBar.togglePlaylists(this)">
+        <div class="_ui_toggler ui_toggler"></div>
+        <div class="ui_toggler_label">Скрыть плейлисты</div>
+    </div>
+
     <div class="download-playlist">
         <div class="playlist-wrapper">
             <button class="flat_button secondary audio_download_playlist_btn" onclick="toggle(ge('download_actions_wrap'))">
@@ -87,3 +94,5 @@
 
 
 </div>
+
+<div class="audio_page_separator"></div>
