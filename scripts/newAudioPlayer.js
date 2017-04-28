@@ -718,47 +718,53 @@ var MusicBar = function(context) {
     this.addRowTemplate = function() {
 
         addTemplates({
-            audio_row_advanced: '' +
-            '<div class="audio_row _audio_row _audio_row_%1%_%0% %cls% clear_fix" onmouseleave="fadeOut(geByClass1(\'audio_row_dropdown\', this), 200)"  onclick="return getAudioPlayer().toggleAudio(this, event)" data-audio="%serialized%" data-full-id="%1%_%0%" id="audio_%1%_%0%"> \
-            <div class="select-check-wrapper" onclick="getAudioPlayer().toggleSelect(this)"> <div class="select-check" ></div> </div>\
-            <div class="audio_play_wrap" data-nodrag="1"><button class="audio_play _audio_play" id="play_%1%_%0%" aria-label="Воспроизвести "></button></div> \
-            <div class="audio_info"> \
-                <div class="audio_duration_wrap _audio_duration_wrap"> \
-                    <div class="audio_hq_label">%bitrate%</div> \
-                    <div class="audio_duration _audio_duration">%duration%</div> \
-                    <div class="audio_acts"  >  \
-                        <div class="audio_act" id="actions" onclick="tooltips.hideAll(); fadeToggle(geByClass1(\'audio_row_dropdown\', this), 200); " onmouseover="showTooltip(this, {text: \'Действия\', black: 1, shift: [10, 6, 0], appendParentCls: \'audio_acts\'})" onclick="">\
-                            <div class="gear-icon"></div>\
-                            <div id="audio_row_dropdown" class="audio_row_dropdown" >\
-                                <div class="rows" style="font-size: 13px;">\
-                                    <div class="header"><div id="privacy_header" class="header_label"><div class="gear-icon"></div>&nbsp;&nbsp; Действия</div></div>\
-                                    <div class="body">\
-                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.downloadSong(this)">Скачать на ПК</div>\
-                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.findPerformer(this)">Об исполнителе</div>\
-                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.findVideo(this)">Найти клип </div>\
-                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.findChords(this)">Найти аккорды </div>\
-                                        <div class="item" onclick="getAudioPlayer()._impl.musicBar.shareSong(this)">Отправить другу</div>\
-                                    </div>\
-                                </div>\
-                            </div>\
-                        </div> \
-                        <div class="audio_act" id="recom" onmouseover="audioShowActionTooltip(this, \'%1%_%0%\')" onclick="AudioPage(this).showRecoms(this, \'%1%_%0%\', event)"><div></div></div> \
-                        <div class="audio_act" id="next" onmouseover="audioShowActionTooltip(this, \'%1%_%0%\')" onclick="getAudioPlayer().setNext(this, event)"><div></div></div> \
-                        <div class="audio_act" id="edit" onmouseover="audioShowActionTooltip(this, \'%1%_%0%\')" onclick="AudioPage(this).editAudio(this, \'%1%_%0%\', event)"><div></div></div> \
-                        <div class="audio_act _audio_act_delete" id="delete" onclick="AudioPage(this).deleteAudio(this, \'%1%_%0%\', event)" onmouseover="audioShowActionTooltip(this, \'%1%_%0%\')"><div></div></div> \
-                        <div class="audio_act" id="add" onclick="return addAudio(this, event)" onmouseover="audioShowActionTooltip(this, \'%1%_%0%\')"><div></div></div> \
-                    </div> \
-                </div> \
-                <div class="audio_title_wrap"> \
-                <a href="%search_href%" onmouseover="setTitle(this)" nodrag="1" onclick="return audioSearchPerformer(this, event)" class="audio_performer">%4%</a \
-                ><span class="audio_info_divider">&ndash;</span\
-                ><span class="audio_title _audio_title" onmouseover="setTitle(this, domPN(this))"\
-                ><span class="audio_title_inner" tabindex="0" nodrag="1" aria-label="%3%" onclick="return toggleAudioLyrics(event, this, \'%1%_%0%\', \'%9%\')">%3%</span\
-                ><span class="audio_author" onclick="cur.cancelClick=true">%8%</span>\
-              </span></div>\
+            audio_row_advanced: '\
+            <div class="audio_row _audio_row _audio_row_%1%_%0% %cls%" onclick="return getAudioPlayer().toggleAudio(this, event)"\
+            data-audio="%serialized%" data-full-id="%1%_%0%" id="audio_%1%_%0%">\
+        <div class="audio_row_inner clear_fix">\
+            <div class="audio_row_counter"></div>\
+            <div class="audio_row_cover_wrap _audio_row_cover_wrap">\
+            <div class="audio_row_cover" style="%cover_style%"></div>\
+            <div class="audio_row_cover_back"></div>\
+            <div class="audio_row_cover_play_icon"></div>\
+            </div>\
+            <div class="audio_info">\
+            <div class="audio_duration_wrap _audio_duration_wrap">\
+            <div class="audio_hq_label">%bitrate%</div>\
+            <div class="audio_duration _audio_duration">%duration%</div>\
+            <div class="audio_acts clear_fix">\
+            <div class="audio_act" id="actions" onclick="tooltips.hideAll(); fadeToggle(geByClass1(\'audio_row_dropdown\', this), 200); " onmouseover="showTooltip(this, {text: \'Действия\', black: 1, shift: [10, 6, 0], appendParentCls: \'audio_acts\'})" onclick="">\
+                <div class="gear-icon"></div>\
+                <div id="audio_row_dropdown" class="audio_row_dropdown" >\
+                    <div class="rows" style="font-size: 13px;">\
+                        <div class="header"><div id="privacy_header" class="header_label"><div class="gear-icon"></div>&nbsp;&nbsp; Действия</div></div>\
+                        <div class="body">\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.downloadSong(this)">Скачать</div>\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findPerformer(this)">Об исполнителе</div>\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findVideo(this)">Найти клип</div>\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findChords(this)">Найти аккорды</div>\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.shareSong(this)">Отправить другу</div>\
+                        </div>\
+                    </div>\
+                </div>\
             </div> \
-            <div class="_audio_player_wrap"></div> \
-                <div class="_audio_lyrics_wrap audio_lyrics" data-nodrag="1"></div> \
+            <div class="audio_act" id="recom" onmouseover="audioShowActionTooltip(this)" onclick="currentAudioPage(this).showRecoms(this, \'%1%_%0%\', event)"></div>\
+            <div class="audio_act" id="next" onmouseover="audioShowActionTooltip(this)" onclick="getAudioPlayer().setNext(this, event)"></div>\
+            <div class="audio_act" id="edit" onmouseover="audioShowActionTooltip(this)"onclick="currentAudioPage(this).editAudio(this, \'%1%_%0%\', event)"></div>\
+            <div class="audio_act _audio_act_delete" id="delete" onclick="currentAudioPage(this).deleteAudio(this, \'%1%_%0%\', event)" onmouseover="audioShowActionTooltip(this)"></div>\
+            <div class="audio_act" id="add" onclick="return addAudio(this, event)"onmouseover="audioShowActionTooltip(this)"></div>\
+            </div>\
+            </div>\
+            <div class="audio_title_wrap"><a href="%search_href%" onmouseover="setTitle(this)" nodrag="1" onclick="return audioSearchPerformer(this, event)" class="audio_performer">%4%</a>\
+            <span class="audio_info_divider">&ndash;</span><span class="audio_title _audio_title" onmouseover="setTitle(this, domPN(this))">\
+            <span class="audio_title_inner" tabindex="0" nodrag="1" aria-label="%3%" onclick="return toggleAudioLyrics(event, this, \'%1%_%0%\', \'%9%\')">%3%</span>\
+            <span class="audio_author">%8%</span>\
+            </span>\
+            </div>\
+            </div>\
+            <div class="_audio_player_wrap"></div>\
+            <div class="_audio_lyrics_wrap audio_lyrics" data-nodrag="1"></div>\
+            </div>\
             </div>'
         });
     };
@@ -874,14 +880,17 @@ var MusicBar = function(context) {
     };
 
     this.updateBitrate = function() {
+
         var countPerRequest = 10;
         var queue = [];
 
         each(domQuery(".page_block .audio_row"), function() {
-            if (!domClosest("audio_rows", this) && !domClosest("wall_audio_rows", this)) return;
+            //if (!domClosest("audio_rows", this) && !domClosest("wall_audio_rows", this)) return;
             var bitrate = geByClass1("audio_hq_label", this).innerText;
             if (!bitrate.length) queue.push(this.getAttribute("data-full-id"));
         })
+
+
         for (var i = 0; i < queue.length / countPerRequest; i++) {
             var part = queue.slice(i * countPerRequest, i * countPerRequest + countPerRequest);
 
@@ -1556,6 +1565,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AUDIO_ITEM_INDEX_EXTRA: 12,
                 AUDIO_ITEM_INDEX_HASHES: 13,
                 AUDIO_ITEM_INDEX_COVER_URL: 14,
+                AUDIO_ITEM_INDEX_BITRATE: 15,
                 AUDIO_ITEM_INLINED_BIT: 1,
                 AUDIO_ITEM_CLAIMED_BIT: 16,
                 AUDIO_ITEM_RECOMS_BIT: 64,
@@ -1571,6 +1581,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AUDIO_HQ_LABEL_CLS: "audio_hq_label_show",
                 AUDIO_MAX_AUDIOS_IN_SNIPPET: 5,
                 AUDIO_ROW_COVER_SIZE: 34,
+                updateBitrateTimer: null,
+                idsToQuery : [],
                 editPlaylist: function(t, e) {
                     stManager.add(["audio.js", "audio.css", "auto_list.js"], function() {
                         AudioPage.editPlaylist(t, e, "edit")
@@ -1627,9 +1639,18 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         domData(this, "new-post", "groups" == cur.module ? "wall" : "feed")
                     })
                 },
-                toggleAudioHQBodyClass: function() {
-                    var t = getAudioPlayer().showHQLabel();
-                    toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS, t)
+                toggleAudioHQBodyClass: function(s, fromMusicBar) {
+                    var t;
+
+                    if (typeof s != "undefined") {
+                        t = s;
+                        getAudioPlayer().showHQLabel(s);
+                    } else {
+                        t = getAudioPlayer().showHQLabel();
+                    }
+
+                    toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS, t);
+                    if (!fromMusicBar) getAudioPlayer()._impl.musicBar.toggleBitrate(null, t, true);
                 },
                 hasAudioHQBodyClass: function() {
                     return hasClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS)
@@ -1799,6 +1820,37 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         o & r && a.push(i[r])
                     }
                     e && a.push(e);
+
+                    var mb = getAudioPlayer()._impl.musicBar;
+                    var fullId = t[1] + "_" +t[0];
+                    this.idsToQuery.push(fullId);
+
+                    if (mb) {
+                        var au = this;
+
+                        clearTimeout(this.updateBitrateTimer);
+                        this.updateBitrateTimer = window.setTimeout(function() {
+                            getAudioPlayer().db.transaction(function(tr) {
+                                tr.executeSql('SELECT * FROM bitrates WHERE song IN (' +'"' + au.idsToQuery.join('", "') + '"'+ ')', [], function (tx, results) {
+
+                                    if (results.rows.length) {
+                                        // Loop for results
+                                        for( i in results.rows) {
+                                            var data = results.rows.item(i);
+
+                                            var row = domQuery(".page_block #audio_"+data.song+" .audio_hq_label");
+                                            if (results.rows.length && row.length && data.value != 0)
+                                                row[0].innerText = data.value;
+                                        }
+                                    }
+                                    if (mb.params.bitrate) mb.updateBitrate();
+                                });
+
+                                AudioUtils.idsToQuery = [];
+                            })
+                        }, 100)
+                    }
+
                     var l = "";
                     if (t[AudioUtils.AUDIO_ITEM_INDEX_COVER_URL]) {
                         var n = t[AudioUtils.AUDIO_ITEM_INDEX_COVER_URL].split(",");
@@ -1807,11 +1859,12 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     var u = formatTime(t[AudioUtils.AUDIO_ITEM_INDEX_DURATION])
                         , d = t[AudioUtils.AUDIO_ITEM_INDEX_PERFORMER].replace(/<\/?em>/g, "")
                         , _ = clean(JSON.stringify(t)).split("$").join("$$")
-                        , c = getTemplate("audio_row", t);
+                        , c = getTemplate("audio_row_advanced", t);
                     return c = c.replace(/%cls%/, a.join(" ")),
                         c = c.replace(/%duration%/, u),
                         c = c.replace(/%serialized%/, _),
                         c = c.replace(/%cover_style%/, l),
+                        c = c.replace(/%bitrate%/, ""),
                         c = c.replace(/%search_href%/, "/search?c[q]=" + encodeURIComponent(d) + "&c[section]=audio&c[performer]=1")
                 },
                 isRecomAudio: function(t) {
@@ -2863,6 +2916,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         this._statusExport = {},
                         this._currentPlayingRows = [],
                         this._allowPrefetchNext = !1,
+                        this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024),
                         !vk.isBanned) {
                     AudioUtils.debugLog("Player creation"),
                         this._initImpl(),
@@ -2879,8 +2933,12 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         ),
             AudioPlayer.prototype.getVersion = function() {
                 return 15
-            }
-            ,
+            },
+
+            AudioPlayer.prototype.unmask = function(t) {
+                return (0,_audio_unmask_source.audioUnmaskSource)(t)
+            },
+
             AudioPlayer.prototype._initImpl = function(t) {
                 var e = this;
                 this._impl && this._impl.destroy();
@@ -3041,8 +3099,13 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         case 176:
                             this.playNext()
                     }
-            }
-            ,
+            },
+
+            AudioPlayer.prototype.downloadPlaylist = function() {
+                var playlist = this.getCurrentPlaylist();
+                this._impl.musicBar.downloadPlaylist(playlist);
+            },
+
             AudioPlayer.prototype.deletePlaylist = function(t) {
                 for (var e = 0; e < this._playlists.length; e++)
                     this._playlists[e] == t && this._playlists.splice(e, 1)
@@ -3933,6 +3996,32 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     ids: i.join(",")
                 }, {
                     onDone: function(i, a) {
+
+                        if (typeof (a) === "undefined") {
+
+                            if (u._impl.musicBar.params.bitrate) {
+
+                                var modal = showFastBox({
+                                    title: "Ошибка",
+                                    dark: 1
+                                }, "К сожалению, сервер временно недоступен. Вы можете отключить отображение битрейта песен для избежания подобной ситуации.", "Закрыть", function(a) {
+                                    modal.hide();
+                                }, 'Отключить битрейт', function() {
+                                    AudioUtils.toggleAudioHQBodyClass(0);
+                                    modal.hide();
+                                })
+                            } else {
+                                var modal = showFastBox({
+                                    title: "Ошибка",
+                                    dark: 1
+                                }, "К сожалению, сервер временно недоступен. Попробуйте повторить действие чуть позже.", "Закрыть", function(a) {
+                                    modal.hide();
+                                })
+                            }
+
+                            return false;
+                        }
+
                         getAudioPlayer().setStatusExportInfo(a),
                             each(i, function(e, i) {
                                 i = AudioUtils.asObject(i);
