@@ -253,6 +253,12 @@
     background: none;
 }
 
+#top_audio_layer_place .audio_row_dropdown {
+    left: -110px;
+    top: -3px;
+}
+}
+
 .audio_row_dropdown.pdd_ralign {
     left: auto;
     right: -11px
@@ -287,7 +293,7 @@
     position: relative
 }
 
-.audio_row_dropdown .header .header_label:after {
+.audio_row_dropdown .header .header_label:not(#privacy_header):after {
     content: "";
     position: absolute;
     top: 12px;
@@ -296,6 +302,18 @@
     height: 5px;
     background: url(/images/icons/multidd.png?2) no-repeat;
     background-position: left -38px
+}
+
+#top_audio_layer_place #privacy_header {
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: row-reverse;
+    -webkit-flex-direction: row-reverse;
+    padding: 7px 10px 8px 26px;
+}
+
+#top_audio_layer_place #privacy_header .gear-icon{
+    margin-left: 10px;
 }
 
 .audio_row_dropdown .body {

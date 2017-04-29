@@ -19,9 +19,6 @@ if (typeof Array.prototype.forEach != 'function') {
 var MusicBar = function(context) {
     var self = this;
     this.db = null;
-    //this.impl = getAudioPlayer()._impl;
-
-
     this.context = context;
     this.source = null;
     this.filters = [];
@@ -197,11 +194,6 @@ var MusicBar = function(context) {
         this.equalizers = message.equalizers;
         this.source = getAudioPlayer()._impl._gainNode;
 
-
-
-        //this.analyzer = this.createAnalyzer();
-
-
         // Init filters for Equalizer
         for (var i = 0; i < this.frequencies.length; i++ ) {
             this.filters[i] = this.context.createBiquadFilter();
@@ -223,7 +215,6 @@ var MusicBar = function(context) {
 
         this.equalizers.forEach(function(item) {
             if (item.active) self.setEqualizer(item);
-            console.log(item);
         });
 
         this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024);
@@ -584,7 +575,7 @@ var MusicBar = function(context) {
         this.youtube = new YT.Player('audio_row_video_player', {
             events: {
                 onReady: function () {
-                    console.log("video ready");
+                    console.log("video is ready");
                 },
                 onStateChange: function(state) {
                     if (state.data == 1) {
@@ -888,11 +879,13 @@ var MusicBar = function(context) {
             //if (!domClosest("audio_rows", this) && !domClosest("wall_audio_rows", this)) return;
             var bitrate = geByClass1("audio_hq_label", this).innerText;
             if (!bitrate.length) queue.push(this.getAttribute("data-full-id"));
-        })
+        });
 
 
         for (var i = 0; i < queue.length / countPerRequest; i++) {
             var part = queue.slice(i * countPerRequest, i * countPerRequest + countPerRequest);
+
+
 
             self.reloadAudio(part, function(e, a) {
 
@@ -907,8 +900,6 @@ var MusicBar = function(context) {
                     var a = {};
                     a[AudioUtils.AUDIO_ITEM_INDEX_URL] = e.url;
                     getAudioPlayer().updateAudio(e.fullId, a);
-
-
 
                     data.push({
                         id: e.fullId,
@@ -928,7 +919,7 @@ var MusicBar = function(context) {
 
     this.reloadAudio = function(ids, callback) {
 
-        console.log(1231);
+        console.log(ids);
 
         var timer = window.setTimeout(function() {
             // Song, whose bitrate we know
@@ -948,11 +939,16 @@ var MusicBar = function(context) {
 
                     // Done function. e = array of audio datas, a - status (false, undefined)
                     var onDone = function(e, a) {
+
                         // Get audio data, set bitrate and push it to array
                         knownBitrates.forEach(function(song) {
+
                             if (ge("audio_" + song.song)) {
                                 var data = JSON.parse(ge("audio_" + song.song).getAttribute("data-audio"));
                                 data[AudioUtils.AUDIO_ITEM_INDEX_BITRATE] = song.value;
+
+                                geByClass1("audio_hq_label", ge("audio_" + song.song)).innerText = song.value;
+
                                 e.push(data);
                             }
                         })
@@ -963,7 +959,8 @@ var MusicBar = function(context) {
                     if (ids.length) {
                         ajax.post("al_audio.php", {
                             act: "reload_audio",
-                            ids: ids.join(",")
+                            ids: ids.join(","),
+                            al: 1
                         }, {
                             onDone: onDone
                         })
@@ -992,6 +989,7 @@ var MusicBar = function(context) {
     }
 
     this.setBitrate = function(song, bitrate) {
+
         var rows = domQuery("[data-full-id='"+song+"']");
         rows.forEach(function(row) {
             if (row) {
@@ -1172,9 +1170,6 @@ var MusicBar = function(context) {
 
     this.toggleBitrate = function(element, state, fromAudioPlayer) {
 
-        console.log(state);
-
-        //if (state && this.params.bitrate != state) this.updateBitrate();
 
         if (fromAudioPlayer) {
             checkbox("show_bitrate_checkbox", state);
@@ -4557,6 +4552,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         AudioPlayerFlash.prototype.setUrl = function(t, e) {
             var i = (0,
                 _audio_unmask_source.audioUnmaskSource)(t);
+
             return this._url == i ? void (e && e(!0)) : (this._url = i,
             this._player && this._player.loadAudio(i),
                 void (e && e(!0)))
