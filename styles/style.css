@@ -31,43 +31,49 @@
     color: #2a5885 !important;
 }
 
-.audio_playlist_wrap .audio_row > *{
+.audio_page_sections .audio_row > *{
     position: relative;
     z-index: 2;
 }
 
-.audio_playlist_wrap .audio_row canvas {
+.audio_page_player canvas {
     position: absolute;
-    left: 0;
+    left: 54px;
     top: 0;
     z-index: 1;
 }
 
-.audio_playlist_wrap.select-download .audio_row .select-check-wrapper {
-    float: left;
-    z-index: 10;
-    margin: -5px 8px -5px -10px;
+.audio_page_player > *:not(canvas) {
+    position: relative;
+    z-index: 2;
 }
 
-.audio_playlist_wrap.select-download .audio_row.selected{
+
+.audio_page_sections.select-download .audio_row .select-check-wrapper {
+    float: left;
+    z-index: 10;
+    margin: -4px 2px -5px -4px;
+}
+
+.audio_page_sections.select-download .audio_row.selected{
     background-color: rgb(233, 239, 247) !important;
 }
 
-.audio_playlist_wrap.select-download .audio_row .select-check {
+.audio_page_sections.select-download .audio_row .select-check {
     width: 17px;
     display: block;
     background: url(/images/icons/msg_check.png) no-repeat;
     opacity: 0.2;
-    margin: 8px;
-    height: 18px;
     background-position: center 1px;
+    height: 17px;
+    margin: 13px;
 }
 
-.audio_playlist_wrap.select-download .audio_row:hover .select-check {
+.audio_page_sections.select-download .audio_row:hover .select-check {
     opacity: 0.5;
 }
 
-.audio_playlist_wrap.select-download .audio_row.selected .select-check {
+.audio_page_sections.select-download .audio_row.selected .select-check {
     opacity: 1;
 }
 
@@ -189,16 +195,16 @@
 
 }
 
-.audio_playlist_wrap .audio_row:hover {
+.audio_page_sections .audio_row:hover {
     z-index: 100;
 }
 
-.audio_playlist_wrap .audio_row:hover .audio_act#actions {
+.audio_page_sections .audio_row:hover .audio_act#actions {
     z-index: 1000;
     opacity: 1;
 }
 
-.audio_playlist_wrap .audio_row .audio_acts .audio_act {
+.audio_page_sections .audio_row .audio_acts .audio_act {
     position: relative;
 }
 
@@ -206,7 +212,7 @@
     background-color: #6287ae;
 }
 
-.audio_playlist_wrap .audio_row .audio_acts #actions {
+.audio_page_sections .audio_row .audio_acts #actions {
     display: block;
 }
 
@@ -619,9 +625,7 @@
 #page_wrap #download-panel {
     height: 50px;
     z-index: 500;
-    margin: 0 0 -14px -9px;
     border-radius: 2px;
-    width: 550px;
     background-color: #fafbfc;
     border-top: 1px solid #e7e8ec;
     border-top-left-radius: 0;
@@ -629,7 +633,8 @@
     position: fixed;
     bottom: 14px;
     box-sizing: border-box;
-    box-shadow: 0px -2px 3px -1px rgba(0,0,0,.12);
+    margin: 0px 0px -14px 0px;
+    width: 554px;
 }
 
 #download-panel.absolute {

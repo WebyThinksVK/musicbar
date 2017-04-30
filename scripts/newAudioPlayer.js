@@ -149,7 +149,6 @@ var MusicBar = function(context) {
         this.source.disconnect();
         this.filters[this.filters.length-1].disconnect();
 
-
         for (var i = 0; i < this.filters.length; i++ ) {
 
             this.filters[i].disconnect();
@@ -160,17 +159,8 @@ var MusicBar = function(context) {
         }
 
         this.source.connect(this.filters[0]);
-
         var soundNode = this.params.surround ? this.splitToSurround(this.filters[this.filters.length-1]) : this.filters[this.filters.length-1];
-
-        console.log(soundNode);
-
-        /*if (this.params.visualization) {
-         soundNode.connect(this.analyser);
-         }*/
-
         soundNode.connect(this.context.destination);
-
 
         if (self.equalizers.indexOf(equalizer) > 0) {
             // Set this equalizer active state
@@ -188,8 +178,6 @@ var MusicBar = function(context) {
 
     // Init extension
     this.init = function(message) {
-        var impl = getAudioPlayer()._impl;
-
         this.params = message.params;
         this.equalizers = message.equalizers;
         this.source = getAudioPlayer()._impl._gainNode;
@@ -702,7 +690,7 @@ var MusicBar = function(context) {
 
         for (i=0; i<16; i++) {
             var height = bands[i]/10;
-            context.fillRect(i* (size[0] / 16), 36-height, (size[0] / 16 - 3), height);
+            context.fillRect(i* (size[0] / 16), 54-height, (size[0] / 16 - 3), height);
         }
     };
 
@@ -710,9 +698,9 @@ var MusicBar = function(context) {
 
         addTemplates({
             audio_row_advanced: '\
-            <div class="audio_row _audio_row _audio_row_%1%_%0% %cls%" onclick="return getAudioPlayer().toggleAudio(this, event)"\
-            data-audio="%serialized%" data-full-id="%1%_%0%" id="audio_%1%_%0%">\
-        <div class="audio_row_inner clear_fix">\
+            <div class="audio_row _audio_row _audio_row_%1%_%0% %cls%" onclick="return getAudioPlayer().toggleAudio(this, event)" data-audio="%serialized%" data-full-id="%1%_%0%" id="audio_%1%_%0%">\
+            <div class="audio_row_inner clear_fix">\
+            <div class="select-check-wrapper" onclick="getAudioPlayer().toggleSelect(this)"> <div class="select-check" ></div> </div>\
             <div class="audio_row_counter"></div>\
             <div class="audio_row_cover_wrap _audio_row_cover_wrap">\
             <div class="audio_row_cover" style="%cover_style%"></div>\
@@ -766,12 +754,24 @@ var MusicBar = function(context) {
     };
 
     this.initPanel = function() {
+
+        // Add canvas for visualization
+        this.currentRow = geByClass1("audio_page_player");
+        var canvas = ce("canvas");
+        canvas.width = getSize(this.currentRow)[0] - 54
+        canvas.height = getSize(this.currentRow)[1];
+        this.currentRow.appendChild(canvas);
+
+        // Set up settings toggles
         toggleClass(geByClass1("ui_toggler", geByClass1("surround_toggle")), "on", this.params.surround);
         toggleClass(geByClass1("ui_toggler", geByClass1("visualization_toggle")), "on", this.params.visualization);
         toggleClass(geByClass1("ui_toggler", geByClass1("playlists_toggle")), "on", this.params.playlists);
-        //toggleClass(ge("show_bitrate_checkbox"), "on", this.params.bitrate)
+        toggleClass(ge("show_bitrate_checkbox"), "on", this.params.bitrate);
+
+        // Show bitrate
         toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS,  this.params.bitrate);
-        toggle(geByClass1("_audio_page_titled_block"), !this.params.playlists)
+
+        toggle(geByClass1("_audio_page_titled_block"), !this.params.playlists);
         toggleClass(geByClass1("audio_page_section_layout"), "no_playlists", this.params.playlists);
 
 
@@ -784,7 +784,7 @@ var MusicBar = function(context) {
         }
 
         if (geByClass1("blind_label", geByClass1("ui_rmenu_pr")))
-            geByClass1("blind_label", geByClass1("ui_rmenu_pr")).remove(); // Remove hidden button titile
+            geByClass1("blind_label", geByClass1("ui_rmenu_pr")).remove(); // Remove hidden button title
 
         // Create new equalizer
         geByClass1("add_equalizer_item").addEventListener("click", function() {
@@ -1200,7 +1200,7 @@ var MusicBar = function(context) {
     };
 
     this.toggleSelect = function(state) {
-        var playlist = geByClass1('audio_playlist_wrap');
+        var playlist = geByClass1('audio_page_sections');
 
         if (state === true) {
             state = toggleClass(playlist,'select-download', state);
@@ -1238,7 +1238,7 @@ var MusicBar = function(context) {
         } else {
             var selectPanel = ge("download-panel");
             if (selectPanel) selectPanel.remove();
-            toggleClass(geByClass1('audio_playlist_wrap'),'select-download', false);
+            toggleClass(geByClass1('audio_page_sections'),'select-download', false);
 
             [].slice.call(domQuery(".audio_row.selected")).forEach(function(row){
                 removeClass(row, "selected");
@@ -3174,8 +3174,16 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         addClass(this, "audio_pl__playing")
                     })
                 }
-            }
-            ,
+            },
+
+            AudioPlayer.prototype.toggleSelect = function(element) {
+                var row = domClosest("audio_row", element);
+                toggleClass(row, "selected");
+                var count = domQuery(".audio_row.selected").length;
+
+                domQuery("#download-panel .count")[0].innerText = count;
+            },
+
             AudioPlayer.prototype.toggleCurrentAudioRow = function(t, e, i) {
                 function o() {
                     if (n && (e ? u._addRowPlayer(t, i) : u._removeRowPlayer(t)),
@@ -4048,7 +4056,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     navigateToUploader: !0
                 }),
                     cancelEvent(e);
-            var a = cur.cancelClick || e && (hasClass(e.target, "audio_lyrics") || domClosest("_audio_duration_wrap", e.target) || domClosest("_audio_inline_player", e.target) || domClosest("audio_performer", e.target));
+
+            var a = cur.cancelClick  || e && hasClass(e.target, "select-check") || e && hasClass(e.target, "select-check-wrapper") || e && hasClass(e.target, "audio_row_chords_block") || e && (hasClass(e.target, "audio_lyrics") || domClosest("_audio_duration_wrap", e.target) || domClosest("_audio_inline_player", e.target) || domClosest("audio_performer", e.target));
+
+
+            //var a = cur.cancelClick || e && (hasClass(e.target, "audio_lyrics") || domClosest("_audio_duration_wrap", e.target) || domClosest("_audio_inline_player", e.target) || domClosest("audio_performer", e.target));
             if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", i) && (a = !0),
                     delete cur.cancelClick,
                     delete cur._sliderMouseUpNowEl,
@@ -4621,10 +4633,6 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         window.AudioPlayerHTML5WebAudio = function(t) {
-
-
-
-
             this._opts = t;
             this._audio = new Audio;
             this._audio.crossOrigin = "anonymous";
@@ -4649,8 +4657,9 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             };
 
             window.setInterval(function(){
-                getAudioPlayer()._impl.musicBar.updateVisualization(bands);
-            }, 1000);
+                if (getAudioPlayer()._impl.musicBar.params.visualization)
+                    getAudioPlayer()._impl.musicBar.updateVisualization(bands);
+            }, 100);
 
 
             this._gainNode = this._context.createGain();

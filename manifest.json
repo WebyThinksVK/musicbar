@@ -42,7 +42,7 @@
     "<all_urls>"
   ],
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "4.6.6",
+  "version": "5.0.0",
   "externally_connectable": {
     "matches": [
       "http://vk.com/*",
