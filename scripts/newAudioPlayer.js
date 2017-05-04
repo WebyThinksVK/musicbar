@@ -205,20 +205,20 @@ var MusicBar = function(context) {
             if (item.active) self.setEqualizer(item);
         });
 
-        this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024);
-        this.db.transaction(function (tx) {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS bitrates (song varchar(30) UNIQUE, value)');
-            //tx.executeSql("DROP TABLE bitrates");
+        /*this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024);
+         this.db.transaction(function (tx) {
+         tx.executeSql('CREATE TABLE IF NOT EXISTS bitrates (song varchar(30) UNIQUE, value)');
+         //tx.executeSql("DROP TABLE bitrates");
 
-            tx.executeSql("SELECT * FROM bitrates", [], function(tr, results) {
+         tx.executeSql("SELECT * FROM bitrates", [], function(tr, results) {
 
-                if (results.rows.length > 100000) {
-                    tx.executeSql("DELETE FROM bitrates");
-                }
+         if (results.rows.length > 100000) {
+         tx.executeSql("DELETE FROM bitrates");
+         }
 
-            })
+         })
 
-        });
+         });*/
 
         // Hide playlists if nesessary
         toggle(geByClass1("_audio_page_titled_block"), !this.params.playlists)
@@ -414,35 +414,35 @@ var MusicBar = function(context) {
             var playlistPanel = geByClass1("download-playlist");
             if (playlistPanel) {
                 geByClass1("playlist_download_progress_bar", playlistPanel).style.width = "0%";
-                geByClass1("playlist_download_progress_text", playlistPanel).innerText = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 0%";
+                geByClass1("playlist_download_progress_text", playlistPanel).innerText = "Загрузка 0%";
             }
 
             toggleClass(playlistPanel, "download", true);
             var name = document.querySelector(".ui_rmenu_pr .ui_rmenu_item_sel span");
             self.postMessage({
                 type: "downloadPlaylist",
-                title: name? name.innerText.trim() : "пїЅпїЅпїЅпїЅпїЅпїЅ"
+                title: name? name.innerText.trim() : "Музыка"
             })
         }
 
         if (this.playlistCount > 50) {
-            var songsMorphy = "пїЅпїЅпїЅпїЅпїЅ";
+            var songsMorphy = "песен";
             switch(this.playlistCount%10) {
-                case 1: songsMorphy = "пїЅпїЅпїЅпїЅпїЅ"; break;
+                case 1: songsMorphy = "песню"; break;
                 case 2:
                 case 3:
-                case 4:songsMorphy = "пїЅпїЅпїЅпїЅпїЅ"; break;
+                case 4:songsMorphy = "песни"; break;
             }
 
-            var box = new MessageBox({title: "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", dark: 1});
-            box.content("пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ <b>"+this.playlistCount+"</b> "+songsMorphy+"? пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ. <br> <br> пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ <a onclick='boxQueue.hideLast(); getAudioPlayer()._impl.musicBar.toggleSelect(true)'> пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ</a>.");
+            var box = new MessageBox({title: "Скачивание аудиозаписей", dark: 1});
+            box.content("Вы уверены, что хотите скачать <b>"+this.playlistCount+"</b> "+songsMorphy+"? Это может занять продолжительное время. <br> <br> Вы также можете <a onclick='boxQueue.hideLast(); getAudioPlayer()._impl.musicBar.toggleSelect(true)'> выбрать нужные песни</a>.");
 
-            box.addButton("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", function() {
+            box.addButton("Продолжить", function() {
                 fn()
                 box.hide();
             });
 
-            box.addButton("пїЅпїЅпїЅпїЅпїЅпїЅ", function() {
+            box.addButton("Отмена", function() {
                 self.playlist = [];
                 self.playlistCount = 0;
                 box.hide();
@@ -498,7 +498,7 @@ var MusicBar = function(context) {
         if (playlistPanel) {
             var percent = 100 - this.playlist.length / (this.playlistCount / 100);
             geByClass1("playlist_download_progress_bar", playlistPanel).style.width = percent.toFixed(4)+"%";
-            geByClass1("playlist_download_progress_text", playlistPanel).innerText = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ "+percent.toFixed(0)+"%";
+            geByClass1("playlist_download_progress_text", playlistPanel).innerText = "Загружено "+percent.toFixed(0)+"%";
         }
 
         var song = AudioUtils.asObject(songData);
@@ -546,9 +546,9 @@ var MusicBar = function(context) {
 
         if (!message.html) {
             var modal = showFastBox({
-                title: "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
+                title: "Поиск видеоклипа",
                 dark: 1
-            }, "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ", function(a) {
+            }, "Не удалось найти видеоклип для этой песни", "Закрыть", function(a) {
                 modal.hide();
             })
             return false;
@@ -580,9 +580,9 @@ var MusicBar = function(context) {
 
         if (!message.html) {
             var modal = showFastBox({
-                title: "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
+                title: "Поиск аккордов",
                 dark: 1
-            }, "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ", function(a) {
+            }, "Не удалось найти аккорды для этой песни", "Закрыть", function(a) {
                 modal.hide();
             })
             return false;
@@ -611,13 +611,13 @@ var MusicBar = function(context) {
         var box = new MessageBox({width: 600});
 
         if (!message.html) {
-            box = new MessageBox({title: "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"});
-            box.content("пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
+            box = new MessageBox({title: "Об исполнителе"});
+            box.content("Не удалось найти информацю об этом исполнителе");
         } else {
             box.content(message.html);
         }
 
-        box.addButton("пїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
+        box.addButton("Закрыть");
         box.show();
     };
 
@@ -712,17 +712,17 @@ var MusicBar = function(context) {
             <div class="audio_hq_label">%bitrate%</div>\
             <div class="audio_duration _audio_duration">%duration%</div>\
             <div class="audio_acts clear_fix">\
-            <div class="audio_act" id="actions" onclick="tooltips.hideAll(); fadeToggle(geByClass1(\'audio_row_dropdown\', this), 200); " onmouseover="showTooltip(this, {text: \'пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ\', black: 1, shift: [10, 6, 0], appendParentCls: \'audio_acts\'})" onclick="">\
+            <div class="audio_act" id="actions" onclick="tooltips.hideAll(); fadeToggle(geByClass1(\'audio_row_dropdown\', this), 200); " onmouseover="showTooltip(this, {text: \'Действия\', black: 1, shift: [10, 6, 0], appendParentCls: \'audio_acts\'})" onclick="">\
                 <div class="gear-icon"></div>\
                 <div id="audio_row_dropdown" class="audio_row_dropdown" >\
                     <div class="rows" style="font-size: 13px;">\
-                        <div class="header"><div id="privacy_header" class="header_label"><div class="gear-icon"></div>&nbsp;&nbsp; пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</div></div>\
+                        <div class="header"><div id="privacy_header" class="header_label"><div class="gear-icon"></div>&nbsp;&nbsp; Действия</div></div>\
                         <div class="body">\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.downloadSong(this)">пїЅпїЅпїЅпїЅпїЅпїЅпїЅ</div>\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findPerformer(this)">пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</div>\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findVideo(this)">пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ</div>\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findChords(this)">пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ</div>\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.shareSong(this)">пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ</div>\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.downloadSong(this)">Скачать</div>\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findPerformer(this)">Об исполнителе</div>\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findVideo(this)">Найти клип</div>\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findChords(this)">Найти аккорды</div>\
+                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.shareSong(this)">Отправить другу</div>\
                         </div>\
                     </div>\
                 </div>\
@@ -778,7 +778,7 @@ var MusicBar = function(context) {
         if (this.playlist.length) {
             var percent = 100 - this.playlist.length / (this.playlistCount / 100);
             geByClass1("playlist_download_progress_bar").style.width = percent.toFixed(4)+"%";
-            geByClass1("playlist_download_progress_text").innerText = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ "+percent.toFixed(0)+"%";
+            geByClass1("playlist_download_progress_text").innerText = "Загружено "+percent.toFixed(0)+"%";
             toggleClass(geByClass1("download-playlist"), "download", true);
 
         }
@@ -789,7 +789,7 @@ var MusicBar = function(context) {
         // Create new equalizer
         geByClass1("add_equalizer_item").addEventListener("click", function() {
             self.ajax(MusicBar.formEqualizerModalUrl, function() {
-                var box = new MessageBox({dark: 1, title: "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", bodyStyle: "padding: 20px; background-color: #fafbfc;"});
+                var box = new MessageBox({dark: 1, title: "Добавить эквалайзер", bodyStyle: "padding: 20px; background-color: #fafbfc;"});
                 box.content(this);
 
                 // Update equalizer
@@ -808,7 +808,7 @@ var MusicBar = function(context) {
                 self.setEqualizer({gains: gains});
 
                 // Save the Equalizer
-                box.addButton("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", function() {
+                box.addButton("Сохранить", function() {
                     var gains = [];
                     each(geByClass("gain_range", box.bodyNode), function(i) {gains.push(this.value);});
 
@@ -840,7 +840,7 @@ var MusicBar = function(context) {
                     box.hide();
                 });
 
-                box.addButton("пїЅпїЅпїЅпїЅпїЅпїЅ", function() {
+                box.addButton("Отмена", function() {
                     self.setEqualizer();
                     box.hide();
                 }, "no");
@@ -890,7 +890,7 @@ var MusicBar = function(context) {
             self.reloadAudio(part, function(e, a) {
 
                 if (a !== false) {
-                    topMsg("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.", 30, '#FFB4A3');
+                    topMsg("Сервер перегружен. Подождите немного.", 30, '#FFB4A3');
                 }
 
                 var data = [];
@@ -919,8 +919,10 @@ var MusicBar = function(context) {
 
     this.reloadAudio = function(ids, callback) {
 
+        return false;
+
         var timer = window.setTimeout(function() {
-            // Songs, whose bitrate we know
+            // Song, whose bitrate we know
             var knownBitrates = [];
 
             self.db.transaction(function (tx) { // Get requested id's in BD
@@ -1044,13 +1046,13 @@ var MusicBar = function(context) {
 
                 var equalizer = domClosest("_audio_equalizer_item", this);
                 var modal = showFastBox({
-                    title: "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
+                    title: "Удалить эквалайзер",
                     dark: 1
-                }, "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ?", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ", function(a) {
+                }, "Вы уверены, что хотите удалить этот эквалайзер?", "Удалить", function(a) {
                     self.removeEqualizer(equalizer.getAttribute("data-index"));
                     modal.hide();
                     equalizer.remove();
-                }, "пїЅпїЅпїЅпїЅпїЅпїЅ");
+                }, "Отмена");
 
                 e.stopPropagation();
                 return false;
@@ -1063,7 +1065,7 @@ var MusicBar = function(context) {
                 var equalizer = self.equalizers[element.getAttribute("data-index")];
 
                 self.ajax(MusicBar.formEqualizerModalUrl, function() {
-                    var box = new MessageBox({dark: 1, title: "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", bodyStyle: "padding: 20px; background-color: #fafbfc;"});
+                    var box = new MessageBox({dark: 1, title: "Редактировать эквалайзер", bodyStyle: "padding: 20px; background-color: #fafbfc;"});
                     box.content(this);
 
                     geByClass("gain_range", box.bodyNode).forEach(function(input) {
@@ -1082,7 +1084,7 @@ var MusicBar = function(context) {
                     each(geByClass("gain_range", box.bodyNode), function(i) { this.value = equalizer.gains[i]; });
 
                     // Save the Equalizer
-                    box.addButton("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", function() {
+                    box.addButton("Сохранить", function() {
                         var gains = [];
                         each(geByClass("gain_range", box.bodyNode), function(i) {gains.push(this.value);});
 
@@ -1107,7 +1109,7 @@ var MusicBar = function(context) {
                         box.hide();
                     });
 
-                    box.addButton("пїЅпїЅпїЅпїЅпїЅпїЅ", function() {
+                    box.addButton("Отмена", function() {
                         self.setEqualizer();
                         box.hide();
                     }, "no");
@@ -4009,19 +4011,19 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             if (u._impl.musicBar.params.bitrate) {
 
                                 var modal = showFastBox({
-                                    title: "пїЅпїЅпїЅпїЅпїЅпїЅ",
+                                    title: "??????",
                                     dark: 1
-                                }, "пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ", function(a) {
+                                }, "? ?????????, ?????? ???????? ??????????. ?? ?????? ????????? ??????????? ???????? ????? ??? ????????? ???????? ????????.", "???????", function(a) {
                                     modal.hide();
-                                }, 'пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ', function() {
+                                }, '????????? ???????', function() {
                                     AudioUtils.toggleAudioHQBodyClass(0);
                                     modal.hide();
                                 })
                             } else {
                                 var modal = showFastBox({
-                                    title: "пїЅпїЅпїЅпїЅпїЅпїЅ",
+                                    title: "??????",
                                     dark: 1
-                                }, "пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.", "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ", function(a) {
+                                }, "? ?????????, ?????? ???????? ??????????. ?????????? ????????? ???????? ???? ?????.", "???????", function(a) {
                                     modal.hide();
                                 })
                             }
