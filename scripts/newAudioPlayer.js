@@ -205,22 +205,22 @@ var MusicBar = function(context) {
             if (item.active) self.setEqualizer(item);
         });
 
-        /*this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024);
-         this.db.transaction(function (tx) {
-         tx.executeSql('CREATE TABLE IF NOT EXISTS bitrates (song varchar(30) UNIQUE, value)');
-         //tx.executeSql("DROP TABLE bitrates");
+        this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024);
+        this.db.transaction(function (tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS bitrates (song VARCHAR(30) UNIQUE, value)');
+            //tx.executeSql("DROP TABLE bitrates");
 
-         tx.executeSql("SELECT * FROM bitrates", [], function(tr, results) {
+            tx.executeSql("SELECT * FROM bitrates", [], function (tr, results) {
 
-         if (results.rows.length > 100000) {
-         tx.executeSql("DELETE FROM bitrates");
-         }
+                if (results.rows.length > 100000) {
+                    tx.executeSql("DELETE FROM bitrates");
+                }
 
-         })
+            })
 
-         });*/
+        });
 
-        // Hide playlists if nesessary
+        // Hide playlists if necessary
         toggle(geByClass1("_audio_page_titled_block"), !this.params.playlists)
         toggleClass(geByClass1("audio_page_section_layout"), "no_playlists", this.params.playlists);
     }
@@ -881,11 +881,8 @@ var MusicBar = function(context) {
             if (!bitrate.length) queue.push(this.getAttribute("data-full-id"));
         });
 
-
         for (var i = 0; i < queue.length / countPerRequest; i++) {
             var part = queue.slice(i * countPerRequest, i * countPerRequest + countPerRequest);
-
-
 
             self.reloadAudio(part, function(e, a) {
 
@@ -919,7 +916,7 @@ var MusicBar = function(context) {
 
     this.reloadAudio = function(ids, callback) {
 
-        return false;
+
 
         var timer = window.setTimeout(function() {
             // Song, whose bitrate we know
@@ -1578,6 +1575,31 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AUDIO_ROW_COVER_SIZE: 34,
                 updateBitrateTimer: null,
                 idsToQuery : [],
+                onAudioChoose: function(t, e, i, o) {
+                    if (isUndefined(e.selected)) {
+                        var a = cur.attachCount && cur.attachCount() || 0;
+                        cur.chooseMedia("audio", i.fullId, o),
+                        (!cur.attachCount || cur.attachCount() > a) && cur.lastAddMedia && (e.selected = cur.lastAddMedia.chosenMedias.length - 1,
+                            addClass(domPN(e), "audio_selected"),
+                            e.innerHTML = getLang("global_cancel"))
+                    } else
+                        cur.lastAddMedia.unchooseMedia(e.selected),
+                            e.selected = void 0,
+                            removeClass(domPN(e), "audio_selected"),
+                            e.innerHTML = getLang("global_add_media");
+                    return cancelEvent(t)
+                },
+                onPlaylistChoose: function(t, e) {
+                    var i = e.getAccessHash();
+                    cur.chooseMedia("audio_playlist", e.getOwnerId() + "_" + e.getPlaylistId() + (i ? ":" + i : ""), {
+                        id: e.getPlaylistId(),
+                        coverUrl: e.getCoverUrl(),
+                        gridCovers: e.getGridCovers(),
+                        title: e.getTitle(),
+                        authorName: e.getAuthorName(),
+                        authorHref: e.getAuthorHref()
+                    })
+                },
                 editPlaylist: function(t, e) {
                     stManager.add(["audio.js", "audio.css", "auto_list.js"], function() {
                         AudioPage.editPlaylist(t, e, "edit")
