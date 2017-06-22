@@ -319,7 +319,7 @@ function findVideo(message, port) {
             });
         }
         var id = response.items[0].id.videoId;
-        var html = '<div class="close" onclick="this.parentNode.remove(); event.stopPropagation();">&times;</div> <iframe id="audio_row_video_player" width="512" height="300" src="https://www.youtube.com/embed/' + id + '?color=white&theme=light&autohide=1&amp;wmode=opaque&amp;showinfo=0&enablejsapi=1&playerapiid=video_player&hd=1&vq=hd720" frameborder="0" allowfullscreen></iframe>';
+        var html = '<div class="close" onclick="getAudioPlayer()._impl.musicBar.hideVideoBlock(this);  event.stopPropagation();">&times;</div> <iframe id="audio_row_video_player" width="512" height="300" src="https://www.youtube.com/embed/' + id + '?color=white&theme=light&autohide=1&amp;wmode=opaque&amp;showinfo=0&enablejsapi=1&playerapiid=video_player&hd=1&vq=hd720" frameborder="0" allowfullscreen></iframe>';
         port.postMessage({
             type: "findVideo",
             id: message.id,
@@ -367,8 +367,6 @@ function findPerformer(message, port) {
                 similar += "<a class=\"similar-band\" onclick=\" nav.change({ q: '"+artist.name+"', performer: 1 }, window, { searchPerformer: true }); curBox().hide();\">"+artist.name+"</a><br>";
             });
 
-
-
             html = html.replace(/%image_url%/, artist.image[2]["#text"]);
             html = html.replace(/%last_fm_url%/, artist.url);
             html = html.replace(/%band_name%/, artist.name);
@@ -391,7 +389,7 @@ function encode(text) {
 }
 
 function findChords(message, port) {
-    var closeBtnHtml = '<div class="close" onclick="this.parentNode.remove(); event.stopPropagation();">&times;</div>';
+    var closeBtnHtml = '<div class="close" onclick="getAudioPlayer()._impl.musicBar.hideChordsBlock(this); event.stopPropagation();">&times;</div>';
 
     findChordsUltimateGuitar(message.artist, message.song, function(chords) {
 

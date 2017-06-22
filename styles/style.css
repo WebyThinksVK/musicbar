@@ -36,6 +36,10 @@
     z-index: 2;
 }
 
+.audio_w_covers .audio_row .audio_row__cover, .audio_w_covers .audio_row .audio_row__cover_back, .audio_w_covers .audio_row .audio_row__cover_icon, .audio_w_covers .audio_row .audio_row__sound_bars {
+    top: 4px !important;
+}
+
 .audio_page_player canvas {
     position: absolute;
     left: 54px;
@@ -49,10 +53,21 @@
 }
 
 
-.audio_page_sections.select-download .audio_row .select-check-wrapper {
+.audio_page_sections.select-download .audio_row_content {
     float: left;
-    z-index: 10;
-    margin: -4px 2px -5px -4px;
+    width: calc(100% - 45px);
+}
+
+.audio_page_sections.select-download .audio_row__sound_bars {
+    left: 50px !important;
+    top: 7px !important;
+}
+
+.audio_page_sections.select-download .audio_row .select-check-wrapper {
+    margin: 0;
+    width: 45px;
+    height: 45px;
+    float: left;
 }
 
 .audio_page_sections.select-download .audio_row.selected{
@@ -62,11 +77,11 @@
 .audio_page_sections.select-download .audio_row .select-check {
     width: 17px;
     display: block;
-    background: url(/images/icons/msg_check.png) no-repeat;
     opacity: 0.2;
-    background-position: center 1px;
     height: 17px;
-    margin: 13px;
+    background: url(/images/icons/msg_check.png) center 0px no-repeat;
+    background-position: center 1px;
+    margin: 15px;
 }
 
 .audio_page_sections.select-download .audio_row:hover .select-check {
@@ -76,6 +91,8 @@
 .audio_page_sections.select-download .audio_row.selected .select-check {
     opacity: 1;
 }
+
+
 
 .audio_equalizer_del_btn {
     float: right;
