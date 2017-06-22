@@ -1413,10 +1413,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         e.c = i,
         e.p = "",
         e(0)
-}([function(t, e, i) {
-    t.exports = i(3)
-}
-    , function(module, exports) {
+}({
+    0: function(t, e, i) {
+        t.exports = i(41)
+    },
+    39: function(module, exports) {
         "use strict";
         function _classCallCheck(t, e) {
             if (!(t instanceof e))
@@ -1527,8 +1528,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AudioLayer
         }();
         exports["default"] = AudioLayer
-    }
-    , function(t, e) {
+    },
+    40: function(t, e) {
         "use strict";
         function i(t) {
             if (~t.indexOf("audio_api_unavailable")) {
@@ -1584,8 +1585,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     i.join("")
             }
         }
-    }
-    , function(module, exports, __webpack_require__) {
+    },
+    41: function(module, exports, __webpack_require__) {
         "use strict";
         function _interopRequireDefault(t) {
             return t && t.__esModule ? t : {
@@ -1700,8 +1701,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 throw new TypeError("Invalid attempt to destructure non-iterable instance")
             }
         }()
-            , _audio_unmask_source = __webpack_require__(2)
-            , _audio_layer = __webpack_require__(1)
+            , _audio_unmask_source = __webpack_require__(40)
+            , _audio_layer = __webpack_require__(39)
             , _audio_layer2 = _interopRequireDefault(_audio_layer);
         window.AudioLayer = _audio_layer2["default"],
             window.AudioUtils = {
@@ -1726,8 +1727,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AUDIO_ITEM_UMA_BIT: 128,
                 AUDIO_ENOUGH_LOCAL_SEARCH_RESULTS: 500,
                 AUDIO_RECOMS_TYPE_LISTENED: "recoms6",
-                AUDIO_PLAYING_CLS: "audio_row_playing",
-                AUDIO_CURRENT_CLS: "audio_row_current",
+                AUDIO_PLAYING_CLS: "audio_row__playing",
+                AUDIO_CURRENT_CLS: "audio_row__current",
                 AUDIO_LAYER_HEIGHT: 550,
                 AUDIO_LAYER_MIN_WIDTH: 400,
                 AUDIO_LAYER_MAX_WIDTH: 1e3,
@@ -1781,7 +1782,57 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                 }
                             })
                 },
+                getRowActionName: function(t, e, i) {
+                    var o = void 0
+                        , a = AudioUtils.getAddRestoreInfo();
+                    switch (t) {
+                        case "current_delete":
+                            o = getLang("audio_delete_from_current");
+                            break;
+                        case "recoms_delete":
+                            o = getLang("audio_dont_show");
+                            break;
+                        case "listened_delete":
+                            o = getLang("audio_remove_from_list");
+                            break;
+                        case "delete":
+                            if (window.AudioPage && AudioPage.isInRecentPlayed(i))
+                                o = getLang("audio_remove_from_list");
+                            else {
+                                var s = a[e.fullId];
+                                o = s && s.deleteAll ? s.deleteAll.text : getLang("global_delete_audio")
+                            }
+                            break;
+                        case "restore_recoms":
+                            o = getLang("audio_restore_audio");
+                            break;
+                        case "add":
+                            var r = a[e.fullId];
+                            if (r && "deleted" == r.state)
+                                o = getLang("audio_restore_audio");
+                            else if (r && "added" == r.state)
+                                o = getLang("global_delete_audio");
+                            else {
+                                var l = window.AudioPage ? currentAudioPage(i) : !1;
+                                o = l && l.getOwnerId() < 0 && l.canAddToGroup() ? getLang("audio_add_to_group") : getLang("audio_add_to_audio")
+                            }
+                            break;
+                        case "edit":
+                            o = getLang("audio_edit_audio");
+                            break;
+                        case "next":
+                            o = cur.lang && cur.lang.global_audio_set_next_audio || getLang("audio_set_next_audio");
+                            break;
+                        case "recoms":
+                            o = getLang("audio_show_recommendations");
+                            break;
+                        default:
+                            o = ""
+                    }
+                    return o
+                },
                 onRowOver: function onRowOver(audioEl, event, forceRedraw) {
+                    var _this2 = this;
                     data(audioEl, "leaved", !1),
                     (!data(audioEl, "actions") || forceRedraw) && (clearTimeout(window.audioRowHoverTO),
                         window.audioRowHoverTO = setTimeout(function() {
@@ -1793,7 +1844,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                 , _AudioUtils$contextSp = AudioUtils.contextSplit(context)
                                 , _AudioUtils$contextSp2 = _slicedToArray(_AudioUtils$contextSp, 2)
                                 , contextSection = _AudioUtils$contextSp2[0]
-                                , contextObjectId = _AudioUtils$contextSp2[1];
+                                , contextObjectId = _AudioUtils$contextSp2[1]
+                                , extra = AudioUtils.getAudioExtra(audioObject);
                             if (audioObject.isDeleted)
                                 if ("recoms_recoms" == contextSection)
                                     actions.push(["restore_recoms", AudioUtils.addAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
@@ -1841,8 +1893,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                             default:
                                                 audioObject.isCurrent && audioObject.withInlinePlayer && (actionsList = ["download","performer", "chords", "video","recoms", "add", "share", "add_to_playlist"])
                                         }
-                                    audioObject.isUMA && actionsList.push("uma");
-                                    var extra = AudioUtils.getAudioExtra(audioObject);
+                                    actionsList.push("uma"),
                                     extra.moder_actions && each(extra.moder_actions, function(i, act) {
                                         moreActions.push(["moder_" + i, function(audioEl, audio) {
                                             eval(act[1])
@@ -1867,7 +1918,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                                 cur.audioPage && actions.push(["recoms", AudioUtils.showRecoms, "", 'onmouseover="audioShowActionTooltip(this)"']);
                                                 break;
                                             case "uma":
-                                                actions.push(["uma", AudioUtils.getUMAInfo, "UMA"]);
+                                                audioObject.isUMA && actions.push(["uma", AudioUtils.getUMAInfo, "UMA"]);
                                                 break;
                                             case "edit":
                                                 audioObject.canEdit && !vk.widget && inArray(contextSection, ["my", "group_list"]) && actions.push(["edit", AudioUtils.editAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
@@ -1910,16 +1961,17 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                         }
                                     })
                                 }();
-                            moreActions.length && vk.audioQuickPlAdd && actions.push(["more"]),
+                            moreActions.length && actions.push(["more"]),
                             actions.length && !function() {
                                 var t = se('<div class="_audio_row__actions audio_row__actions"></div>');
                                 each(actions, function(e, i) {
-                                    var o = se('<div data-action="' + i[0] + '" class="audio_row__action audio_row__action_' + i[0] + " _audio_row__action_" + i[0] + '" ' + (i[3] || "") + ">" + (i[2] || "") + "</div>");
-                                    o.addEventListener("click", function(t) {
+                                    var o = AudioUtils.getRowActionName(i[0], audioObject, audioEl)
+                                        , a = se('<button aria-label="' + o + '" data-action="' + i[0] + '" class="audio_row__action audio_row__action_' + i[0] + " _audio_row__action_" + i[0] + '" ' + (i[3] || "") + ">" + (i[2] || "") + "</button>");
+                                    a.addEventListener("click", function(t) {
                                         return i[1] && i[1].call(window, audioEl, audioObject, audio),
                                             cancelEvent(t)
                                     }),
-                                        t.appendChild(o)
+                                        t.appendChild(a)
                                 });
                                 var e = geByClass1("_audio_row__info", audioEl)
                                     , i = geByClass1("_audio_row__duration", audioEl)
@@ -1928,7 +1980,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     setStyle(i, "visibility", "hidden"),
                                     e.appendChild(t);
                                 var a = geByClass1("_audio_row__action_more", t);
-                                moreActions.length && a && vk.audioQuickPlAdd && !function() {
+                                moreActions.length && a && !function() {
                                     var t = se('<div class="_audio_row__more_actions audio_row__more_actions"></div>');
                                     each(moreActions, function(e, i) {
                                         var a = se(rs(AudioUtils.AUDIO_ROW_ACTION_ROW_ITEM, i));
@@ -2019,7 +2071,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                                         audio_id: o.id,
                                                         do_add: intval(i)
                                                     }, {
-                                                        onDone: function() {
+                                                        onDone: function(t) {
                                                             i = !i,
                                                                 r = !1
                                                         }
@@ -2046,6 +2098,13 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                 }
                                 i.updatePosition()
                             }
+                        })
+                },
+                onAudioAddedToPlaylist: function(t, e, i, o) {
+                    var a = getAudioPlayer().getPlaylist(AudioPlaylist.TYPE_PLAYLIST, t, e);
+                    a.addAudio(o, 0),
+                        each(geByClass("_audio_pl_" + t + "_" + e), function(t, e) {
+                            domReplaceEl(e, se(i))
                         })
                 },
                 onRowLeave: function(t) {
@@ -2099,20 +2158,20 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         c = trim(t).toLowerCase(),
                             s()
                     }, 200);
-                    var y = {}
-                        , p = {};
+                    var A = {}
+                        , y = {};
                     addEvent(n, "click", function(t) {
                         var e = domClosest("_ape_pl_item", t.target)
                             , i = domData(e, "id")
                             , o = toggleClass(e, "ape_selected");
-                        o ? (p[i] = !0,
-                            delete y[i]) : (y[i] = !0,
-                            delete p[i])
+                        o ? (y[i] = !0,
+                            delete A[i]) : (A[i] = !0,
+                            delete y[i])
                     }),
                         r.removeButtons(),
                         r.addButton(getLang("global_save"), function(o) {
-                            var s = Object.keys(p)
-                                , l = Object.keys(y);
+                            var s = Object.keys(y)
+                                , l = Object.keys(A);
                             ajax.post("al_audio.php", {
                                 act: "save_audio_in_playlists",
                                 add_pl_ids: s.join(","),
@@ -2526,7 +2585,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             hash: e.editHash
                         }, {
                             onDone: function() {
-                                i(!1)
+                                o(!1)
                             }
                         }),
                             removeClass(t, "audio_row__deleted"),
@@ -2699,8 +2758,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     return i || (i = JSON.parse(domData(t, "audio"))),
                     e && (i = AudioUtils.asObject(i),
                         i.isDeleted = hasClass(t, "audio_row__deleted"),
-                        i.isCurrent = hasClass(t, "audio_row__current"),
-                        i.isPlaying = hasClass(t, "audio_row__playing"),
+                        i.isCurrent = hasClass(t, AudioUtils.AUDIO_CURRENT_CLS),
+                        i.isPlaying = hasClass(t, AudioUtils.AUDIO_PLAYING_CLS),
                         i.isFromCurrentPlaylist = !!gpeByClass("_audio_section__current", t),
                         i.isNumeric = !!gpeByClass("audio_numeric", t),
                         i.isWithCovers = !!gpeByClass("audio_w_covers", t),
@@ -2708,7 +2767,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         i.isInSnippet = !!gpeByClass("_audio_pl_snippet__list", t),
                         i.isInEditBox = !!gpeByClass("_audio_pl_edit_box", t),
                         i.isInRecomsBlock = !!gpeByClass("_audio_recoms_blocks", t),
-                        i.isInFastChat = !!gpeByClass("fc_tab", t)),
+                        i.isInFastChat = !!gpeByClass("fc_tab", t),
+                        i.isSetClaimed = hasClass(t, "audio_moder_claimed")),
                         i
                 },
                 asObject: function(t) {
@@ -2761,7 +2821,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     function i(t) {
                         return [].slice.call(t)
                     }
-                    var o, a = getAudioPlayer(), s = AudioUtils.getAudioFromEl(t, !0), r = null, l = [], n = domData(t, "new-post"), d = !1, u = null, _ = AudioPlaylist.TYPE_TEMP, c = vk.id, h = {}, y = [], p = t, A = window.AudioPage && currentAudioPage(t), f = window.traverseParent || function(t, e) {
+                    var o, a = getAudioPlayer(), s = AudioUtils.getAudioFromEl(t, !0), r = null, l = [], n = domData(t, "new-post"), d = !1, u = null, _ = AudioPlaylist.TYPE_TEMP, c = vk.id, h = {}, A = [], y = t, p = window.AudioPage && currentAudioPage(t), f = window.traverseParent || function(t, e) {
                             for (t = ge(t); t && !e(t) && (t = domPN(t),
                             t != document); )
                                 ;
@@ -2793,16 +2853,16 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         for (L && u.mergeWith({
                             accessHash: L
                         }),
-                                 A && A.getPageCurrentPlaylist() == u && A.getSortedList() ? u.initSortedList(A.getSortedList()) : s.isFromCurrentPlaylist || u.shuffle(0); p = domPN(p); )
-                            y.push((p.id ? "#" + p.id : "") + (p.className ? "." + p.className : ""));
-                        y = y.slice(0, 30),
-                            y = y.filter(function(t) {
+                                 p && p.getPageCurrentPlaylist() == u && p.getSortedList() ? u.initSortedList(p.getSortedList()) : s.isFromCurrentPlaylist || u.shuffle(0); y = domPN(y); )
+                            A.push((y.id ? "#" + y.id : "") + (y.className ? "." + y.className : ""));
+                        A = A.slice(0, 30),
+                            A = A.filter(function(t) {
                                 return !!trim(t)
                             }),
-                            y = y.reverse().join(" / "),
-                            y = document.location.href + " : " + y
-                    } else if (A && A.getPageCurrentPlaylist())
-                        u = A.getPageCurrentPlaylist();
+                            A = A.reverse().join(" / "),
+                            A = document.location.href + " : " + A
+                    } else if (p && p.getPageCurrentPlaylist())
+                        u = p.getPageCurrentPlaylist();
                     else if ("module" == v) {
                         var w = E;
                         u = a.getPlaylist(AudioPlaylist.TYPE_PLAYLIST, w || cur.oid || vk.id, AudioPlaylist.DEFAULT_PLAYLIST_ID),
@@ -2835,29 +2895,29 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         _ = AudioPlaylist.TYPE_WALL,
                             c = cur.oid;
                         var C = (E || "").split("_")[1]
-                            , D = cur.wallQuery || ""
+                            , U = cur.wallQuery || ""
                             , S = ge("wall_search")
-                            , U = inArray(cur.wallType, ["own", "full_own"]) ? "own" : "all";
-                        o = hashCode(U + "_" + D),
-                        "wall" == cur.module && val(S) && (D = val(S)),
+                            , D = inArray(cur.wallType, ["own", "full_own"]) ? "own" : "all";
+                        o = hashCode(D + "_" + U),
+                        "wall" == cur.module && val(S) && (U = val(S)),
                         C && (h = {
                             postId: C,
-                            wallQuery: D,
-                            wallType: U
+                            wallQuery: U,
+                            wallType: D
                         });
                         var O = 0 === s.context.indexOf("reply");
                         O && (l = i([gpeByClass("_replies_list", t)]),
                             o = "reply" + o),
                             l = l.concat(i([r]))
                     } else {
-                        for (; p = domPN(p); )
-                            y.push((p.id ? "#" + p.id : "") + (p.className ? "." + p.className : ""));
-                        y = y.slice(0, 30),
-                            y = y.filter(function(t) {
+                        for (; y = domPN(y); )
+                            A.push((y.id ? "#" + y.id : "") + (y.className ? "." + y.className : ""));
+                        A = A.slice(0, 30),
+                            A = A.filter(function(t) {
                                 return !!trim(t)
                             }),
-                            y = y.reverse().join(" / "),
-                            y = document.location.href + " : " + y
+                            A = A.reverse().join(" / "),
+                            A = document.location.href + " : " + A
                     }
                     return r || (r = domPN(t)),
                         l = l.filter(function(t) {
@@ -2885,31 +2945,29 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     })
                 },
                 claim: function(t, e, i) {
-                    ajax.post("al_claims.php", {
-                        act: "a_claim",
-                        claim_id: i,
-                        type: "audio",
-                        id: t.id,
-                        owner_id: t.ownerId
-                    }, {
-                        onDone: function() {
-                            addClass(e, "audio_claimed")
-                        }
-                    })
+                    addClass(e, "audio_moder_claimed"),
+                        AudioUtils.onRowOver(e, !1, !0),
+                        t = AudioUtils.asObject(t),
+                        ajax.post("al_claims.php", {
+                            act: "a_claim",
+                            claim_id: i,
+                            type: "audio",
+                            id: t.id,
+                            owner_id: t.ownerId
+                        })
                 },
                 unclaim: function(t, e, i) {
-                    ajax.post("al_claims.php", {
-                        act: "a_unclaim",
-                        claim_id: i,
-                        type: "audio",
-                        id: t.id,
-                        owner_id: t.ownerId,
-                        hash: t.actionHash
-                    }, {
-                        onDone: function() {
-                            removeClass(e, "audio_claimed")
-                        }
-                    })
+                    removeClass(e, "audio_moder_claimed"),
+                        AudioUtils.onRowOver(e, !1, !0),
+                        t = AudioUtils.asObject(t),
+                        ajax.post("al_claims.php", {
+                            act: "a_unclaim",
+                            claim_id: i,
+                            type: "audio",
+                            id: t.id,
+                            owner_id: t.ownerId,
+                            hash: t.actionHash
+                        })
                 },
                 getUMAInfo: function(t, e) {
                     showBox("al_audio.php", {
@@ -3967,7 +4025,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             e)
                         !function() {
                             o.on(t, AudioPlayer.EVENT_PLAY, function(e) {
-                                AudioUtils.asObject(e).fullId == a.fullId && (addClass(t, "audio_row__playing"),
+                                AudioUtils.asObject(e).fullId == a.fullId && (addClass(t, AudioUtils.AUDIO_PLAYING_CLS),
+                                l && attr(l, "aria-label", getLang("global_audio_pause")),
                                 s && attr(s, "role", "heading"))
                             }),
                                 o.on(t, AudioPlayer.EVENT_PROGRESS, function(t, e, i) {
@@ -3979,7 +4038,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     r && (r.innerHTML = s)
                                 }),
                                 o.on(t, [AudioPlayer.EVENT_PAUSE, AudioPlayer.EVENT_ENDED], function() {
-                                    removeClass(t, "audio_row__playing"),
+                                    removeClass(t, AudioUtils.AUDIO_PLAYING_CLS),
+                                    l && attr(l, "aria-label", getLang("global_audio_play")),
                                     s && attr(s, "role", "")
                                 });
                             var e = data(t, "bars");
@@ -4001,31 +4061,33 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     _updateAudioSoundBars(e, [0, 0, 0, 0], s),
                                     data(t, "bars", e)
                             }(),
-                                toggleClass(t, "audio_row__playing", o.isPlaying())
+                                toggleClass(t, AudioUtils.AUDIO_PLAYING_CLS, o.isPlaying())
                         }();
                     else {
                         this.off(t),
-                            removeClass(t, "audio_row__playing"),
-                            removeClass(t, "audio_row__current"),
+                            removeClass(t, AudioUtils.AUDIO_PLAYING_CLS),
+                            removeClass(t, AudioUtils.AUDIO_CURRENT_CLS),
                         r && (r.innerHTML = formatTime(a.duration)),
+                        l && attr(l, "aria-label", getLang("global_audio_play")),
                         s && attr(s, "role", "");
-                        var l = data(t, "bars");
-                        l && (re(l),
+                        var n = data(t, "bars");
+                        n && (re(n),
                             data(t, "bars", null))
                     }
                     i ? setTimeout(function() {
                         var e = AudioUtils.getAudioFromEl(t, !0);
-                        toggleClass(t, "audio_row__current", !!e.isCurrent)
-                    }, 0) : toggleClass(t, "audio_row__current", e)
+                        toggleClass(t, AudioUtils.AUDIO_CURRENT_CLS, !!e.isCurrent)
+                    }, 0) : toggleClass(t, AudioUtils.AUDIO_CURRENT_CLS, e)
                 }
                 var a = AudioUtils.getAudioFromEl(t, !0);
                 if (a.isCurrent != e) {
-                    addClass(t, "audio_row__current");
+                    addClass(t, AudioUtils.AUDIO_CURRENT_CLS);
                     var s = geByClass1("_audio_row__title", t)
-                        , r = geByClass1("_audio_row__duration", t);
+                        , r = geByClass1("_audio_row__duration", t)
+                        , l = geByClass1("_audio_row__play_btn", t);
                     a.withInlinePlayer && toggleClass(t, "audio_row__player_transition", i),
                         i = a.withInlinePlayer ? i : !1,
-                        i ? setTimeout(o.bind(this), 0) : o.call(this)
+                        i ? setTimeout(o.bind(this), 0) : o.call(this);
                 }
             }
             ,
@@ -5881,4 +5943,4 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             stManager.done("audioplayer.js")
         } catch (e) {}
     }
-]);
+});
