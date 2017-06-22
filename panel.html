@@ -1,8 +1,8 @@
 <div class="">
-    <h2>Настройки</h2>
+    <h2>%header%</h2>
 
     <div id="ui_rmenu_audio_albums" class="ui_rmenu_item _ui_item_audio_equalizers _ui_rmenu_audio_equalizers_toggle" role="listitem" data-on-toggle="" onclick="return uiRightMenu.toggleSubmenu('audio_equalizers', this);">
-        <span>Эквалайзер: <span class="equalizer_name"></span><span class="ui_rmenu_item_arrow"></span></span>
+        <span>%equalizer%: <span class="equalizer_name"></span><span class="ui_rmenu_item_arrow"></span></span>
     </div>
 
     <div class="_ui_rmenu_sublist _ui_rmenu_audio_equalizers_list unshown" data-sublist-id="audio_equalizers">
@@ -16,7 +16,7 @@
                             <div class="audio_album_btn_icon"></div>
                         </div>
                     </div>
-                    <div class="audio_album_title">Добавить эквалайзер</div>
+                    <div class="audio_album_title">%add_equalizer%</div>
                 </div>
             </span>
         </div>
@@ -28,10 +28,10 @@
         <a class="ui_rmenu_subitem _ui_rmenu_subitem _ui_rmenu _audio_equalizer_item unshown equalizer_template" role="listitem" >
             <span>
                 <div class="audio_album_btns _audio_album_btns clear_fix">
-                    <div class="audio_equalizer_del_btn audio_album_btn" onclick="" onmouseover="showTooltip(this, {text: 'Удалить эквалайзер', black: 1, shift: [10, 6, 0], needLeft: 1, appendParentCls: '_ui_rmenu_sublist'})">
+                    <div class="audio_equalizer_del_btn audio_album_btn" onclick="" onmouseover="showTooltip(this, {text: '%delete_equalizer%', black: 1, shift: [10, 6, 0], needLeft: 1, appendParentCls: '_ui_rmenu_sublist'})">
                         <div class="audio_equalizer_btn_icon"></div>
                     </div>
-                    <div class="audio_equalizer_edit_btn audio_album_btn" onclick="" onmouseover="showTooltip(this, {text: 'Редактировать эквалайзер', black: 1, shift: [10, 6, 0], appendParentCls: '_ui_rmenu_sublist'})">
+                    <div class="audio_equalizer_edit_btn audio_album_btn" onclick="" onmouseover="showTooltip(this, {text: '%edit_equalizer%', black: 1, shift: [10, 6, 0], appendParentCls: '_ui_rmenu_sublist'})">
                         <div class="audio_equalizer_btn_icon"></div>
                     </div>
                 </div>
@@ -43,29 +43,30 @@
 
     <div class="ui_toggler_wrap surround_toggle" onclick="getAudioPlayer()._impl.musicBar.toggleSurround(this)">
         <div class="_ui_toggler ui_toggler"></div>
-        <div class="ui_toggler_label">Объемный звук 5.1</div>
+        <div class="ui_toggler_label">%dolby_surround%</div>
+
     </div>
 
     <div class="ui_toggler_wrap visualization_toggle" onclick="getAudioPlayer()._impl.musicBar.toggleVisualization(this)">
         <div class="_ui_toggler ui_toggler"></div>
-        <div class="ui_toggler_label">Визуализация</div>
+        <div class="ui_toggler_label">%visualization%</div>
     </div>
 
     <div class="ui_toggler_wrap playlists_toggle" onclick="getAudioPlayer()._impl.musicBar.togglePlaylists(this)">
         <div class="_ui_toggler ui_toggler"></div>
-        <div class="ui_toggler_label">Скрыть плейлисты</div>
+        <div class="ui_toggler_label">%hide_playlists%</div>
     </div>
 
     <div class="download-playlist">
         <div class="playlist-wrapper">
             <button class="flat_button secondary audio_download_playlist_btn" onclick="toggle(ge('download_actions_wrap'))">
-                <span class="download_actions_dd_label">Скачать аудиозаписи</span>
+                <span class="download_actions_dd_label">%download_songs%</span>
             </button>
 
             <div class="playlist_download_progress">
                 <div class="playlist_download_progress_bar" style="width: 0;"></div>
-                <div class="playlist_download_progress_text">Загрузка</div>
-                <div class="playlist_download_progress_cancel" onclick= "getAudioPlayer()._impl.musicBar.stopDownloadPlaylist()" onmouseover="showTooltip(this, {black: 1, text: 'Прервать загрузку', forcetoup: 1, shift: [16, 12, 3]});"></div>
+                <div class="playlist_download_progress_text">%loading%</div>
+                <div class="playlist_download_progress_cancel" onclick= "getAudioPlayer()._impl.musicBar.stopDownloadPlaylist()" onmouseover="showTooltip(this, {black: 1, text: '%cancel%', forcetoup: 1, shift: [16, 12, 3]});"></div>
             </div>
         </div>
 
@@ -77,18 +78,18 @@
 
              id="download_actions_wrap" style="opacity: 1; display: none">
             <div class="download_actions_header" onclick="toggle(ge('download_actions_wrap'))">
-                <span class="download_actions_header_inner">Скачать аудиозаписи</span>
+                <span class="download_actions_header_inner">%download_songs%</span>
             </div>
             <div class="download_actions_inner">
-                <a class="download_actions_item" onclick="toggle(ge('download_actions_wrap')); getAudioPlayer().downloadPlaylist()" tabindex="0" role="link">Текущий плейлист</a>
-                <a class="download_actions_item" onclick="toggle(ge('download_actions_wrap')); getAudioPlayer()._impl.musicBar.toggleSelect(true)" tabindex="0" role="link">Выбрать из списка</a>
+                <a class="download_actions_item" onclick="toggle(ge('download_actions_wrap')); getAudioPlayer().downloadPlaylist()" tabindex="0" role="link">%current_playlist%</a>
+                <a class="download_actions_item" onclick="toggle(ge('download_actions_wrap')); getAudioPlayer()._impl.musicBar.toggleSelect(true)" tabindex="0" role="link">%choose_list%</a>
             </div>
         </div>
     </div>
 
     <div class="bitrate_narrow_row">
         <div class="checkbox" id="show_bitrate_checkbox" onclick="getAudioPlayer()._impl.musicBar.toggleBitrate(this);">
-            Отображать битрейт песен
+            %show_bitrate%
         </div>
     </div>
 

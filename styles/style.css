@@ -17,6 +17,14 @@
     position: relative;
 }
 
+.equalizers_list .audio_album_btns{
+    float: right;
+}
+
+._audio_equalizer_item:hover .audio_album_btn{
+    opacity: 1;
+}
+
 .equalizer_name {
     font-weight: 500;
 }
@@ -94,7 +102,7 @@
 
 
 
-.audio_equalizer_del_btn {
+.audio_equalizer_del_btn, .audio_equalizer_edit_btn  {
     float: right;
     -o-transition: opacity 60ms linear;
     transition: opacity 60ms linear;
@@ -279,7 +287,6 @@
 #top_audio_layer_place .audio_row_dropdown {
     left: -110px;
     top: -3px;
-}
 }
 
 .audio_row_dropdown.pdd_ralign {
@@ -610,9 +617,12 @@
     opacity: 0.75;
 }
 
+body:not(.audio_hq_label_show) .audio_row .audio_row__duration:before {
+    display: none !important;
+}
 
-
-.audio_hq_label {
+.audio_hq_label_show .audio_row .audio_row__duration:before {
+    content: attr(data-bitrate) !important;
     background: #c4d1de !important;
     opacity: 1 !important;
     border-radius: 2px;
@@ -621,11 +631,12 @@
     width: auto !important;
     padding: 0 4px;
     height: auto !important;
-    margin-right: 4px !important;
-    position: relative;
-    display: none;
-    top: -1px;
+    left: -30px !important;
+    display: block;
+    position: absolute;
+    top: 2px;
 }
+
 
 .audio_hq_label_show div.audio_hq_label {
     display: inline-block !important;

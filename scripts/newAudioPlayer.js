@@ -61,7 +61,22 @@ var MusicBar = function(context) {
                 download: "Скачать",
                 about_performer: "Об исполнителе",
                 find_video: "Найти видео",
-                find_chords: "Найти аккордыы"
+                find_chords: "Найти аккорды",
+                audio_settings: "Настройки",
+                audio_equalizer: "Настройки",
+                audio_add_equalizer: "Добавить эквалайзер",
+                audio_delete_equalizer: "Удалить эквалайзер",
+                audio_edit_equalizer: "Редактировать эквалайзер",
+                audio_dolby_surround: "Объемный звук 5.1",
+                audio_visualization: "Визуализация",
+                audio_hide_playlists: "Скрыть плейлисты",
+                audio_download_songs: "Скачать аудиозаписи",
+                audio_loading: "Загрузка",
+                audio_cancel_download: "Прервать загрузку",
+                audio_current_playlist: "Текущий плейлист",
+                audio_choose_list: "Выбрать из списка",
+                audio_show_bitrate: "Отображать битрейт песен",
+                audio_downloaded: "Загружено ",
             },
 
             {
@@ -75,7 +90,22 @@ var MusicBar = function(context) {
                 download: "Download",
                 about_performer: "Performer bio",
                 find_video: "Find clip",
-                find_chords: "Find chords"
+                find_chords: "Find chords",
+                audio_settings: "Settings",
+                audio_equalizer: "Equalizer",
+                audio_add_equalizer: "Add equalizer",
+                audio_delete_equalizer: "Delete equalizer",
+                audio_edit_equalizer: "Edit equalizer",
+                audio_dolby_surround: "Surround sound 5.1",
+                audio_visualization: "Visualization",
+                audio_hide_playlists: "Hide playlists",
+                audio_download_songs: "Download songs",
+                audio_loading: "Downloading",
+                audio_cancel_download: "Cancel",
+                audio_current_playlist: "Current playlist",
+                audio_choose_list: "Choose from list",
+                audio_show_bitrate: "Show bitrate",
+                audio_downloaded: "Download ",
             }
         ];
 
@@ -532,7 +562,7 @@ var MusicBar = function(context) {
         if (playlistPanel) {
             var percent = 100 - this.playlist.length / (this.playlistCount / 100);
             geByClass1("playlist_download_progress_bar", playlistPanel).style.width = percent.toFixed(4)+"%";
-            geByClass1("playlist_download_progress_text", playlistPanel).innerText = "Загружено "+percent.toFixed(0)+"%";
+            geByClass1("playlist_download_progress_text", playlistPanel).innerText = getLang("audio_downloaded") +percent.toFixed(0)+"%";
         }
 
         var song = AudioUtils.asObject(songData);
@@ -871,7 +901,7 @@ var MusicBar = function(context) {
         if (this.playlist.length) {
             var percent = 100 - this.playlist.length / (this.playlistCount / 100);
             geByClass1("playlist_download_progress_bar").style.width = percent.toFixed(4)+"%";
-            geByClass1("playlist_download_progress_text").innerText = "Загружено "+percent.toFixed(0)+"%";
+            geByClass1("playlist_download_progress_text").innerText = getLang("audio_downloaded")+percent.toFixed(0)+"%";
             toggleClass(geByClass1("download-playlist"), "download", true);
 
         }
@@ -970,8 +1000,9 @@ var MusicBar = function(context) {
 
         each(domQuery(".page_block .audio_row"), function() {
             //if (!domClosest("audio_rows", this) && !domClosest("wall_audio_rows", this)) return;
-            var bitrate = geByClass1("audio_hq_label", this).innerText;
-            if (!bitrate.length) queue.push(this.getAttribute("data-full-id"));
+            var bitrate = geByClass1("audio_row__duration", this).getAttribute("data-bitrate");
+
+            if (!bitrate) queue.push(this.getAttribute("data-full-id"));
         });
 
         for (var i = 0; i < queue.length / countPerRequest; i++) {
@@ -999,6 +1030,8 @@ var MusicBar = function(context) {
                     });
                 })
 
+
+
                 self.postMessage({
                     type: "calcBitrate",
                     data: data
@@ -1008,9 +1041,6 @@ var MusicBar = function(context) {
     }
 
     this.reloadAudio = function(ids, callback) {
-
-
-
         var timer = window.setTimeout(function() {
             // Song, whose bitrate we know
             var knownBitrates = [];
@@ -1033,11 +1063,14 @@ var MusicBar = function(context) {
                         // Get audio data, set bitrate and push it to array
                         knownBitrates.forEach(function(song) {
 
-                            if (ge("audio_" + song.song)) {
-                                var data = JSON.parse(ge("audio_" + song.song).getAttribute("data-audio"));
+                            var row = document.querySelector(".audio_row[data-full-id='"+song.song+"']");
+
+                            if (row) {
+                                var data = JSON.parse(row.getAttribute("data-audio"));
+
                                 data[AudioUtils.AUDIO_ITEM_INDEX_BITRATE] = song.value;
 
-                                geByClass1("audio_hq_label", ge("audio_" + song.song)).innerText = song.value;
+                                geByClass1("audio_row__duration", row).setAttribute("data-bitrate", song.value);
 
                                 e.push(data);
                             }
@@ -1080,10 +1113,12 @@ var MusicBar = function(context) {
 
     this.setBitrate = function(song, bitrate) {
 
+
         var rows = domQuery("[data-full-id='"+song+"']");
         rows.forEach(function(row) {
             if (row) {
-                if (!geByClass1("audio_hq_label", row).innerText.length) {
+
+                if (!geByClass1("audio_row__duration", row).getAttribute("data-bitrate")) {
 
                     var dataAudio = JSON.parse(row.getAttribute("data-audio"));
                     var e = AudioUtils.asObject(dataAudio);
@@ -1092,7 +1127,9 @@ var MusicBar = function(context) {
                     a[AudioUtils.AUDIO_ITEM_INDEX_BITRATE] = bitrate;
                     getAudioPlayer().updateAudio(e.fullId, a);
 
-                    geByClass1("audio_hq_label", row).innerText = bitrate;
+                    geByClass1("audio_row__duration", row).setAttribute("data-bitrate", bitrate);
+
+
 
                     self.db.transaction(function (tx) {
                         tx.executeSql('SELECT * FROM bitrates WHERE song = "'+e.fullId+'"', [], function (tx, results) {
@@ -3853,7 +3890,31 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     xhr.onreadystatechange = function() { // (3)
 
                         if (xhr.readyState == 4) {
-                            panel.innerHTML = xhr.responseText;
+
+                            var html = xhr.responseText;
+
+
+
+                            html = html.replace("%header%", getLang("audio_settings"));
+                            html = html.replace("%equalizer%", getLang("audio_equalizer"));
+                            html = html.replace("%add_equalizer%", getLang("audio_add_equalizer"));
+                            html = html.replace("%delete_equalizer%", getLang("audio_delete_equalizer"));
+                            html = html.replace("%edit_equalizer%", getLang("audio_edit_equalizer"));
+                            html = html.replace("%dolby_surround%", getLang("audio_dolby_surround"));
+                            html = html.replace("%hide_playlists%", getLang("audio_hide_playlists"));
+                            html = html.replace(/%download_songs%/g, getLang("audio_download_songs"));
+                            html = html.replace(/%visualization%/g, getLang("audio_visualization"));
+                            html = html.replace("%loading%", getLang("audio_loading"));
+                            html = html.replace("%cancel_download%", getLang("audio_cancel_download"));
+                            html = html.replace("%current_playlist%", getLang("audio_current_playlist"));
+                            html = html.replace("%choose_list%", getLang("audio_choose_list"));
+                            html = html.replace("%show_bitrate%", getLang("audio_show_bitrate"));
+
+
+                            panel.innerHTML = html;
+
+
+
                             getAudioPlayer()._impl.musicBar.initPanel();
                         }
 
@@ -4661,7 +4722,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 }, {
                     onDone: function(i, a) {
 
-                        console.log(i)
+
 
                         if (typeof (a) === "undefined") {
 
