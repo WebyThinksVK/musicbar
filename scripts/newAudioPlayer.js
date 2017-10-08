@@ -77,6 +77,8 @@ var MusicBar = function(context) {
                 audio_choose_list: "Выбрать из списка",
                 audio_show_bitrate: "Отображать битрейт песен",
                 audio_downloaded: "Загружено ",
+                cancel: "Отмена",
+                selected_audio: "Выбрано аудиозаписей",
             },
 
             {
@@ -106,6 +108,8 @@ var MusicBar = function(context) {
                 audio_choose_list: "Choose from list",
                 audio_show_bitrate: "Show bitrate",
                 audio_downloaded: "Download ",
+                cancel: "Cancel",
+                selected_audio: "Selected songs",
             }
         ];
 
@@ -383,10 +387,21 @@ var MusicBar = function(context) {
 
             data.url = getAudioPlayer().unmask(data.url);
 
+            var name = data.performer + " - " + data.title + ".mp3";
+            name = name.replace("?", "");
+            name = name.replace("*", "");
+            name = name.replace("|", "");
+            name = name.replace("\\", "");
+            name = name.replace(":", "");
+            name = name.replace("<", "");
+            name = name.replace(">", "");
+            name = name.replace("/", "");
+            name = name.replace("\"", "");
+
             self.postMessage({
                 type: "download",
                 url: data.url,
-                name: data.performer + " - " + data.title + ".mp3"
+                name: name
             })
         })
     };
@@ -820,54 +835,7 @@ var MusicBar = function(context) {
             '    </div>\n' +
             '</div>',
 
-            audio_row_advanced: '\
-            <div class="audio_row _audio_row _audio_row_%1%_%0% %cls%" onclick="return getAudioPlayer().toggleAudio(this, event)" data-audio="%serialized%" data-full-id="%1%_%0%" id="audio_%1%_%0%">\
-            <div class="audio_row_inner clear_fix">\
-            <div class="select-check-wrapper" onclick="getAudioPlayer().toggleSelect(this)"> <div class="select-check" ></div> </div>\
-            <div class="audio_row_counter"></div>\
-            <div class="audio_row_cover_wrap _audio_row_cover_wrap">\
-            <div class="audio_row_cover" style="%cover_style%"></div>\
-            <div class="audio_row_cover_back"></div>\
-            <div class="audio_row_cover_play_icon"></div>\
-            </div>\
-            <div class="audio_info">\
-            <div class="audio_duration_wrap _audio_duration_wrap">\
-            <div class="audio_hq_label">%bitrate%</div>\
-            <div class="audio_duration _audio_duration">%duration%</div>\
-            <div class="audio_acts clear_fix">\
-            <div class="audio_act" id="actions" onclick="tooltips.hideAll(); fadeToggle(geByClass1(\'audio_row_dropdown\', this), 200); " onmouseover="showTooltip(this, {text: \'Действия\', black: 1, shift: [10, 6, 0], appendParentCls: \'audio_acts\'})" onclick="">\
-                <div class="gear-icon"></div>\
-                <div id="audio_row_dropdown" class="audio_row_dropdown" >\
-                    <div class="rows" style="font-size: 13px;">\
-                        <div class="header"><div id="privacy_header" class="header_label"><div class="gear-icon"></div>&nbsp;&nbsp; Действия</div></div>\
-                        <div class="body">\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.downloadSong(this)">Скачать</div>\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findPerformer(this)">Об исполнителе</div>\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findVideo(this)">Найти клип</div>\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.findChords(this)">Найти аккорды</div>\
-                            <div class="item" onclick="getAudioPlayer()._impl.musicBar.shareSong(this)">Отправить другу</div>\
-                        </div>\
-                    </div>\
-                </div>\
-            </div> \
-            <div class="audio_act" id="recom" onmouseover="audioShowActionTooltip(this)" onclick="currentAudioPage(this).showRecoms(this, \'%1%_%0%\', event)"></div>\
-            <div class="audio_act" id="next" onmouseover="audioShowActionTooltip(this)" onclick="getAudioPlayer().setNext(this, event)"></div>\
-            <div class="audio_act" id="edit" onmouseover="audioShowActionTooltip(this)"onclick="currentAudioPage(this).editAudio(this, \'%1%_%0%\', event)"></div>\
-            <div class="audio_act _audio_act_delete" id="delete" onclick="currentAudioPage(this).deleteAudio(this, \'%1%_%0%\', event)" onmouseover="audioShowActionTooltip(this)"></div>\
-            <div class="audio_act" id="add" onclick="return addAudio(this, event)"onmouseover="audioShowActionTooltip(this)"></div>\
-            </div>\
-            </div>\
-            <div class="audio_title_wrap"><a href="%search_href%" onmouseover="setTitle(this)" nodrag="1" onclick="return audioSearchPerformer(this, event)" class="audio_performer">%4%</a>\
-            <span class="audio_info_divider">&ndash;</span><span class="audio_title _audio_title" onmouseover="setTitle(this, domPN(this))">\
-            <span class="audio_title_inner" tabindex="0" nodrag="1" aria-label="%3%" onclick="return toggleAudioLyrics(event, this, \'%1%_%0%\', \'%9%\')">%3%</span>\
-            <span class="audio_author">%8%</span>\
-            </span>\
-            </div>\
-            </div>\
-            <div class="_audio_player_wrap"></div>\
-            <div class="_audio_lyrics_wrap audio_lyrics" data-nodrag="1"></div>\
-            </div>\
-            </div>'
+
         });
     };
     this.addRowTemplate();
@@ -1339,7 +1307,14 @@ var MusicBar = function(context) {
                     id: "download-panel"
                 })
 
-                selectPanel.innerHTML = this;
+                var html = this;
+                html = html.replace("%cancel%", getLang("cancel"));
+                html = html.replace("%download%", getLang("download"));
+                html = html.replace("%selected_audio%", getLang("selected_audio"));
+
+                selectPanel.innerHTML = html;
+
+
                 playlist.appendChild(selectPanel);
 
                 var rows = geByClass1("audio_rows");
@@ -1413,10 +1388,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         e.c = i,
         e.p = "",
         e(0)
-}([function(t, e, i) {
-    t.exports = i(2)
-}
-    , function(module, exports) {
+}({
+    0: function(t, e, i) {
+        t.exports = i(86)
+    },
+    65: function(module, exports) {
         "use strict";
         function _classCallCheck(t, e) {
             if (!(t instanceof e))
@@ -1491,9 +1467,9 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AudioLayer.prototype._initTooltip = function _initTooltip() {
                     var _this2 = this;
                     this._els.tt || (this._els.container = se('<div class="audio_layer_container"><div class="top_audio_loading">' + rs(vk.pr_tpl, {
-                            id: "",
-                            cls: "pr_big"
-                        }) + "</div></div>"),
+                        id: "",
+                        cls: "pr_big"
+                    }) + "</div></div>"),
                         this._els.tt = new ElementTooltip(this._els.layerPlace,{
                             id: "audio_layer_tt",
                             content: this._els.container,
@@ -1527,8 +1503,89 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AudioLayer
         }();
         exports["default"] = AudioLayer
-    }
-    , function(module, exports, __webpack_require__) {
+    },
+    66: function(t, e) {
+        "use strict";
+        function i() {
+            return window.wbopen && ~(window.open + "").indexOf("wbopen")
+        }
+        function o(t) {
+            if (!i() && ~t.indexOf("audio_api_unavailable")) {
+                var e = t.split("?extra=")[1].split("#")
+                    , o = "" === e[1] ? "" : a(e[1]);
+                if (e = a(e[0]),
+                    "string" != typeof o || !e)
+                    return t;
+                o = o ? o.split(String.fromCharCode(9)) : [];
+                for (var s, r, n = o.length; n--; ) {
+                    if (r = o[n].split(String.fromCharCode(11)),
+                            s = r.splice(0, 1, e)[0],
+                            !l[s])
+                        return t;
+                    e = l[s].apply(null, r)
+                }
+                if (e && "http" === e.substr(0, 4))
+                    return e
+            }
+            return t
+        }
+        function a(t) {
+            if (!t || t.length % 4 == 1)
+                return !1;
+            for (var e, i, o = 0, a = 0, s = ""; i = t.charAt(a++); )
+                i = r.indexOf(i),
+                ~i && (e = o % 4 ? 64 * e + i : i,
+                o++ % 4) && (s += String.fromCharCode(255 & e >> (-2 * o & 6)));
+            return s
+        }
+        function s(t, e) {
+            var i = t.length
+                , o = [];
+            if (i) {
+                var a = i;
+                for (e = Math.abs(e); a--; )
+                    o[a] = (e += e * (a + i) / e) % i | 0
+            }
+            return o
+        }
+        Object.defineProperty(e, "__esModule", {
+            value: !0
+        }),
+            e.audioUnmaskSource = o;
+        var r = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/="
+            , l = {
+            v: function(t) {
+                return t.split("").reverse().join("")
+            },
+            r: function(t, e) {
+                t = t.split("");
+                for (var i, o = r + r, a = t.length; a--; )
+                    i = o.indexOf(t[a]),
+                    ~i && (t[a] = o.substr(i - e, 1));
+                return t.join("")
+            },
+            s: function(t, e) {
+                var i = t.length;
+                if (i) {
+                    var o = s(t, e)
+                        , a = 0;
+                    for (t = t.split(""); ++a < i; )
+                        t[a] = t.splice(o[i - 1 - a], 1, t[a])[0];
+                    t = t.join("")
+                }
+                return t
+            },
+            x: function(t, e) {
+                var i = [];
+                return e = e.charCodeAt(0),
+                    each(t.split(""), function(t, o) {
+                        i.push(String.fromCharCode(o.charCodeAt(0) ^ e))
+                    }),
+                    i.join("")
+            }
+        }
+    },
+    86: function(module, exports, __webpack_require__) {
         "use strict";
         function _interopRequireDefault(t) {
             return t && t.__esModule ? t : {
@@ -1610,166 +1667,166 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             }
         }
         function convertTrackGenreToAdmanGenre(t) {
-            if (!t || -1 == t)
+            if (-1 == t)
                 return 19;
             var e = {
-                1: 2,
-                2: 14,
-                3: 4,
-                4: 5,
+                0: 2,
+                1: 14,
+                2: 4,
+                3: 5,
+                4: 10,
                 5: 10,
-                6: 10,
-                7: 14,
-                8: 11,
-                9: 9,
+                6: 14,
+                7: 11,
+                8: 9,
+                9: 14,
                 10: 14,
-                11: 14,
-                12: 17,
-                13: 19,
-                14: 10,
+                11: 17,
+                12: 19,
+                13: 10,
+                14: 11,
                 15: 11,
-                16: 11,
-                17: 12,
-                18: 14,
+                16: 12,
+                17: 14,
+                18: 7,
                 19: 7,
-                20: 7,
-                21: 1,
+                20: 1,
+                21: 14,
                 22: 14,
-                23: 14,
+                23: 19,
                 24: 19,
-                25: 19,
-                26: 7,
-                27: 1,
-                28: 8,
-                29: 19,
+                25: 7,
+                26: 1,
+                27: 8,
+                28: 19,
+                29: 9,
                 30: 9,
-                31: 9,
-                32: 7,
-                33: 3,
-                34: 16,
+                31: 7,
+                32: 3,
+                33: 16,
+                34: 7,
                 35: 7,
-                36: 7,
+                36: 19,
                 37: 19,
-                38: 19,
-                39: 13,
-                40: 1,
-                41: 14,
-                42: 8,
-                43: 11,
-                44: 14,
-                45: 19,
-                46: 6,
-                47: 10,
-                48: 14,
-                49: 18,
+                38: 13,
+                39: 1,
+                40: 14,
+                41: 8,
+                42: 11,
+                43: 14,
+                44: 19,
+                45: 6,
+                46: 10,
+                47: 14,
+                48: 18,
+                49: 14,
                 50: 14,
-                51: 14,
+                51: 7,
                 52: 7,
-                53: 7,
-                54: 18,
-                55: 5,
-                56: 1,
-                57: 14,
-                58: 19,
-                59: 13,
-                60: 8,
-                61: 17,
-                62: 13,
-                63: 11,
-                64: 7,
+                53: 18,
+                54: 5,
+                55: 1,
+                56: 14,
+                57: 19,
+                58: 13,
+                59: 8,
+                60: 17,
+                61: 13,
+                62: 11,
+                63: 7,
+                64: 18,
                 65: 18,
-                66: 18,
-                67: 7,
-                68: 1,
-                69: 7,
+                66: 7,
+                67: 1,
+                68: 7,
+                69: 19,
                 70: 19,
-                71: 19,
-                72: 1,
-                73: 18,
-                74: 14,
-                75: 6,
-                76: 18,
-                77: 19,
-                78: 15,
+                71: 1,
+                72: 18,
+                73: 14,
+                74: 6,
+                75: 18,
+                76: 19,
+                77: 15,
+                78: 14,
                 79: 14,
-                80: 14,
+                80: 18,
                 81: 18,
                 82: 18,
-                83: 18,
+                83: 9,
                 84: 9,
-                85: 9,
-                86: 2,
-                87: 18,
-                88: 1,
+                85: 2,
+                86: 18,
+                87: 1,
+                88: 18,
                 89: 18,
-                90: 18,
-                91: 1,
+                90: 1,
+                91: 14,
                 92: 14,
                 93: 14,
                 94: 14,
                 95: 14,
-                96: 14,
-                97: 9,
-                98: 3,
+                96: 9,
+                97: 3,
+                98: 6,
                 99: 6,
-                100: 6,
+                100: 19,
                 101: 19,
-                102: 19,
-                103: 18,
+                102: 18,
+                103: 3,
                 104: 3,
                 105: 3,
                 106: 3,
-                107: 3,
-                108: 5,
-                109: 14,
+                107: 5,
+                108: 14,
+                109: 19,
                 110: 19,
-                111: 19,
-                112: 11,
+                111: 11,
+                112: 5,
                 113: 5,
                 114: 5,
-                115: 5,
+                115: 18,
                 116: 18,
-                117: 18,
-                118: 14,
-                119: 2,
-                120: 5,
-                121: 19,
-                122: 14,
-                123: 19,
-                124: 3,
+                117: 14,
+                118: 2,
+                119: 5,
+                120: 19,
+                121: 14,
+                122: 19,
+                123: 3,
+                124: 5,
                 125: 5,
-                126: 5,
+                126: 7,
                 127: 7,
-                128: 7,
-                129: 5,
+                128: 5,
+                129: 7,
                 130: 7,
-                131: 7,
-                132: 1,
-                133: 14,
+                131: 1,
+                132: 14,
+                133: 1,
                 134: 1,
-                135: 1,
-                136: 7,
-                137: 13,
+                135: 7,
+                136: 13,
+                137: 14,
                 138: 14,
-                139: 14,
-                140: 3,
-                141: 13,
-                142: 18,
+                139: 3,
+                140: 13,
+                141: 18,
+                142: 5,
                 143: 5,
-                144: 5,
-                145: 14,
-                146: 19,
-                147: 7,
-                148: 7
+                144: 14,
+                145: 19,
+                146: 7,
+                147: 7
             };
             return e[t] || 19
         }
         var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(t) {
-            return typeof t
-        }
+                return typeof t
+            }
             : function(t) {
-            return t && "function" == typeof Symbol && t.constructor === Symbol && t !== Symbol.prototype ? "symbol" : typeof t
-        }
+                return t && "function" == typeof Symbol && t.constructor === Symbol && t !== Symbol.prototype ? "symbol" : typeof t
+            }
             , _slicedToArray = function() {
             function t(t, e) {
                 var i = []
@@ -1801,8 +1858,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 throw new TypeError("Invalid attempt to destructure non-iterable instance")
             }
         }()
-            , _audio_unmask_source = __webpack_require__(3)
-            , _audio_layer = __webpack_require__(1)
+            , _audio_unmask_source = __webpack_require__(66)
+            , _audio_layer = __webpack_require__(65)
             , _audio_layer2 = _interopRequireDefault(_audio_layer);
         window.AudioLayer = _audio_layer2["default"],
             window.AudioUtils = {
@@ -1838,7 +1895,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AUDIO_MAX_AUDIOS_IN_SNIPPET: 5,
                 AUDIO_ROW_COVER_SIZE: 40,
                 AUDIO_ROW_PLAY_SIZE: 24,
-                AUDIO_ROW_ACTION_ROW_ITEM: '<div class="audio_row__more_action audio_row__more_action_%0% _audio_row__more_action_%0% %3%">%2%</div>',
+                AUDIO_ROW_ACTION_ROW_ITEM: '<div role="button" class="audio_row__more_action audio_row__more_action_%0% _audio_row__more_action_%0% %3%">%2%</div>',
                 audioSearchPerformer: function(t, e, i) {
                     var o = window.AudioPage ? currentAudioPage(t) : !1
                         , a = window.AudioPage && currentAudioPage(t) || cur.audioPage;
@@ -1935,7 +1992,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 onRowOver: function onRowOver(audioEl, event, forceRedraw) {
                     var _this2 = this;
                     data(audioEl, "leaved", !1),
-                    (!data(audioEl, "actions") || forceRedraw) && (clearTimeout(window.audioRowHoverTO),
+                    (!data(audioEl, "actions") || forceRedraw) && (hasClass(audioEl, "no_extra") || (clearTimeout(window.audioRowHoverTO),
                         window.audioRowHoverTO = setTimeout(function() {
                             var audio = AudioUtils.getAudioFromEl(audioEl)
                                 , audioObject = AudioUtils.getAudioFromEl(audioEl, !0)
@@ -1955,182 +2012,189 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     deleteRestoreInfo[audioObject.fullId] && deleteRestoreInfo[audioObject.fullId].deleteAll && actions.push(["delete", AudioUtils.deleteAudio, "", 'onmouseover="audioShowActionTooltip(this)"']),
                                         actions.push(["add", AudioUtils.addAudio, "", 'onmouseover="audioShowActionTooltip(this)"'])
                                 }
-                            else
-                                !function() {
-                                    var actionsList = ["download","performer",  "chords", "video",  "next", "add", "share", "add_to_playlist"];
-                                    if (audioObject.isFromCurrentPlaylist)
-                                        actionsList = ["download", "performer", "chords", "video", "recoms", "add", audioObject.isCurrent ? !1 : "current_delete", "share", "add_to_playlist"];
-                                    else if (audioObject.isInSnippet)
-                                        actionsList = ["download", "performer", "chords", "video", "recoms", "next", "edit", "add", "share", "add_to_playlist"];
-                                    else if (audioObject.isInEditBox)
-                                        actionsList = [];
-                                    else if (audioObject.isInFastChat)
-                                        actionsList = ["download","add"];
-                                    else if (vk.widget)
-                                        actionsList = vk.id ? ["download","add"] : [];
-                                    else if (contextSection)
-                                        switch (contextSection) {
-                                            case "my":
-                                            case "user_list":
-                                            case "group_list":
-                                                actionsList = ["download", "performer", "chords", "video", "recoms", "edit", "next", "add", "delete", "share", "add_to_playlist"];
-                                                break;
-                                            case "edit_playlist":
-                                                actionsList = ["download", "add", "next", "edit"];
-                                                break;
-                                            case "recoms_recoms":
-                                                actionsList = ["download", "performer", "chords", "video", "recoms", "next", "add", "recoms_delete", "share", "add_to_playlist"];
-                                                break;
-                                            case "recoms_recent_audios":
-                                                actionsList = ["download","performer", "chords", "video","recoms", "edit", "next", "add", "listened_delete", "share", "add_to_playlist"];
-                                                break;
-                                            case "module":
-                                                actionsList = [];
-                                                break;
-                                            case "attach":
-                                            case "attach_preview":
-                                                actionsList = [];
-                                                break;
-                                            default:
-                                                audioObject.isCurrent && audioObject.withInlinePlayer && (actionsList = ["download","performer", "chords", "video","recoms", "add", "share", "add_to_playlist"])
-                                        }
-                                    actionsList.push("uma"),
-                                    extra.moder_actions && each(extra.moder_actions, function(i, act) {
-                                        moreActions.push(["moder_" + i, function(audioEl, audio) {
-                                            eval(act[1])
-                                        }
-                                            , act[2]])
-                                    });
-                                    var ap = getAudioPlayer();
-                                    each(actionsList, function(t, e) {
-                                        switch (e) {
-                                            case "next":
-                                                audioObject.isCurrent || audioObject.isClaimed || actions.push(["next", ap.setNext.bind(ap), "", 'onmouseover="audioShowActionTooltip(this)"']);
-                                                break;
-                                            case "restore_recoms":
-                                                actions.push(["restore_recoms", AudioUtils.addAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
-                                                break;
-                                            case "add":
-                                                var i = vk.id;
-                                                cur.audioPage && cur.audioPage.canAddToGroup() && (i = cur.audioPage.getOwnerId()),
-                                                !audioObject.isClaimed && audioObject.canAdd && audioObject.ownerId != i && actions.push(["add", AudioUtils.addAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
-                                                break;
-                                            case "recoms":
-                                                cur.audioPage && actions.push(["recoms", AudioUtils.showRecoms, "", 'onmouseover="audioShowActionTooltip(this)"']);
-                                                break;
-                                            case "uma":
-                                                audioObject.isUMA && actions.push(["uma", AudioUtils.getUMAInfo, "UMA"]);
-                                                break;
-                                            case "edit":
-                                                audioObject.canEdit && !vk.widget && inArray(contextSection, ["my", "group_list"]) && actions.push(["edit", AudioUtils.editAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
-                                                break;
-                                            case "delete":
-                                                !audioObject.canEdit || audioObject.isInRecomsBlock || vk.widget || actions.push(["delete", AudioUtils.deleteAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
-                                                break;
-                                            case "current_delete":
-                                                actions.push(["current_delete", AudioUtils.deleteCurrentAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
-                                                break;
-                                            case "recoms_delete":
-                                                audioObject.isInRecomsBlock || actions.push(["recoms_delete", AudioUtils.deleteRecomsAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
-                                                break;
-                                            case "listened_delete":
-                                                audioObject.isInRecomsBlock || actions.push(["listened_delete", AudioUtils.deleteListenedAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
-                                                break;
-                                            case "share":
-                                                audioObject.isClaimed || moreActions.push(["share", AudioUtils.shareAudio, getLang("audio_share_audio")]);
-                                                break;
-                                            case "add_to_playlist":
-                                                audioObject.isClaimed || moreActions.push(["add_to_playlist", "", getLang("audio_add_to_playlist")]);
-                                                break;
-                                            case "download":
-                                                moreActions.push(["download", ap._impl.musicBar.downloadSong, getLang("download")]);
-                                                break;
+                            else {
+                                var actionsList = ["download","performer",  "chords", "video",  "next", "add", "share", "add_to_playlist"];
+                                if (audioObject.isFromCurrentPlaylist)
+                                    actionsList = ["download", "performer", "chords", "video", "recoms", "add", audioObject.isCurrent ? !1 : "current_delete", "share", "add_to_playlist"];
+                                else if (audioObject.isInSnippet)
+                                    actionsList = ["download", "performer", "chords", "video", "recoms", "next", "edit", "add", "share", "add_to_playlist"];
+                                else if (audioObject.isInEditBox)
+                                    actionsList = [];
+                                else if (audioObject.isInFastChat)
+                                    actionsList = ["download","add"];
+                                else if (vk.widget)
+                                    actionsList = vk.id ? ["download","add"] : [];
+                                else if (contextSection)
+                                    switch (contextSection) {
+                                        case "my":
+                                        case "user_list":
+                                        case "group_list":
+                                            actionsList = ["download", "performer", "chords", "video", "recoms", "edit", "next", "add", "delete", "share", "add_to_playlist"];
+                                            break;
+                                        case "edit_playlist":
+                                            actionsList = ["download", "add", "next", "edit"];
+                                            break;
+                                        case "recoms_recoms":
+                                            actionsList = ["download", "performer", "chords", "video", "recoms", "next", "add", "recoms_delete", "share", "add_to_playlist"];
+                                            break;
+                                        case "recoms_recent_audios":
+                                            actionsList = ["download","performer", "chords", "video","recoms", "edit", "next", "add", "listened_delete", "share", "add_to_playlist"];
+                                            break;
+                                        case "module":
+                                            actionsList = [];
+                                            break;
+                                        case "attach":
+                                        case "attach_preview":
+                                            actionsList = [];
+                                            break;
+                                        default:
+                                            audioObject.isCurrent && audioObject.withInlinePlayer && (actionsList = ["download","performer", "chords", "video","recoms", "add", "share", "add_to_playlist"])
+                                    }
+                                actionsList.push("uma"),
+                                audioObject.isReplaceable && actionsList.push("replace"),
+                                extra.moder_actions && each(extra.moder_actions, function(i, act) {
+                                    moreActions.push(["moder_" + i, function(audioEl, audio) {
+                                        eval(act[1])
+                                    }
+                                        , act[2]])
+                                });
+                                var ap = getAudioPlayer();
+                                each(actionsList, function(t, e) {
+                                    switch (e) {
+                                        case "next":
+                                            audioObject.isCurrent || audioObject.isClaimed || actions.push(["next", ap.setNext.bind(ap), "", 'onmouseover="audioShowActionTooltip(this)"']);
+                                            break;
+                                        case "restore_recoms":
+                                            actions.push(["restore_recoms", AudioUtils.addAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
+                                            break;
+                                        case "add":
+                                            var i = vk.id;
+                                            cur.audioPage && cur.audioPage.canAddToGroup() && (i = cur.audioPage.getOwnerId()),
+                                            !audioObject.isClaimed && audioObject.canAdd && audioObject.ownerId != i && actions.push(["add", AudioUtils.addAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
+                                            break;
+                                        case "recoms":
+                                            cur.audioPage && actions.push(["recoms", AudioUtils.showRecoms, "", 'onmouseover="audioShowActionTooltip(this)"']);
+                                            break;
+                                        case "uma":
+                                            audioObject.isUMA && actions.push(["uma", AudioUtils.getUMAInfo, "UMA"]);
+                                            break;
+                                        case "edit":
+                                            audioObject.canEdit && !vk.widget && inArray(contextSection, ["my", "group_list"]) && actions.push(["edit", AudioUtils.editAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
+                                            break;
+                                        case "delete":
+                                            !audioObject.canEdit || audioObject.isInRecomsBlock || vk.widget || actions.push(["delete", AudioUtils.deleteAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
+                                            break;
+                                        case "current_delete":
+                                            actions.push(["current_delete", AudioUtils.deleteCurrentAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
+                                            break;
+                                        case "recoms_delete":
+                                            audioObject.isInRecomsBlock || actions.push(["recoms_delete", AudioUtils.deleteRecomsAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
+                                            break;
+                                        case "listened_delete":
+                                            audioObject.isInRecomsBlock || actions.push(["listened_delete", AudioUtils.deleteListenedAudio, "", 'onmouseover="audioShowActionTooltip(this)"']);
+                                            break;
+                                        case "share":
+                                            audioObject.isClaimed || moreActions.push(["share", AudioUtils.shareAudio, getLang("audio_share_audio")]);
+                                            break;
+                                        case "add_to_playlist":
+                                            audioObject.isClaimed || moreActions.push(["add_to_playlist", "", getLang("audio_add_to_playlist")])
+                                            break;
 
-                                            case "performer":
-                                                moreActions.push(["performer", ap._impl.musicBar.findPerformer, getLang("about_performer")]);
-                                                break;
+                                        case "download":
+                                            moreActions.push(["download", ap._impl.musicBar.downloadSong, getLang("download")]);
+                                            break;
 
-                                            case "video":
-                                                moreActions.push(["video", ap._impl.musicBar.findVideo, getLang("find_video")]);
-                                                break;
+                                        case "performer":
+                                            moreActions.push(["performer", ap._impl.musicBar.findPerformer, getLang("about_performer")]);
+                                            break;
 
-                                            case "chords":
-                                                moreActions.push(["chords", ap._impl.musicBar.findChords, getLang("find_chords")]);
-                                                break;
+                                        case "video":
+                                            moreActions.push(["video", ap._impl.musicBar.findVideo, getLang("find_video")]);
+                                            break;
 
-
-                                        }
-                                    })
-                                }();
-                            moreActions.length && actions.push(["more"]),
-                            actions.length && !function() {
-                                var t = se('<div class="_audio_row__actions audio_row__actions"></div>');
-                                each(actions, function(e, i) {
-                                    var o = AudioUtils.getRowActionName(i[0], audioObject, audioEl)
-                                        , a = se('<button aria-label="' + o + '" data-action="' + i[0] + '" class="audio_row__action audio_row__action_' + i[0] + " _audio_row__action_" + i[0] + '" ' + (i[3] || "") + ">" + (i[2] || "") + "</button>");
-                                    a.addEventListener("click", function(t) {
-                                        return i[1] && i[1].call(window, audioEl, audioObject, audio),
+                                        case "chords":
+                                            moreActions.push(["chords", ap._impl.musicBar.findChords, getLang("find_chords")]);
+                                            break;
+                                    }
+                                }),
+                                extra.claim && nav.objLoc.claim && (audioObject.isSetClaimed ? actions.push(["claim_btn", AudioUtils.unclaim.bind(_this2, audio, audioEl, extra.claim), "Unclaim"]) : actions.push(["claim_btn", AudioUtils.claim.bind(_this2, audio, audioEl, extra.claim), "Claim"]))
+                            }
+                            if (moreActions.length && actions.push(["more"]),
+                                    actions.length) {
+                                var actionsEl = se('<div class="_audio_row__actions audio_row__actions"></div>');
+                                each(actions, function(t, e) {
+                                    var i = AudioUtils.getRowActionName(e[0], audioObject, audioEl)
+                                        , o = se('<button aria-label="' + i + '" data-action="' + e[0] + '" class="audio_row__action audio_row__action_' + e[0] + " _audio_row__action_" + e[0] + '" ' + (e[3] || "") + ">" + (e[2] || "") + "</button>");
+                                    o.addEventListener("click", function(t) {
+                                        return e[1] && e[1].call(window, audioEl, audioObject, audio),
                                             cancelEvent(t)
                                     }),
-                                        t.appendChild(a)
+                                        actionsEl.appendChild(o)
                                 });
-                                var e = geByClass1("_audio_row__info", audioEl)
-                                    , i = geByClass1("_audio_row__duration", audioEl)
-                                    , o = geByClass1("_audio_row__actions", audioEl);
-                                re(o),
-                                    setStyle(i, "visibility", "hidden"),
-                                    e.appendChild(t);
-                                var a = geByClass1("_audio_row__action_more", t);
-                                moreActions.length && a && !function() {
-                                    var t = se('<div class="_audio_row__more_actions audio_row__more_actions"></div>');
-                                    each(moreActions, function(e, i) {
-                                        var a = se(rs(AudioUtils.AUDIO_ROW_ACTION_ROW_ITEM, i));
-                                        "add_to_playlist" == i[0] ? !function() {
-                                            var t = void 0
-                                                , e = void 0;
-                                            a.addEventListener("mouseenter", t = function() {
-                                                    clearTimeout(e),
-                                                        e = setTimeout(function() {
-                                                            a.removeEventListener("mouseenter", t),
-                                                                AudioUtils.initRowPlaylistsChooser(audio, a, o)
+                                var rowInfoEl = geByClass1("_audio_row__info", audioEl)
+                                    , rowDurationEl = geByClass1("_audio_row__duration", audioEl)
+                                    , rowAlreadyActionsEl = geByClass1("_audio_row__actions", audioEl);
+                                re(rowAlreadyActionsEl),
+                                    setStyle(rowDurationEl, "visibility", "hidden"),
+                                    rowInfoEl.appendChild(actionsEl);
+                                var moreActionsBtnEl = geByClass1("_audio_row__action_more", actionsEl);
+                                if (moreActions.length && moreActionsBtnEl) {
+                                    var moreActionsContentEls = se('<div class="_audio_row__more_actions audio_row__more_actions"></div>');
+                                    each(moreActions, function(t, e) {
+                                        var i = se(rs(AudioUtils.AUDIO_ROW_ACTION_ROW_ITEM, e));
+                                        if ("add_to_playlist" == e[0]) {
+                                            var o = void 0
+                                                , a = void 0;
+                                            i.addEventListener("mouseenter", o = function() {
+                                                    clearTimeout(a),
+                                                        a = setTimeout(function() {
+                                                            i.removeEventListener("mouseenter", o),
+                                                                AudioUtils.initRowPlaylistsChooser(audio, i, moreTooltip)
                                                         }, 150)
                                                 }
                                             ),
-                                                a.addEventListener("mouseleave", function() {
-                                                    clearTimeout(e)
+                                                i.addEventListener("mouseleave", function() {
+                                                    clearTimeout(a)
                                                 })
-                                        }() : a.addEventListener("click", function(t) {
-                                            return i[1].call(window, audioEl, audioObject),
-                                                cancelEvent(t)
-                                        }),
-                                            t.appendChild(a)
+                                        } else
+                                            i.addEventListener("click", function(t) {
+                                                return e[1].call(window, audioEl, audioObject),
+                                                    cancelEvent(t)
+                                            });
+                                        moreActionsContentEls.appendChild(i)
                                     });
-                                    var e = gpeByClass("_eltt_content", audioEl)
-                                        , i = e ? {
-                                        appendTo: e
+                                    var layerTooltip = gpeByClass("_eltt_content", audioEl)
+                                        , tooltipAppendOption = layerTooltip ? {
+                                        appendTo: layerTooltip
                                     } : {
                                         appendToParent: !0
                                     }
-                                        , o = new ElementTooltip(a,extend({
+                                        , moreTooltip = new ElementTooltip(moreActionsBtnEl,extend({
                                         cls: "_audio_row__tt",
                                         defaultSide: "bottom",
                                         rightShift: 20,
-                                        content: t,
-                                        bottomGap: 200,
+                                        content: moreActionsContentEls,
+                                        bottomGap: 150,
                                         preventSideChange: !0,
                                         autoShow: !0,
-                                        onFirstTimeShow: function() {
-                                            this.getOptions().bottomGap = 0
+                                        onFirstTimeShow: function(t, e) {
+                                            domData(e, "nodrag", 1),
+                                                setTimeout(function() {
+                                                    this.getOptions().bottomGap = 0
+                                                }
+                                                    .bind(this))
                                         },
                                         onHide: function() {
                                             data(audioEl, "leaved") && AudioUtils.onRowLeave(audioEl)
                                         }
-                                    }, i));
-                                    data(audioEl, "tt", o)
-                                }(),
-                                    data(audioEl, "actions", 1)
-                            }()
-                        }, forceRedraw ? 0 : 10))
+                                    }, {
+                                        appendToParent: !0
+                                    }));
+                                    data(audioEl, "tt", moreTooltip)
+                                }
+                                data(audioEl, "actions", 1)
+                            }
+                        }, forceRedraw ? 0 : 10)))
                 },
                 _showPlaylistsChooser: function(t, e, i, o, a, s) {
                     var r = i.playlists
@@ -2291,20 +2355,20 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             c = trim(t).toLowerCase(),
                                 s()
                         }, 200);
-                    var A = {}
-                        , p = {};
+                    var p = {}
+                        , y = {};
                     addEvent(n, "click", function(t) {
                         var e = domClosest("_ape_pl_item", t.target)
                             , i = domData(e, "id")
                             , o = toggleClass(e, "ape_selected");
-                        o ? (p[i] = !0,
-                            delete A[i]) : (A[i] = !0,
-                            delete p[i])
+                        o ? (y[i] = !0,
+                            delete p[i]) : (p[i] = !0,
+                            delete y[i])
                     }),
                         r.removeButtons(),
                         r.addButton(getLang("global_save"), function(o) {
-                            var s = Object.keys(p)
-                                , l = Object.keys(A);
+                            var s = Object.keys(y)
+                                , l = Object.keys(p);
                             ajax.post("al_audio.php", {
                                 act: "save_audio_in_playlists",
                                 add_pl_ids: s.join(","),
@@ -2341,14 +2405,25 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             }
                         })) : void 0
                 },
-                replaceAudio: function(t, e) {
-                    if (e = e || getAudioPlayer().getCurrentAudio()) {
-                        e = AudioUtils.asObject(e);
-                        var i = JSON.parse(e.extra).claim.original
-                            , o = se(AudioUtils.drawAudio(i));
-                        AudioUtils.addAudio(o, AudioUtils.asObject(i)),
-                            t.parentElement.insertBefore(o, t)
-                    }
+                replaceWithOriginal: function(t, e, i) {
+                    e = e || getAudioPlayer().getCurrentAudio(),
+                    e && (e = AudioUtils.asObject(e),
+                        ajax.post("al_audio.php", {
+                            act: "replace_with_original",
+                            hash: e.replaceHash,
+                            audio_id: e.fullId
+                        }, {
+                            onDone: function(o) {
+                                var a = JSON.parse(e.extra).claim.original;
+                                a[AudioUtils.AUDIO_ITEM_INDEX_ID] = o,
+                                    a[AudioUtils.AUDIO_ITEM_INDEX_OWNER_ID] = e.ownerId;
+                                var s = se(AudioUtils.drawAudio(a));
+                                t.parentElement.insertBefore(s, t),
+                                    t.parentElement.removeChild(t),
+                                i && i()
+                            },
+                            onFail: i
+                        }))
                 },
                 editAudio: function(t, e, i) {
                     showBox("al_audio.php", {
@@ -2441,7 +2516,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     act: "delete_audio",
                                     oid: e.ownerId,
                                     aid: e.id,
-                                    hash: e.editHash,
+                                    hash: e.deleteHash,
                                     restore: 1
                                 }, {
                                     onDone: function(i, o) {
@@ -2469,7 +2544,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         (t || "").split(":")
                 },
                 showAudioPlaylist: function(t, e, i, o, a) {
-                    return cur.apLayer ? cancelEvent(a) : (boxRefreshCoords(boxLoader),
+                    return cur.apLayer ? cancelEvent(a) : vk.widget ? !0 : (boxRefreshCoords(boxLoader),
                         show(boxLoader),
                         show(boxLayerWrap),
                         stManager.add(["auto_list.js", "audio.css"], function() {
@@ -2525,6 +2600,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     followHash: s.getFollowHash(),
                                     accessHash: s.getAccessHash(),
                                     editHash: s.getEditHash(),
+                                    deleteHash: s.getDeleteHash(),
+                                    replaceHash: s.getReplaceHash(),
                                     gridCovers: s.getGridCovers(),
                                     context: o,
                                     followButtonText: s.isFollowed() ? getLang("audio_playlist_btn_followed") : getLang("audio_playlist_btn_follow")
@@ -2712,7 +2789,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         d = d == t ? !1 : d;
                         var u, _ = a && a.getPageCurrentPlaylist(), c = AudioUtils.getContextPlaylist(t, !0);
                         c && (c = AudioUtils.contextSplit(c),
-                            u = c[0]);
+                            u = c[0]),
+                        "search" == u && _ && _.getSearchQid() && (u = "search:external");
                         var h = {
                             act: "add",
                             group_id: r,
@@ -2739,7 +2817,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             act: "delete_audio",
                             oid: n.audio.ownerId,
                             aid: n.audio.id,
-                            hash: n.audio.editHash
+                            hash: n.audio.deleteHash
                         }, {
                             onDone: function() {
                                 if (a) {
@@ -2881,7 +2959,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     var d = formatTime(t[AudioUtils.AUDIO_ITEM_INDEX_DURATION])
                         , u = t[AudioUtils.AUDIO_ITEM_INDEX_PERFORMER].replace(/<\/?em>/g, "")
                         , _ = clean(JSON.stringify(t)).split("$").join("$$")
-                        , c = getTemplate("audio_row", t);
+                        , c = getTemplate("audio_row_new", t);
                     return c = c.replace(/%cls%/, a.join(" ")),
                         c = c.replace(/%duration%/, d),
                         c = c.replace(/%serialized%/, _),
@@ -2944,14 +3022,17 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         addHash: e[0] || "",
                         editHash: e[1] || "",
                         actionHash: e[2] || "",
+                        deleteHash: e[3] || "",
+                        replaceHash: e[4] || "",
                         canEdit: !!e[1],
+                        canDelete: !!e[3],
                         isLongPerformer: t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_LONG_PERFORMER_BIT,
                         canAdd: !!(t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_CAN_ADD_BIT),
                         coverUrl_s: i[0],
                         coverUrl_p: i[1],
                         isClaimed: !!(t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_CLAIMED_BIT),
                         isUMA: !!(t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_UMA_BIT),
-                        isReplacable: !!(t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_REPLACEABLE),
+                        isReplaceable: !!(t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_REPLACEABLE),
                         trackGenre: t[AudioUtils.AUDIO_ITEM_INDEX_TRACK_GENRE]
                     }
                 },
@@ -2969,13 +3050,13 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     function i(t) {
                         return [].slice.call(t)
                     }
-                    var o, a = getAudioPlayer(), s = AudioUtils.getAudioFromEl(t, !0), r = null, l = [], n = domData(t, "new-post"), d = !1, u = null, _ = AudioPlaylist.TYPE_TEMP, c = vk.id, h = {}, A = [], p = t, y = window.AudioPage && currentAudioPage(t), f = window.traverseParent || function(t, e) {
-                                for (t = ge(t); t && !e(t) && (t = domPN(t),
-                                t != document); )
-                                    ;
-                                return null
-                            }
-                        ;
+                    var o, a = getAudioPlayer(), s = AudioUtils.getAudioFromEl(t, !0), r = null, l = [], n = domData(t, "new-post"), d = !1, u = null, _ = AudioPlaylist.TYPE_TEMP, c = vk.id, h = {}, p = [], y = t, A = window.AudioPage && currentAudioPage(t), f = window.traverseParent || function(t, e) {
+                            for (t = ge(t); t && !e(t) && (t = domPN(t),
+                            t != document); )
+                                ;
+                            return null
+                        }
+                    ;
                     if (f(t, function(t) {
                             return d = domData(t, "audio-context")
                         }),
@@ -3001,16 +3082,16 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         for (L && u.mergeWith({
                             accessHash: L
                         }),
-                                 y && y.getPageCurrentPlaylist() == u && y.getSortedList() ? u.initSortedList(y.getSortedList()) : s.isFromCurrentPlaylist || u.shuffle(0); p = domPN(p); )
-                            A.push((p.id ? "#" + p.id : "") + (p.className ? "." + p.className : ""));
-                        A = A.slice(0, 30),
-                            A = A.filter(function(t) {
+                                 A && A.getPageCurrentPlaylist() == u && A.getSortedList() ? u.initSortedList(A.getSortedList()) : s.isFromCurrentPlaylist || u.shuffle(0); y = domPN(y); )
+                            p.push((y.id ? "#" + y.id : "") + (y.className ? "." + y.className : ""));
+                        p = p.slice(0, 30),
+                            p = p.filter(function(t) {
                                 return !!trim(t)
                             }),
-                            A = A.reverse().join(" / "),
-                            A = document.location.href + " : " + A
-                    } else if (y && y.getPageCurrentPlaylist())
-                        u = y.getPageCurrentPlaylist();
+                            p = p.reverse().join(" / "),
+                            p = document.location.href + " : " + p
+                    } else if (A && A.getPageCurrentPlaylist())
+                        u = A.getPageCurrentPlaylist();
                     else if ("module" == E) {
                         var w = v;
                         u = a.getPlaylist(AudioPlaylist.TYPE_PLAYLIST, w || cur.oid || vk.id, AudioPlaylist.DEFAULT_PLAYLIST_ID),
@@ -3044,28 +3125,28 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             c = cur.oid;
                         var C = (v || "").split("_")[1]
                             , U = cur.wallQuery || ""
-                            , D = ge("wall_search")
-                            , S = inArray(cur.wallType, ["own", "full_own"]) ? "own" : "all";
-                        o = hashCode(S + "_" + U),
-                        "wall" == cur.module && val(D) && (U = val(D)),
+                            , S = ge("wall_search")
+                            , D = inArray(cur.wallType, ["own", "full_own"]) ? "own" : "all";
+                        o = hashCode(D + "_" + U),
+                        "wall" == cur.module && val(S) && (U = val(S)),
                         C && (h = {
                             postId: C,
                             wallQuery: U,
-                            wallType: S
+                            wallType: D
                         });
                         var O = 0 === s.context.indexOf("reply");
                         O && (l = i([gpeByClass("_replies_list", t)]),
                             o = "reply" + o),
                             l = l.concat(i([r]))
                     } else {
-                        for (; p = domPN(p); )
-                            A.push((p.id ? "#" + p.id : "") + (p.className ? "." + p.className : ""));
-                        A = A.slice(0, 30),
-                            A = A.filter(function(t) {
+                        for (; y = domPN(y); )
+                            p.push((y.id ? "#" + y.id : "") + (y.className ? "." + y.className : ""));
+                        p = p.slice(0, 30),
+                            p = p.filter(function(t) {
                                 return !!trim(t)
                             }),
-                            A = A.reverse().join(" / "),
-                            A = document.location.href + " : " + A
+                            p = p.reverse().join(" / "),
+                            p = document.location.href + " : " + p
                     }
                     return r || (r = domPN(t)),
                         l = l.filter(function(t) {
@@ -3165,8 +3246,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             cancelEvent(t))
                     }),
                     addEvent(ge("top_audio"), "mousedown", function(t) {
-                        return AudioUtils.getLayer().toggle(),
-                            cancelEvent(t)
+                        return checkEvent(t) === !0 ? !1 : (AudioUtils.getLayer().toggle(),
+                            cancelEvent(t))
                     }),
                     this.onPlay(this.ap.getCurrentAudio())
             }
@@ -3424,6 +3505,14 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 return this.getSelf()._editHash || ""
             }
             ,
+            AudioPlaylist.prototype.getDeleteHash = function() {
+                return this.getSelf()._deleteHash || ""
+            }
+            ,
+            AudioPlaylist.prototype.getReplaceHash = function() {
+                return this.getSelf()._replaceHash || ""
+            }
+            ,
             AudioPlaylist.prototype.getCoverUrl = function() {
                 return this.getSelf()._coverUrl || ""
             }
@@ -3446,6 +3535,10 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             ,
             AudioPlaylist.prototype.getSearchParams = function() {
                 return this.getSelf()._searchParams || null
+            }
+            ,
+            AudioPlaylist.prototype.getSearchQid = function() {
+                return this.getSelf()._searchQid || null
             }
             ,
             AudioPlaylist.prototype.getLocalFoundCount = function() {
@@ -3647,41 +3740,54 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 if (!this.hasMore())
                     return onDone && onDone(this);
                 var searchParams = this.getSearchParams();
-                return this.getType() != AudioPlaylist.TYPE_SEARCH || searchParams.globalQuery ? (this._onDoneLoading = this._onDoneLoading || [],
-                    this._onDoneLoading.push(onDone),
-                    this._loadingAll ? void 0 : needAll ? (this._loadingAll = !0,
-                        void _loadAllPlaylistAudios(this, callOnDones.bind(this))) : void ajax.post("al_audio.php", {
-                        act: "load_section",
-                        type: this.getType(),
-                        owner_id: this.getOwnerId(),
-                        playlist_id: this.getPlaylistId(),
-                        offset: this.getNextOffset() - this.getLocalFoundCount(),
-                        access_hash: this.getAccessHash(),
-                        search_q: searchParams ? searchParams.globalQuery : null,
-                        search_performer: searchParams ? searchParams.performer : null,
-                        search_lyrics: searchParams ? searchParams.lyrics : null,
-                        search_sort: searchParams ? searchParams.sort : null,
-                        search_history: searchParams ? intval(searchParams.fromHistory) : null,
-                        feed_from: this.getFeedFrom(),
-                        feed_offset: this.getFeedOffset(),
-                        shuffle: this.getShuffle(),
-                        post_id: this.getPostId(),
-                        wall_query: this.getWallQuery(),
-                        wall_type: this.getWallType(),
-                        claim: intval(nav.objLoc.claim)
-                    }, {
-                        onDone: function(loadedPlaylist, tpl, langs, templatesScript) {
-                            addTemplates({
-                                audio_playlist_snippet: tpl
-                            }),
-                                extend(cur.lang, langs),
-                            templatesScript && eval(templatesScript),
-                            (!this._loadingAll || needAll) && (getAudioPlayer().mergePlaylistData(this, loadedPlaylist),
-                                callOnDones.call(this),
-                                getAudioPlayer().saveStateCurrentPlaylist())
-                        }
-                            .bind(this)
-                    })) : onDone && onDone(this)
+                if (this.getType() == AudioPlaylist.TYPE_SEARCH && !searchParams.globalQuery)
+                    return onDone && onDone(this);
+                if (this._onDoneLoading = this._onDoneLoading || [],
+                        this._onDoneLoading.push(onDone),
+                        !this._loadingAll) {
+                    if (needAll)
+                        return this._loadingAll = !0,
+                            void _loadAllPlaylistAudios(this, callOnDones.bind(this));
+                    var offset = this.getNextOffset();
+                    offset == this.getLocalFoundCount() && (offset -= this.getLocalFoundCount()),
+                    offset || clearTimeout(this._searchViewStatsTimeout),
+                        ajax.post("al_audio.php", {
+                            act: "load_section",
+                            type: this.getType(),
+                            owner_id: this.getOwnerId(),
+                            playlist_id: this.getPlaylistId(),
+                            offset: offset,
+                            access_hash: this.getAccessHash(),
+                            search_q: searchParams ? searchParams.globalQuery : null,
+                            search_performer: searchParams ? searchParams.performer : null,
+                            search_lyrics: searchParams ? searchParams.lyrics : null,
+                            search_sort: searchParams ? searchParams.sort : null,
+                            search_history: searchParams ? intval(searchParams.fromHistory) : null,
+                            search_qid: this.getSearchQid(),
+                            feed_from: this.getFeedFrom(),
+                            feed_offset: this.getFeedOffset(),
+                            shuffle: this.getShuffle(),
+                            post_id: this.getPostId(),
+                            wall_query: this.getWallQuery(),
+                            wall_type: this.getWallType(),
+                            claim: intval(nav.objLoc.claim)
+                        }, {
+                            onDone: function(loadedPlaylist, tpl, langs, templatesScript) {
+                                addTemplates({
+                                    audio_playlist_snippet: tpl
+                                }),
+                                    extend(cur.lang, langs),
+                                templatesScript && eval(templatesScript),
+                                (!this._loadingAll || needAll) && (getAudioPlayer().mergePlaylistData(this, loadedPlaylist),
+                                    callOnDones.call(this),
+                                    getAudioPlayer().saveStateCurrentPlaylist(),
+                                offset || (clearTimeout(this._searchViewStatsTimeout),
+                                    this._searchViewStatsTimeout = setTimeout(this.sendSearchStats.bind(this, "search_view"), 3e3),
+                                    this._searchPlayStatsSent = !1))
+                            }
+                                .bind(this)
+                        })
+                }
             }
             ,
             AudioPlaylist.prototype.getLiveInfo = function() {
@@ -3778,7 +3884,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             this._items.push(t.items[a])
                     }
                     var r = this;
-                    each("gridCovers communitiesBlock addClasses nextOffset hasMore followHash accessHash isFollowed rawId title authorLine authorHref authorName infoLine1 infoLine2 isOfficial rawDescription description lastUpdated listens feedFrom feedOffset live searchParams totalCount totalCountHash postId wallQuery wallType originalList shuffle isAdsAllowed editHash coverUrl".split(" "), function(e, i) {
+                    each("gridCovers communitiesBlock addClasses nextOffset hasMore followHash accessHash isFollowed rawId title authorLine authorHref authorName infoLine1 infoLine2 isOfficial rawDescription description lastUpdated listens feedFrom feedOffset live searchParams totalCount totalCountHash postId wallQuery wallType originalList shuffle isAdsAllowed editHash coverUrl searchQid".split(" "), function(e, i) {
                         void 0 !== t[i] && (r["_" + i] = t[i])
                     })
                 }
@@ -3840,6 +3946,19 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             e(o)
                     }
                         .bind(this))
+            }
+            ,
+            AudioPlaylist.prototype.sendSearchStats = function(t) {
+                if ("search_play" == t) {
+                    if (this._searchPlayStatsSent)
+                        return;
+                    this._searchPlayStatsSent = !0
+                }
+                ajax.post("al_audio.php?act=search_stats", {
+                    event_type: t,
+                    search_type: this.getSearchQid() ? "external" : "internal",
+                    results_count: this.getTotalCount()
+                })
             }
             ,
             AudioPlaylist.prototype.toString = function() {
@@ -4629,37 +4748,37 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     r.length && debugLog("AudioPlayer - " + r.length + " playlists removed")
                 }
             }
-            ,
-            AudioPlayer.prototype.hasPlaylist = function(t, e, i) {
-                var o;
-                o = void 0 !== e && void 0 !== i ? t + "_" + e + "_" + i : t;
-                for (var a = 0; a < this._playlists.length; a++) {
-                    var s = this._playlists[a];
-                    if (!s.isReference() && s.getId() == o)
-                        return s
-                }
-                return !1
+        ,
+        AudioPlayer.prototype.hasPlaylist = function(t, e, i) {
+            var o;
+            o = void 0 !== e && void 0 !== i ? t + "_" + e + "_" + i : t;
+            for (var a = 0; a < this._playlists.length; a++) {
+                var s = this._playlists[a];
+                if (!s.isReference() && s.getId() == o)
+                    return s
             }
-            ,
-            AudioPlayer.prototype.getPlaylist = function(t, e, i, o) {
-                if (t && !e && !i) {
-                    var a = t.split("_");
-                    t = a[0],
-                        e = a[1],
-                        i = a[2]
-                }
-                var s = this.hasPlaylist(t, e, i);
-                return s ? (s.mergeWith({
-                    accessHash: o
-                }),
-                    s) : new AudioPlaylist({
-                    type: t,
-                    ownerId: e,
-                    albumId: i,
-                    hasMore: t != AudioPlaylist.TYPE_TEMP,
-                    accessHash: o
-                })
+            return !1
+        }
+        ,
+        AudioPlayer.prototype.getPlaylist = function(t, e, i, o) {
+            if (t && !e && !i) {
+                var a = t.split("_");
+                t = a[0],
+                    e = a[1],
+                    i = a[2]
             }
+            var s = this.hasPlaylist(t, e, i);
+            return s ? (s.mergeWith({
+                accessHash: o
+            }),
+                s) : new AudioPlaylist({
+                type: t,
+                ownerId: e,
+                albumId: i,
+                hasMore: t != AudioPlaylist.TYPE_TEMP,
+                accessHash: o
+            })
+        }
         ,
         AudioPlayer.prototype.toggleRepeatCurrentAudio = function() {
             this._repeatCurrent = !this._repeatCurrent
@@ -5002,17 +5121,17 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             if (hasClass(e.target, "audio_row__performer"))
                 return checkEvent(e) || vk.widget ? !0 : (AudioUtils.audioSearchPerformer(e.target, o.performer, e),
                     cancelEvent(e));
-            var s = cur.cancelClick || e && (hasClass(e.target, "audio_lyrics") || domClosest("_audio_duration_wrap", e.target) || domClosest("_audio_inline_player", e.target) || domClosest("audio_performer", e.target));
+            var s = cur.cancelClick || e && (hasClass(e.target, "audio_lyrics") ||  hasClass(e.target, "select-check") || hasClass(e.target, "select-check-wrapper") || domClosest("_audio_duration_wrap", e.target) || domClosest("_audio_inline_player", e.target) || domClosest("audio_performer", e.target));
             if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", i) && (s = !0),
                     delete cur.cancelClick,
                     delete cur._sliderMouseUpNowEl,
                     s)
                 return !0;
-            if (AudioUtils.isClaimedAudio(o)) {
+            if (AudioUtils.isClaimedAudio(o) || o.isReplaceable) {
                 var r = AudioUtils.getAudioExtra(o)
                     , l = r.claim;
                 if (l)
-                    return void (hasClass(i, "no_actions") || o.isInEditBox || showAudioClaimWarning(o, l))
+                    return void (hasClass(i, "no_actions") || o.isInEditBox || showAudioClaimWarning(o, l, AudioUtils.replaceWithOriginal.bind(AudioUtils, i, o)))
             }
             if (o.isPlaying)
                 this.pause();
@@ -5054,7 +5173,6 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayer.prototype.playPlaylist = function(t, e, i, o, a) {
-            var s = this;
             if (vk && vk.widget && !vk.id && window.Widgets)
                 return Widgets.oauth(),
                     !1;
@@ -5107,7 +5225,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 i && this._initPlayingContext(i);
                 var d = e.getAudio(t);
                 d && e.load(e.indexOfAudio(d) + 3),
-                n || this._sendListenedData(),
+                n || (this._sendListenedData(),
+                e.getType() == AudioPlaylist.TYPE_SEARCH && e.indexOfAudio(d) >= e.getLocalFoundCount() && e.sendSearchStats("search_play")),
                 n || this._adsIsAdPlaying() || this._adsDeinit(),
                     n && l ? this._adsIsAdPlaying() ? this._adsResumeAd() : this.isPlaying() || (this._isPlaying = !0,
                         this._sendLCNotification(),
@@ -5130,6 +5249,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             this.notify(AudioPlayer.EVENT_PROGRESS, 0),
                             this._muteProgressEvents = !0,
                             this._implClearAllTasks(),
+                        this._impl.preparePlay && this._impl.preparePlay(),
                             a ? this._startAdsPlay(d, e, !1, function() {
                                 d = this.getCurrentAudio(),
                                 d && this.isPlaying() && (this.notify(AudioPlayer.EVENT_UPDATE),
@@ -5801,6 +5921,143 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             e.src = (0,_audio_unmask_source.audioUnmaskSource)(t)
         }
         ,
+        window.AudioPlayerHTML5Simple = function(t) {
+            this.opts = t || {},
+                this._audioEl = this._createAudioNode(),
+                this.type = "html5simple"
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.setUrl = function(t, e) {
+            return e && e(!0)
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.onReady = function(t) {
+            return t(!0)
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.seek = function(t) {
+            var e = this._audioEl;
+            isNaN(e.duration) || (e.currentTime = e.duration * t)
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.isFullyLoaded = function() {
+            return !1
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.getPlayedTime = function() {
+            for (var t = this._audioEl.played, e = 0, i = 0; i < t.length; i++)
+                e += t.end(i) - t.start(i);
+            return e
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.setVolume = function(t) {
+            void 0 === t && (t = this._audioEl.volume),
+                this._audioEl.volume = t,
+                this._volume = t
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.fadeVolume = function(t, e) {
+            this.setVolume(t),
+            e && e()
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.getCurrentProgress = function() {
+            var t = this._audioEl;
+            return isNaN(t.duration) ? 0 : Math.max(0, Math.min(1, t.currentTime / t.duration))
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype._stopFrequencyAnalise = function() {
+            clearInterval(this._freqUpdateInterval),
+                this.opts.onFrequency([0, 0, 0, 0])
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype._startFrequencyAnalise = function() {
+            function t(t, e, i, o) {
+                var a = i - e;
+                return a * t / o + e
+            }
+            function e(t, e) {
+                return Math.random() * (e - t) + t
+            }
+            var i = this;
+            this._stopFrequencyAnalise();
+            var o = 999
+                , a = 3
+                , s = null
+                , r = null;
+            this._freqUpdateInterval = setInterval(function() {
+                var l = void 0;
+                i._audioEl.paused || !data(i._audioEl, "canplay") ? l = [0, 0, 0, 0] : (o++,
+                o > a && (o = 0,
+                    s = r,
+                    r = [e(.7, 1), e(.55, .8), e(.3, .55), e(.03, .45)],
+                s || (s = [e(.7, 1), e(.55, .8), e(.3, .55), e(.03, .45)])),
+                    l = [t(o, s[0], r[0], a), t(o, s[1], r[1], a), t(o, s[2], r[2], a), t(o, s[3], r[3], a)]),
+                    i.opts.onFrequency(l)
+            }, 50)
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.getCurrentBuffered = function() {
+            var t = this._audioEl;
+            return t && t.buffered.length ? Math.min(1, t.buffered.end(0) / t.duration) : 0
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.play = function(t) {
+            var e = (0,
+                _audio_unmask_source.audioUnmaskSource)(t);
+            this._audioEl.src != e && (this._audioEl.src = e),
+                this._audioEl.play(),
+                this._startFrequencyAnalise()
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.preparePlay = function() {
+            this._audioEl.play()
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.pause = function() {
+            this._audioEl.pause()
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype.stop = function() {
+            this._audioEl.pause(),
+                this._audioEl.src = ""
+        }
+        ,
+        AudioPlayerHTML5Simple.prototype._createAudioNode = function() {
+            var t = new Audio
+                , e = this;
+            return this.opts.onBufferUpdate && addEvent(t, "progress", function() {
+                e.opts.onBufferUpdate(e.getCurrentBuffered());
+                var i = t.buffered;
+                1 == i.length && 0 == i.start(0) && i.end(0) == t.duration && (t._fullyLoaded = !0)
+            }),
+            this.opts.onProgressUpdate && addEvent(t, "timeupdate", function() {
+                this.opts.onProgressUpdate(this.getCurrentProgress(), this.getPlayedTime())
+            }
+                .bind(this)),
+            this.opts.onEnd && addEvent(t, "ended", function() {
+                e.opts.onEnd()
+            }),
+            this.opts.onSeeked && addEvent(t, "seeked", function() {
+                e.opts.onSeeked()
+            }),
+            this.opts.onSeek && addEvent(t, "seeking", function() {
+                e.opts.onSeek()
+            }),
+                t.addEventListener("error", function(t) {
+                    AudioUtils.debugLog("HTML5 error track loading"),
+                    e.opts.onFail && e.opts.onFail()
+                }),
+                t.addEventListener("canplay", function() {
+                    e.opts.onCanPlay && e.opts.onCanPlay(),
+                        data(t, "canplay", !0),
+                    e._seekOnReady && (e.seek(e._seekOnReady),
+                        e._seekOnReady = !1)
+                }),
+                t.crossOrigin = "anonymous",
+                t
+        }
+        ,
         window.AudioPlayerHTML5 = function(t) {
             this.opts = t || {},
                 this._audioNodes = [],
@@ -6098,85 +6355,4 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             stManager.done("audioplayer.js")
         } catch (e) {}
     }
-    , function(t, e) {
-        "use strict";
-        function i() {
-            return window.wbopen && ~(window.open + "").indexOf("wbopen")
-        }
-        function o(t) {
-            if (!i() && ~t.indexOf("audio_api_unavailable")) {
-                var e = t.split("?extra=")[1].split("#")
-                    , o = "" === e[1] ? "" : a(e[1]);
-                if (e = a(e[0]),
-                    "string" != typeof o || !e)
-                    return t;
-                o = o ? o.split(String.fromCharCode(9)) : [];
-                for (var s, r, n = o.length; n--; ) {
-                    if (r = o[n].split(String.fromCharCode(11)),
-                            s = r.splice(0, 1, e)[0],
-                            !l[s])
-                        return t;
-                    e = l[s].apply(null, r)
-                }
-                if (e && "http" === e.substr(0, 4))
-                    return e
-            }
-            return t
-        }
-        function a(t) {
-            if (!t || t.length % 4 == 1)
-                return !1;
-            for (var e, i, o = 0, a = 0, s = ""; i = t.charAt(a++); )
-                i = r.indexOf(i),
-                ~i && (e = o % 4 ? 64 * e + i : i,
-                o++ % 4) && (s += String.fromCharCode(255 & e >> (-2 * o & 6)));
-            return s
-        }
-        function s(t, e) {
-            var i = t.length
-                , o = [];
-            if (i) {
-                var a = i;
-                for (e = Math.abs(e); a--; )
-                    o[a] = (e += e * (a + i) / e) % i | 0
-            }
-            return o
-        }
-        Object.defineProperty(e, "__esModule", {
-            value: !0
-        }),
-            e.audioUnmaskSource = o;
-        var r = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/="
-            , l = {
-            v: function(t) {
-                return t.split("").reverse().join("")
-            },
-            r: function(t, e) {
-                t = t.split("");
-                for (var i, o = r + r, a = t.length; a--; )
-                    i = o.indexOf(t[a]),
-                    ~i && (t[a] = o.substr(i - e, 1));
-                return t.join("")
-            },
-            s: function(t, e) {
-                var i = t.length;
-                if (i) {
-                    var o = s(t, e)
-                        , a = 0;
-                    for (t = t.split(""); ++a < i; )
-                        t[a] = t.splice(o[i - 1 - a], 1, t[a])[0];
-                    t = t.join("")
-                }
-                return t
-            },
-            x: function(t, e) {
-                var i = [];
-                return e = e.charCodeAt(0),
-                    each(t.split(""), function(t, o) {
-                        i.push(String.fromCharCode(o.charCodeAt(0) ^ e))
-                    }),
-                    i.join("")
-            }
-        }
-    }
-]);
+});

@@ -61,8 +61,13 @@
 }
 
 
-.audio_page_sections.select-download .audio_row_content {
+.audio_page_sections .audio_row_content {
     float: left;
+    width: calc(100%);
+    transition: 0.2s width;
+}
+
+.audio_page_sections.select-download .audio_row_content {
     width: calc(100% - 45px);
 }
 
@@ -71,11 +76,16 @@
     top: 7px !important;
 }
 
-.audio_page_sections.select-download .audio_row .select-check-wrapper {
+.audio_page_sections .audio_row .select-check-wrapper {
     margin: 0;
-    width: 45px;
+    width: 0;
     height: 45px;
     float: left;
+    transition: 0.2s width;
+}
+
+.audio_page_sections.select-download .audio_row .select-check-wrapper {
+    width: 45px;
 }
 
 .audio_page_sections.select-download .audio_row.selected{
