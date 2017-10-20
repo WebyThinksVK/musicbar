@@ -46,7 +46,7 @@ var MusicBar = function(context) {
 
     // Connect to background
     if (this.connection  = chrome.runtime.connect(MusicBar.EXTENSION_ID)) {
-        console.log("connected");
+        console.info("Music Bar connected");
     }
 
     // Event handler
@@ -66,6 +66,7 @@ var MusicBar = function(context) {
                 audio_equalizer: "Настройки",
                 audio_add_equalizer: "Добавить эквалайзер",
                 audio_delete_equalizer: "Удалить эквалайзер",
+                audio_delete_equalizer_confirm: "Вы уверены, что хотите удалить этот эквалайзер?",
                 audio_edit_equalizer: "Редактировать эквалайзер",
                 audio_dolby_surround: "Объемный звук 5.1",
                 audio_visualization: "Визуализация",
@@ -78,11 +79,53 @@ var MusicBar = function(context) {
                 audio_show_bitrate: "Отображать битрейт песен",
                 audio_downloaded: "Загружено ",
                 cancel: "Отмена",
+                delete: "Удалить",
+                save: "Сохранить",
                 selected_audio: "Выбрано аудиозаписей",
+                audio_name: "Название",
+                download_playlist: "Скачать плейлист",
+                keep_confirm: "Продолжить",
+                audio_playlist_download_confirm: [
+                    "",
+                    "Вы уверены, что хотите скачать <b>%s</b> песню? Это может занять продолжительное время. <br> <br> Вы также можете <a class='choose-one'> выбрать нужные песни</a>.",
+                    "Вы уверены, что хотите скачать <b>%s</b> песни? Это может занять продолжительное время. <br> <br> Вы также можете <a class='choose-one'> выбрать нужные песни</a>.",
+                    "Вы уверены, что хотите скачать <b>%s</b> песен? Это может занять продолжительное время. <br> <br> Вы также можете <a class='choose-one'> выбрать нужные песни</a>."
+                ]
             },
 
             {
-                download: "Скачать",
+                download: "Завантажити",
+                about_performer: "Про виконавця",
+                find_video: "Знайти відео",
+                find_chords: "Знайти акорди",
+                audio_settings: "Налаштування",
+                audio_equalizer: "Налаштування",
+                audio_add_equalizer: "Додати еквалайзер",
+                audio_delete_equalizer: "Видалити еквалайзер",
+                audio_delete_equalizer_confirm: "Вы уверены, что хотите удалить этот эквалайзер?",
+                audio_edit_equalizer: "Редагувати еквалайзер",
+                audio_dolby_surround: "Об'ємний звук 5.1",
+                audio_visualization: "Візуалізація",
+                audio_hide_playlists: "Приховати плейлисти",
+                audio_download_songs: "Завантажити аудіозаписи",
+                audio_loading: "Завантаження",
+                audio_cancel_download: "Перервати завантаження",
+                audio_current_playlist: "Поточний плейлист",
+                audio_choose_list: "Вибрати із списку",
+                audio_show_bitrate: "Відображати бітрейт пісень",
+                audio_downloaded: "Завантажено",
+                delete: "Видалити",
+                cancel: "Скасувати",
+                save: "Зберегти",
+                selected_audio: "Вибрано аудіозаписів",
+                audio_name: "Назва",
+                download_playlist: "Скачать плейлист",
+                audio_playlist_download_confirm: [
+                    "",
+                    "Вы уверены, что хотите скачать <b>%s</b> песню? Это может занять продолжительное время. <br> <br> Вы также можете <a class='choose-one'> выбрать нужные песни</a>.",
+                    "Вы уверены, что хотите скачать <b>%s</b> песни? Это может занять продолжительное время. <br> <br> Вы также можете <a class='choose-one'> выбрать нужные песни</a>.",
+                    "Вы уверены, что хотите скачать <b>%s</b> песен? Это может занять продолжительное время. <br> <br> Вы также можете <a class='choose-one'> выбрать нужные песни</a>."
+                ]
             },
 
             {
@@ -97,6 +140,7 @@ var MusicBar = function(context) {
                 audio_equalizer: "Equalizer",
                 audio_add_equalizer: "Add equalizer",
                 audio_delete_equalizer: "Delete equalizer",
+                audio_delete_equalizer_confirm: "Are you sure you want to delete this equalizer?",
                 audio_edit_equalizer: "Edit equalizer",
                 audio_dolby_surround: "Surround sound 5.1",
                 audio_visualization: "Visualization",
@@ -108,8 +152,19 @@ var MusicBar = function(context) {
                 audio_choose_list: "Choose from list",
                 audio_show_bitrate: "Show bitrate",
                 audio_downloaded: "Download ",
+                keep_confirm: "Continue",
                 cancel: "Cancel",
+                save: "Save",
+                delete: "Delete",
                 selected_audio: "Selected songs",
+                audio_name: "Name",
+                download_playlist: "Download playlist",
+                audio_playlist_download_confirm: [
+                    "",
+                    "Are you sure you want to download <b>%s</b> songs? It can take a while. <br> <br> You are also able to <a class='choose-one'>choose necessary songs</a>.",
+                    "Are you sure you want to download <b>%s</b> songs? It can take a while. <br> <br> You are also able to <a class='choose-one'>choose necessary songs</a>.",
+                    "Are you sure you want to download <b>%s</b> songs? It can take a while. <br> <br> You are also able to <a class='choose-one'>choose necessary songs</a>.",
+                ]
             }
         ];
 
@@ -217,7 +272,8 @@ var MusicBar = function(context) {
         for (var i = 0; i < this.filters.length; i++ ) {
 
             this.filters[i].disconnect();
-            this.filters[i].gain.value = equalizer.gains[i];
+            //this.filters[i].gain.value = equalizer.gains[i];
+            this.filters[i].gain.setTargetAtTime( equalizer.gains[i],this.context.currentTime + 1, 0.5);
 
             if (this.filters[i-1])
                 this.filters[i-1].connect(this.filters[i]);
@@ -251,7 +307,8 @@ var MusicBar = function(context) {
         for (var i = 0; i < this.frequencies.length; i++ ) {
             this.filters[i] = this.context.createBiquadFilter();
             this.filters[i].type = "peaking";
-            this.filters[i].frequency.value = this.frequencies[i];
+            //this.filters[i].frequency.value = this.frequencies[i];
+            this.filters[i].frequency.setTargetAtTime(this.frequencies[i],this.context.currentTime + 1, 0.5);
             this.filters[i].frequency.Q = 20;
 
             if (this.filters[i-1]) {
@@ -505,23 +562,19 @@ var MusicBar = function(context) {
         }
 
         if (this.playlistCount > 50) {
-            var songsMorphy = "песен";
-            switch(this.playlistCount%10) {
-                case 1: songsMorphy = "песню"; break;
-                case 2:
-                case 3:
-                case 4:songsMorphy = "песни"; break;
-            }
+            var box = new MessageBox({title: getLang("download_playlist"), dark: 1});
+            box.content(getLang("audio_playlist_download_confirm", this.playlistCount));
 
-            var box = new MessageBox({title: "Скачивание аудиозаписей", dark: 1});
-            box.content("Вы уверены, что хотите скачать <b>"+this.playlistCount+"</b> "+songsMorphy+"? Это может занять продолжительное время. <br> <br> Вы также можете <a onclick='boxQueue.hideLast(); getAudioPlayer()._impl.musicBar.toggleSelect(true)'> выбрать нужные песни</a>.");
+            geByClass1("choose-one",box.bodyNode).addEventListener("click", function() {
+                boxQueue.hideLast(); getAudioPlayer()._impl.musicBar.toggleSelect(true);
+            }, true);
 
-            box.addButton("Продолжить", function() {
+            box.addButton(getLang("keep_confirm"), function() {
                 fn()
                 box.hide();
             });
 
-            box.addButton("Отмена", function() {
+            box.addButton(getLang("cancel"), function() {
                 self.playlist = [];
                 self.playlistCount = 0;
                 box.hide();
@@ -647,7 +700,7 @@ var MusicBar = function(context) {
         this.youtube = new YT.Player('audio_row_video_player', {
             events: {
                 onReady: function () {
-                    console.log("video is ready");
+                    //console.log("video is ready");
                 },
                 onStateChange: function(state) {
                     if (state.data == 1) {
@@ -880,8 +933,12 @@ var MusicBar = function(context) {
         // Create new equalizer
         geByClass1("add_equalizer_item").addEventListener("click", function() {
             self.ajax(MusicBar.formEqualizerModalUrl, function() {
-                var box = new MessageBox({dark: 1, title: "Добавить эквалайзер", bodyStyle: "padding: 20px; background-color: #fafbfc;"});
-                box.content(this);
+
+                var html = this;
+                html = html.replace("%name%", getLang("audio_name"));
+
+                var box = new MessageBox({dark: 1, title: getLang("audio_add_equalizer"), bodyStyle: "padding: 20px; background-color: #fafbfc;"});
+                box.content(html);
 
                 // Update equalizer
                 geByClass("gain_range", box.bodyNode).forEach(function(input) {
@@ -899,7 +956,7 @@ var MusicBar = function(context) {
                 self.setEqualizer({gains: gains});
 
                 // Save the Equalizer
-                box.addButton("Сохранить", function() {
+                box.addButton(getLang("save"), function() {
                     var gains = [];
                     each(geByClass("gain_range", box.bodyNode), function(i) {gains.push(this.value);});
 
@@ -931,7 +988,7 @@ var MusicBar = function(context) {
                     box.hide();
                 });
 
-                box.addButton("Отмена", function() {
+                box.addButton(getLang("cancel"), function() {
                     self.setEqualizer();
                     box.hide();
                 }, "no");
@@ -1141,13 +1198,13 @@ var MusicBar = function(context) {
 
                 var equalizer = domClosest("_audio_equalizer_item", this);
                 var modal = showFastBox({
-                    title: "Удалить эквалайзер",
+                    title: getLang("audio_delete_equalizer"),
                     dark: 1
-                }, "Вы уверены, что хотите удалить этот эквалайзер?", "Удалить", function(a) {
+                }, getLang("audio_delete_equalizer_confirm"), getLang("delete"), function(a) {
                     self.removeEqualizer(equalizer.getAttribute("data-index"));
                     modal.hide();
                     equalizer.remove();
-                }, "Отмена");
+                }, getLang("cancel"));
 
                 e.stopPropagation();
                 return false;
@@ -1160,8 +1217,11 @@ var MusicBar = function(context) {
                 var equalizer = self.equalizers[element.getAttribute("data-index")];
 
                 self.ajax(MusicBar.formEqualizerModalUrl, function() {
-                    var box = new MessageBox({dark: 1, title: "Редактировать эквалайзер", bodyStyle: "padding: 20px; background-color: #fafbfc;"});
-                    box.content(this);
+                    var box = new MessageBox({dark: 1, title: getLang("audio_edit_equalizer"), bodyStyle: "padding: 20px; background-color: #fafbfc;"});
+
+                    var html = this;
+                    html = html.replace("%name%", getLang("audio_name"));
+                    box.content(html);
 
                     geByClass("gain_range", box.bodyNode).forEach(function(input) {
                         input.addEventListener("change", function() {
@@ -1179,7 +1239,7 @@ var MusicBar = function(context) {
                     each(geByClass("gain_range", box.bodyNode), function(i) { this.value = equalizer.gains[i]; });
 
                     // Save the Equalizer
-                    box.addButton("Сохранить", function() {
+                    box.addButton( getLang("save"), function() {
                         var gains = [];
                         each(geByClass("gain_range", box.bodyNode), function(i) {gains.push(this.value);});
 
@@ -1204,7 +1264,7 @@ var MusicBar = function(context) {
                         box.hide();
                     });
 
-                    box.addButton("Отмена", function() {
+                    box.addButton( getLang("cancel"), function() {
                         self.setEqualizer();
                         box.hide();
                     }, "no");

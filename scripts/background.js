@@ -193,7 +193,7 @@ function removeConnection(port) {
  * @returns {*}
  */
 function parseMessageFromPage(message, port) {
-     console.log(params.bitrate);
+
 	switch(message.type) {
 
 		case "setEqualizer":
