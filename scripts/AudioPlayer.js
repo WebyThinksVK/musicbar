@@ -18,9 +18,9 @@
         e(0)
 }({
     0: function(t, e, i) {
-        t.exports = i(86)
+        t.exports = i(94)
     },
-    65: function(module, exports) {
+    21: function(module, exports) {
         "use strict";
         function _classCallCheck(t, e) {
             if (!(t instanceof e))
@@ -132,88 +132,7 @@
         }();
         exports["default"] = AudioLayer
     },
-    66: function(t, e) {
-        "use strict";
-        function i() {
-            return window.wbopen && ~(window.open + "").indexOf("wbopen")
-        }
-        function o(t) {
-            if (!i() && ~t.indexOf("audio_api_unavailable")) {
-                var e = t.split("?extra=")[1].split("#")
-                    , o = "" === e[1] ? "" : a(e[1]);
-                if (e = a(e[0]),
-                    "string" != typeof o || !e)
-                    return t;
-                o = o ? o.split(String.fromCharCode(9)) : [];
-                for (var s, r, n = o.length; n--; ) {
-                    if (r = o[n].split(String.fromCharCode(11)),
-                            s = r.splice(0, 1, e)[0],
-                            !l[s])
-                        return t;
-                    e = l[s].apply(null, r)
-                }
-                if (e && "http" === e.substr(0, 4))
-                    return e
-            }
-            return t
-        }
-        function a(t) {
-            if (!t || t.length % 4 == 1)
-                return !1;
-            for (var e, i, o = 0, a = 0, s = ""; i = t.charAt(a++); )
-                i = r.indexOf(i),
-                ~i && (e = o % 4 ? 64 * e + i : i,
-                o++ % 4) && (s += String.fromCharCode(255 & e >> (-2 * o & 6)));
-            return s
-        }
-        function s(t, e) {
-            var i = t.length
-                , o = [];
-            if (i) {
-                var a = i;
-                for (e = Math.abs(e); a--; )
-                    o[a] = (e += e * (a + i) / e) % i | 0
-            }
-            return o
-        }
-        Object.defineProperty(e, "__esModule", {
-            value: !0
-        }),
-            e.audioUnmaskSource = o;
-        var r = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/="
-            , l = {
-            v: function(t) {
-                return t.split("").reverse().join("")
-            },
-            r: function(t, e) {
-                t = t.split("");
-                for (var i, o = r + r, a = t.length; a--; )
-                    i = o.indexOf(t[a]),
-                    ~i && (t[a] = o.substr(i - e, 1));
-                return t.join("")
-            },
-            s: function(t, e) {
-                var i = t.length;
-                if (i) {
-                    var o = s(t, e)
-                        , a = 0;
-                    for (t = t.split(""); ++a < i; )
-                        t[a] = t.splice(o[i - 1 - a], 1, t[a])[0];
-                    t = t.join("")
-                }
-                return t
-            },
-            x: function(t, e) {
-                var i = [];
-                return e = e.charCodeAt(0),
-                    each(t.split(""), function(t, o) {
-                        i.push(String.fromCharCode(o.charCodeAt(0) ^ e))
-                    }),
-                    i.join("")
-            }
-        }
-    },
-    86: function(module, exports, __webpack_require__) {
+    94: function(module, exports, __webpack_require__) {
         "use strict";
         function _interopRequireDefault(t) {
             return t && t.__esModule ? t : {
@@ -486,8 +405,8 @@
                 throw new TypeError("Invalid attempt to destructure non-iterable instance")
             }
         }()
-            , _audio_unmask_source = __webpack_require__(66)
-            , _audio_layer = __webpack_require__(65)
+            , _audio_unmask_source = __webpack_require__(180)
+            , _audio_layer = __webpack_require__(21)
             , _audio_layer2 = _interopRequireDefault(_audio_layer);
         window.AudioLayer = _audio_layer2["default"],
             window.AudioUtils = {
@@ -1161,7 +1080,7 @@
                     return isObject(t) && (t = t.context),
                         (t || "").split(":")
                 },
-                showAudioPlaylist: function(t, e, i, o, a) {
+                showAudioPlaylist: function(t, e, i, o, a, s) {
                     return cur.apLayer ? cancelEvent(a) : vk.widget ? !0 : (boxRefreshCoords(boxLoader),
                         show(boxLoader),
                         show(boxLayerWrap),
@@ -1172,8 +1091,8 @@
                                     cur.apLayerAutoList = null),
                                     layers.wraphide(window.audioPlaylistLayerWrap),
                                     layers.fullhide = !1,
-                                l && removeEvent(window.audioPlaylistLayerWrap, "click", l),
-                                n && removeEvent(bodyNode, "keydown", n),
+                                n && removeEvent(window.audioPlaylistLayerWrap, "click", n),
+                                d && removeEvent(bodyNode, "keydown", d),
                                     delete cur.apLayer,
                                     delete cur.apLayerPlaylistId,
                                     removeClass(layerBG, "ap_layer_bg_dark"),
@@ -1182,55 +1101,55 @@
                                     }),
                                     layerQueue.pop()
                             }
-                            function s(s, r) {
+                            function r(r, l) {
                                 if (hide(boxLoader),
                                         hide(boxLayerWrap),
-                                        r) {
-                                    var d = getLang("audio_error_deleted_playlist_box").split("/");
+                                        l) {
+                                    var u = getLang("audio_error_deleted_playlist_box").split("/");
                                     return new MessageBox({
-                                        title: d[0]
-                                    }).content(d[1]).setButtons(getLang("global_close"), function() {
+                                        title: u[0]
+                                    }).content(u[1]).setButtons(getLang("global_close"), function() {
                                         curBox().hide()
                                     }).show(),
                                         void nav.setLoc(extend(nav.objLoc, {
                                             z: null
                                         }))
                                 }
-                                var u = extend(nav.objLoc, {
+                                var _ = extend(nav.objLoc, {
                                     z: "audio_playlist" + t + "_" + e + (i ? "/" + i : "")
                                 });
-                                nav.setLoc(u),
+                                nav.setLoc(_),
                                 window.audioPlaylistLayerWrap || (window.audioPlaylistLayerWrap = se('<div class="ap_layer_wrap"></div>'),
                                     bodyNode.appendChild(window.audioPlaylistLayerWrap)),
                                     window.audioPlaylistLayerWrap.innerHTML = "";
-                                var _ = s.getAudiosList().length
-                                    , c = getTemplate("audio_playlist_snippet", {
-                                    title: s.getTitle(),
-                                    description: s.getDescription(),
-                                    coverStyle: s.getCoverUrl() ? "background-image:url(" + s.getCoverUrl() + "); background-size: cover;" : "",
-                                    authorLine: s.getAuthorLine(),
-                                    infoLine1: s.getInfoLine1(),
-                                    infoLine2: s.getInfoLine2(),
-                                    id: s.getPlaylistId(),
-                                    ownerId: s.getOwnerId(),
-                                    href: "/audio?z=audio_playlist_" + s.getOwnerId() + "_" + s.getPlaylistId() + "/" + s.getAccessHash(),
-                                    addCls: s.getAddClasses(),
-                                    followHash: s.getFollowHash(),
-                                    accessHash: s.getAccessHash(),
-                                    editHash: s.getEditHash(),
-                                    deleteHash: s.getDeleteHash(),
-                                    replaceHash: s.getReplaceHash(),
-                                    gridCovers: s.getGridCovers(),
+                                var c = r.getAudiosList().length
+                                    , h = getTemplate("audio_playlist_snippet", {
+                                    title: r.getTitle(),
+                                    description: r.getDescription(),
+                                    coverStyle: r.getCoverUrl() ? "background-image:url(" + r.getCoverUrl() + "); background-size: cover;" : "",
+                                    authorLine: r.getAuthorLine(),
+                                    infoLine1: r.getInfoLine1(),
+                                    infoLine2: r.getInfoLine2(),
+                                    id: r.getPlaylistId(),
+                                    ownerId: r.getOwnerId(),
+                                    href: "/audio?z=audio_playlist_" + r.getOwnerId() + "_" + r.getPlaylistId() + "/" + r.getAccessHash(),
+                                    addCls: r.getAddClasses(),
+                                    followHash: r.getFollowHash(),
+                                    accessHash: r.getAccessHash(),
+                                    editHash: r.getEditHash(),
+                                    deleteHash: r.getDeleteHash(),
+                                    replaceHash: r.getReplaceHash(),
+                                    gridCovers: r.getGridCovers(),
                                     context: o,
-                                    followButtonText: s.isFollowed() ? getLang("audio_playlist_btn_followed") : getLang("audio_playlist_btn_follow")
+                                    followButtonText: r.isFollowed() ? getLang("audio_playlist_btn_followed") : getLang("audio_playlist_btn_follow")
                                 });
-                                cur.apLayer = se('<div class="ap_layer"><div class="ap_layer__content">' + c + '</div><div class="ap_layer__close _ap_layer__close"></div></div>'),
+                                cur.apLayer = se('<div class="ap_layer"><div class="ap_layer__content">' + h + '</div><div class="ap_layer__close _ap_layer__close"></div></div>'),
                                     window.audioPlaylistLayerWrap.appendChild(cur.apLayer),
-                                    addEvent(window.audioPlaylistLayerWrap, "click", l = function(t) {
+                                    addEvent(window.audioPlaylistLayerWrap, "click", n = function(t) {
                                             (t.target == window.audioPlaylistLayerWrap || t.target == geByClass1("_ap_layer__close", cur.apLayer)) && layers.fullhide()
                                         }
                                     ),
-                                    addEvent(bodyNode, "keydown", n = function(t) {
+                                    addEvent(bodyNode, "keydown", d = function(t) {
                                             return 27 == t.keyCode ? (layers.fullhide(),
                                                 cancelEvent(t)) : void 0
                                         }
@@ -1240,24 +1159,25 @@
                                     boxQueue.hideAll(),
                                     layers.wrapshow(window.audioPlaylistLayerWrap, .7),
                                     addClass(layerBG, "ap_layer_bg_dark");
-                                var h = geByClass1("_audio_pl_snippet__list", cur.apLayer);
-                                _ && (cur.apLayerAutoList = new AutoList(h,{
+                                var p = geByClass1("_audio_pl_snippet__list", cur.apLayer);
+                                c && (cur.apLayerAutoList = new AutoList(p,{
                                     scrollNode: window.audioPlaylistLayerWrap,
                                     onNeedRows: function(t, e) {
-                                        for (var i = [], o = s.getUnshuffledAudiosList(), a = e; e + 30 > a && o[a]; a++)
+                                        for (var i = [], o = r.getUnshuffledAudiosList(), a = e; e + 30 > a && o[a]; a++)
                                             i.push(AudioUtils.drawAudio(o[a]));
                                         t(i)
                                     }
                                 })),
-                                    setStyle(h, {}),
+                                    setStyle(p, {}),
                                     boxRefreshCoords(cur.apLayer),
                                     getAudioPlayer().updateCurrentPlaying(),
                                     layers.fullhide = a,
-                                    cur.apLayerPlaylistId = [t, e]
+                                    cur.apLayerPlaylistId = [t, e],
+                                s && s()
                             }
-                            var r = getAudioPlayer().getPlaylist(AudioPlaylist.TYPE_PLAYLIST, t, e, i);
-                            r.loadAll(s);
-                            var l, n
+                            var l = getAudioPlayer().getPlaylist(AudioPlaylist.TYPE_PLAYLIST, t, e, i);
+                            l.loadAll(r);
+                            var n, d
                         }),
                         !1)
                 },
@@ -1399,7 +1319,7 @@
                         var u, _ = a && a.getPageCurrentPlaylist(), c = AudioUtils.getContextPlaylist(t, !0);
                         c && (c = AudioUtils.contextSplit(c),
                             u = c[0]),
-                        "search" == u && _ && _.getSearchQid() && (u = "search:external");
+                        ("search" == u && _ && _.getSearchQid() || "search" == cur.module && cur.qid) && (u = "search:external");
                         var h = {
                             act: "add",
                             group_id: r,
@@ -1449,7 +1369,8 @@
                                         audio: AudioUtils.asObject(t)
                                     };
                                     var a = getAudioPlayer().getPlaylist(AudioPlaylist.TYPE_PLAYLIST, r ? -r : vk.id, AudioPlaylist.DEFAULT_PLAYLIST_ID);
-                                    a.addAudio(t, 0)
+                                    a.addAudio(t, 0),
+                                    _ && _.getType() == AudioPlaylist.TYPE_SEARCH && _.sendSearchStats("search_add")
                                 }
                                 o(!1)
                             },
@@ -1629,7 +1550,8 @@
                         for (L && u.mergeWith({
                             accessHash: L
                         }),
-                                 A && A.getPageCurrentPlaylist() == u && A.getSortedList() ? u.initSortedList(A.getSortedList()) : s.isFromCurrentPlaylist || u.shuffle(0); y = domPN(y); )
+                                 A && A.getPageCurrentPlaylist() == u && A.getSortedList() ? u.initSortedList(A.getSortedList()) : s.isFromCurrentPlaylist || (u.removeSortedList(),
+                                     u.shuffle(0)); y = domPN(y); )
                             p.push((y.id ? "#" + y.id : "") + (y.className ? "." + y.className : ""));
                         p = p.slice(0, 30),
                             p = p.filter(function(t) {
@@ -1671,14 +1593,14 @@
                         _ = AudioPlaylist.TYPE_WALL,
                             c = cur.oid;
                         var C = (v || "").split("_")[1]
-                            , U = cur.wallQuery || ""
-                            , S = ge("wall_search")
+                            , S = cur.wallQuery || ""
+                            , U = ge("wall_search")
                             , D = inArray(cur.wallType, ["own", "full_own"]) ? "own" : "all";
-                        o = hashCode(D + "_" + U),
-                        "wall" == cur.module && val(S) && (U = val(S)),
+                        o = hashCode(D + "_" + S),
+                        "wall" == cur.module && val(U) && (S = val(U)),
                         C && (h = {
                             postId: C,
-                            wallQuery: U,
+                            wallQuery: S,
                             wallType: D
                         });
                         var O = 0 === s.context.indexOf("reply");
@@ -2168,6 +2090,12 @@
                     e._list = t
             }
             ,
+            AudioPlaylist.prototype.removeSortedList = function(t) {
+                var e = this.getSelf();
+                e._originalList && (e._list = [].concat(e._originalList)),
+                    e._sorted = !1
+            }
+            ,
             AudioPlaylist.prototype.shuffle = function(t, e) {
                 if (!(this.isShuffled() && t || !this.isShuffled() && !t)) {
                     var i = this.getSelf();
@@ -2297,7 +2225,7 @@
                             void _loadAllPlaylistAudios(this, callOnDones.bind(this));
                     var offset = this.getNextOffset();
                     offset == this.getLocalFoundCount() && (offset -= this.getLocalFoundCount()),
-                    offset || clearTimeout(this._searchViewStatsTimeout),
+                    offset || clearTimeout(this._sendSearchStatsTimeout),
                         ajax.post("al_audio.php", {
                             act: "load_section",
                             type: this.getType(),
@@ -2328,8 +2256,8 @@
                                 (!this._loadingAll || needAll) && (getAudioPlayer().mergePlaylistData(this, loadedPlaylist),
                                     callOnDones.call(this),
                                     getAudioPlayer().saveStateCurrentPlaylist(),
-                                offset || (clearTimeout(this._searchViewStatsTimeout),
-                                    this._searchViewStatsTimeout = setTimeout(this.sendSearchStats.bind(this, "search_view"), 3e3),
+                                offset || (clearTimeout(this._sendSearchStatsTimeout),
+                                    this._sendSearchStatsTimeout = setTimeout(this.sendSearchStats.bind(this, "search_view"), 3e3),
                                     this._searchPlayStatsSent = !1))
                             }
                                 .bind(this)
@@ -2504,6 +2432,7 @@
                 ajax.post("al_audio.php?act=search_stats", {
                     event_type: t,
                     search_type: this.getSearchQid() ? "external" : "internal",
+                    search_params: JSON.stringify(this.getSearchParams()),
                     results_count: this.getTotalCount()
                 })
             }
@@ -2680,7 +2609,7 @@
                 var t = ls.get(AudioPlayer.LS_PREFIX + AudioPlayer.LS_SAVED) || 0
                     , e = 72e5;
                 t < vkNow() - e && AudioPlayer._iterateCacheKeys(function(t, e) {
-                    return !inArray(e, [AudioPlayer.LS_PL, AudioPlayer.LS_TRACK, AudioPlayer.LS_PROGRESS])
+                    return !inArray(e, [AudioPlayer.LS_PL, AudioPlayer.LS_TRACK, AudioPlayer.LS_PROGRESS]);
                 })
             }
             ,
@@ -3143,10 +3072,9 @@
                     })
             }
             ,
-            AudioPlayer.prototype.showSubscriptionPopup = function(t) {
+            AudioPlayer.prototype.showSubscriptionPopup = function() {
                 showBox("/al_audio.php", {
-                    act: "subscription_box",
-                    hash: t
+                    act: "subscription_box"
                 }, {
                     params: {
                         containerClass: "audio_subscription_popup",
@@ -3194,6 +3122,14 @@
                         cur.loggingOff = !0,
                             AudioPlayer.clearAllCacheKeys(),
                             e.stop()
+                    }),
+                    t.addRecvClbk("stories_video_start", "audio", function() {
+                        e.isPlaying() && (e.pause(),
+                            e.pausedByStories = vkNow())
+                    }),
+                    t.addRecvClbk("stories_video_end", "audio", function() {
+                        !e.isPlaying() && e.pausedByStories && (vkNow() - e.pausedByStories < 18e4 && e.play(),
+                            delete e.pausedByStories)
                     }))
             }
             ,
@@ -4808,5 +4744,90 @@
         try {
             stManager.done("audioplayer.js")
         } catch (e) {}
+    },
+    180: function(t, e) {
+        "use strict";
+        function i() {
+            return window.wbopen && ~(window.open + "").indexOf("wbopen")
+        }
+        function o(t) {
+            if (!i() && ~t.indexOf("audio_api_unavailable")) {
+                var e = t.split("?extra=")[1].split("#")
+                    , o = "" === e[1] ? "" : a(e[1]);
+                if (e = a(e[0]),
+                    "string" != typeof o || !e)
+                    return t;
+                o = o ? o.split(String.fromCharCode(9)) : [];
+                for (var s, r, n = o.length; n--; ) {
+                    if (r = o[n].split(String.fromCharCode(11)),
+                            s = r.splice(0, 1, e)[0],
+                            !l[s])
+                        return t;
+                    e = l[s].apply(null, r)
+                }
+                if (e && "http" === e.substr(0, 4))
+                    return e
+            }
+            return t
+        }
+        function a(t) {
+            if (!t || t.length % 4 == 1)
+                return !1;
+            for (var e, i, o = 0, a = 0, s = ""; i = t.charAt(a++); )
+                i = r.indexOf(i),
+                ~i && (e = o % 4 ? 64 * e + i : i,
+                o++ % 4) && (s += String.fromCharCode(255 & e >> (-2 * o & 6)));
+            return s
+        }
+        function s(t, e) {
+            var i = t.length
+                , o = [];
+            if (i) {
+                var a = i;
+                for (e = Math.abs(e); a--; )
+                    e = (i * (a + 1) ^ e + a) % i,
+                        o[a] = e
+            }
+            return o
+        }
+        Object.defineProperty(e, "__esModule", {
+            value: !0
+        }),
+            e.audioUnmaskSource = o;
+        var r = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/="
+            , l = {
+            v: function(t) {
+                return t.split("").reverse().join("")
+            },
+            r: function(t, e) {
+                t = t.split("");
+                for (var i, o = r + r, a = t.length; a--; )
+                    i = o.indexOf(t[a]),
+                    ~i && (t[a] = o.substr(i - e, 1));
+                return t.join("")
+            },
+            s: function(t, e) {
+                var i = t.length;
+                if (i) {
+                    var o = s(t, e)
+                        , a = 0;
+                    for (t = t.split(""); ++a < i; )
+                        t[a] = t.splice(o[i - 1 - a], 1, t[a])[0];
+                    t = t.join("")
+                }
+                return t
+            },
+            i: function(t, e) {
+                return l.s(t, e ^ vk.id)
+            },
+            x: function(t, e) {
+                var i = [];
+                return e = e.charCodeAt(0),
+                    each(t.split(""), function(t, o) {
+                        i.push(String.fromCharCode(o.charCodeAt(0) ^ e))
+                    }),
+                    i.join("")
+            }
+        }
     }
 });
