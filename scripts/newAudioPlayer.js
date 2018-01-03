@@ -1451,121 +1451,9 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         e(0)
 }({
     0: function(t, e, i) {
-        t.exports = i(94)
+        t.exports = i(14)
     },
-    21: function(module, exports) {
-        "use strict";
-        function _classCallCheck(t, e) {
-            if (!(t instanceof e))
-                throw new TypeError("Cannot call a class as a function")
-        }
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        });
-        var AudioLayer = function() {
-            function AudioLayer() {
-                _classCallCheck(this, AudioLayer),
-                    this._els = {
-                        layerPlace: ge("top_audio_layer_place"),
-                        topPlayBtn: geByClass1("_top_audio_player_play"),
-                        topNotaBtn: geByClass1("_top_nav_audio_btn")
-                    }
-            }
-            return AudioLayer.prepare = function(t) {
-                stManager.add(["audio.js", "audioplayer.js", "audio.css", "suggester.js", "auto_list.js", "indexer.js"], function() {
-                    t && t()
-                })
-            }
-                ,
-                AudioLayer.prototype.toggle = function(t, e) {
-                    var i = this;
-                    this._initTooltip();
-                    var o = this._els.tt
-                        , a = void 0 !== t ? t : !o.isShown();
-                    a ? (o.show(),
-                        cancelStackPush("top_audio", function() {
-                            i.toggle(!1, !0)
-                        }, !0)) : (e || cancelStackPop(),
-                        o.hide()),
-                        toggleClass(this._els.topNotaBtn, "active", a)
-                }
-                ,
-                AudioLayer.prototype.hide = function() {
-                    this._els.tt.hide()
-                }
-                ,
-                AudioLayer.prototype.isShown = function() {
-                    return this._els.tt && this._els.tt.isShown()
-                }
-                ,
-                AudioLayer.prototype.updatePosition = function() {
-                    return this._els.tt && this._els.tt.updatePosition()
-                }
-                ,
-                AudioLayer.prototype._layerPosition = function() {
-                    var t = getXY(this._els.layerPlace)
-                        , e = getXY("page_body")
-                        , i = e[0] - t[0] - 1
-                        , o = 0;
-                    if (isVisible(this._els.topNotaBtn)) {
-                        var a = getXY(this._els.topNotaBtn);
-                        o = -i + (a[0] - t[0]) + 15
-                    } else {
-                        var s = getXY(this._els.topPlayBtn);
-                        o = -i + (s[0] - t[0]) + 3
-                    }
-                    return {
-                        left: i,
-                        top: 0,
-                        arrowPosition: o
-                    }
-                }
-                ,
-                AudioLayer.prototype.getPageInstance = function() {
-                    return this._page
-                }
-                ,
-                AudioLayer.prototype._initTooltip = function _initTooltip() {
-                    var _this2 = this;
-                    this._els.tt || (this._els.container = se('<div class="audio_layer_container"><div class="top_audio_loading">' + rs(vk.pr_tpl, {
-                        id: "",
-                        cls: "pr_big"
-                    }) + "</div></div>"),
-                        this._els.tt = new ElementTooltip(this._els.layerPlace,{
-                            id: "audio_layer_tt",
-                            content: this._els.container,
-                            width: 660,
-                            offset: [22, 5],
-                            autoShow: !1,
-                            setPos: this._layerPosition.bind(this),
-                            forceSide: "bottom",
-                            onHide: function() {
-                                _this2._page && _this2._page.onLayerHide()
-                            },
-                            onShow: function() {
-                                _this2._page && _this2._page.onLayerShow(_this2._initSection)
-                            }
-                        }),
-                        ajax.post("al_audio.php", {
-                            act: "layer",
-                            is_layer: 1,
-                            is_current_playlist: ap.getCurrentPlaylist() ? 1 : 0
-                        }, {
-                            onDone: function onDone(html, data, templatesScript) {
-                                eval(templatesScript),
-                                    _this2._els.container.innerHTML = html,
-                                    _this2._page = new AudioPage(geByClass1("_audio_page_layout", _this2._els.container),data),
-                                    _this2._initSection = "recoms" == data.initSection ? data.initSection : void 0,
-                                    _this2._page.onLayerShow(_this2._initSection)
-                            }
-                        }))
-                }
-                ,
-                AudioLayer
-        }();
-        exports["default"] = AudioLayer
-    },
-    94: function(module, exports, __webpack_require__) {
+    14: function(module, exports, __webpack_require__) {
         "use strict";
         function _interopRequireDefault(t) {
             return t && t.__esModule ? t : {
@@ -1838,8 +1726,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 throw new TypeError("Invalid attempt to destructure non-iterable instance")
             }
         }()
-            , _audio_unmask_source = __webpack_require__(180)
-            , _audio_layer = __webpack_require__(21)
+            , _audio_unmask_source = __webpack_require__(38)
+            , _audio_layer = __webpack_require__(20)
             , _audio_layer2 = _interopRequireDefault(_audio_layer);
         window.AudioLayer = _audio_layer2["default"],
             window.AudioUtils = {
@@ -2575,7 +2463,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     , h = getTemplate("audio_playlist_snippet", {
                                     title: r.getTitle(),
                                     description: r.getDescription(),
-                                    coverStyle: r.getCoverUrl() ? "background-image:url(" + r.getCoverUrl() + "); background-size: cover;" : "",
+                                    coverStyle: r.getCoverUrl() ? "background-image:url('" + r.getCoverUrl() + "'); background-size: cover;" : "",
                                     authorLine: r.getAuthorLine(),
                                     infoLine1: r.getInfoLine1(),
                                     infoLine2: r.getInfoLine2(),
@@ -3692,6 +3580,10 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 return this.getSelf()._communitiesBlock
             }
             ,
+            AudioPlaylist.prototype.getPlaylistsBlock = function() {
+                return this.getSelf()._playlistsBlock
+            }
+            ,
             AudioPlaylist.prototype.getNextAudio = function(t, e) {
                 if (!t)
                     return t = this.getAudioAt(0),
@@ -3749,7 +3641,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         ajax.post("al_audio.php", {
                             act: "load_section",
                             type: this.getType(),
-                            owner_id: this.getOwnerId(),
+                            owner_id: cur.audioPage && "search" === this.getType() ? cur.audioPage.getOwnerId() : this.getOwnerId(),
                             playlist_id: this.getPlaylistId(),
                             offset: offset,
                             access_hash: this.getAccessHash(),
@@ -3879,7 +3771,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             this._items.push(t.items[a])
                     }
                     var r = this;
-                    each("gridCovers communitiesBlock addClasses nextOffset hasMore followHash accessHash isFollowed rawId title authorLine authorHref authorName infoLine1 infoLine2 isOfficial rawDescription description lastUpdated listens feedFrom feedOffset live searchParams totalCount totalCountHash postId wallQuery wallType originalList shuffle isAdsAllowed editHash coverUrl searchQid".split(" "), function(e, i) {
+                    each("gridCovers communitiesBlock playlistsBlock addClasses nextOffset hasMore followHash accessHash isFollowed rawId title authorLine authorHref authorName infoLine1 infoLine2 isOfficial rawDescription description lastUpdated listens feedFrom feedOffset live searchParams totalCount totalCountHash postId wallQuery wallType originalList shuffle isAdsAllowed editHash coverUrl searchQid".split(" "), function(e, i) {
                         void 0 !== t[i] && (r["_" + i] = t[i])
                     })
                 }
@@ -4133,7 +4025,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 var t = ls.get(AudioPlayer.LS_PREFIX + AudioPlayer.LS_SAVED) || 0
                     , e = 72e5;
                 t < vkNow() - e && AudioPlayer._iterateCacheKeys(function(t, e) {
-                    return !inArray(e, [AudioPlayer.LS_PL, AudioPlayer.LS_TRACK, AudioPlayer.LS_PROGRESS]);
+                    return !inArray(e, [AudioPlayer.LS_PL, AudioPlayer.LS_TRACK, AudioPlayer.LS_PROGRESS])
                 })
             }
             ,
@@ -4926,7 +4818,6 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     impl: this._impl.type,
                     hash: this._listenedHash,
                     v: 5,
-                    tr: window.traverseParent ? 1 : 0,
                     loc: nav.strLoc
                 }, e);
                 isArray(cur.audioLoadTimings) && (i.timings = cur.audioLoadTimings.join(","),
@@ -5633,7 +5524,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerFlash.prototype.setVolume = function(t) {
-            this._player && this._player.setVolume && this._player.setVolume(t)
+            this._player && this._player.setVolume && this._player.setVolume(t);
         }
         ,
         AudioPlayerFlash.prototype.play = function() {
@@ -6343,7 +6234,120 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             stManager.done("audioplayer.js")
         } catch (e) {}
     },
-    180: function(t, e) {
+    20: function(module, exports) {
+        "use strict";
+        function _classCallCheck(t, e) {
+            if (!(t instanceof e))
+                throw new TypeError("Cannot call a class as a function")
+        }
+        Object.defineProperty(exports, "__esModule", {
+            value: !0
+        });
+        var AudioLayer = function() {
+            function AudioLayer() {
+                _classCallCheck(this, AudioLayer),
+                    this._els = {
+                        layerPlace: ge("top_audio_layer_place"),
+                        topPlayBtn: geByClass1("_top_audio_player_play"),
+                        topNotaBtn: geByClass1("_top_nav_audio_btn")
+                    }
+            }
+            return AudioLayer.prepare = function(t) {
+                stManager.add(["audio.js", "audioplayer.js", "audio.css", "suggester.js", "auto_list.js", "indexer.js"], function() {
+                    t && t()
+                })
+            }
+                ,
+                AudioLayer.prototype.toggle = function(t, e) {
+                    var i = this;
+                    this._initTooltip();
+                    var o = this._els.tt
+                        , a = void 0 !== t ? t : !o.isShown();
+                    a ? (o.show(),
+                        cancelStackPush("top_audio", function() {
+                            i.toggle(!1, !0)
+                        }, !0)) : (e || cancelStackPop(),
+                        o.hide()),
+                        toggleClass(this._els.topNotaBtn, "active", a)
+                }
+                ,
+                AudioLayer.prototype.hide = function() {
+                    this._els.tt.hide()
+                }
+                ,
+                AudioLayer.prototype.isShown = function() {
+                    return this._els.tt && this._els.tt.isShown()
+                }
+                ,
+                AudioLayer.prototype.updatePosition = function() {
+                    return this._els.tt && this._els.tt.updatePosition()
+                }
+                ,
+                AudioLayer.prototype._layerPosition = function() {
+                    var t = getXY(this._els.layerPlace)
+                        , e = getXY("page_body")
+                        , i = e[0] - t[0] - 1
+                        , o = 0;
+                    if (isVisible(this._els.topNotaBtn)) {
+                        var a = getXY(this._els.topNotaBtn);
+                        o = -i + (a[0] - t[0]) + 15
+                    } else {
+                        var s = getXY(this._els.topPlayBtn);
+                        o = -i + (s[0] - t[0]) + 3
+                    }
+                    return {
+                        left: i,
+                        top: 0,
+                        arrowPosition: o
+                    }
+                }
+                ,
+                AudioLayer.prototype.getPageInstance = function() {
+                    return this._page
+                }
+                ,
+                AudioLayer.prototype._initTooltip = function _initTooltip() {
+                    var _this2 = this;
+                    this._els.tt || (this._els.container = se('<div class="audio_layer_container"><div class="top_audio_loading">' + rs(vk.pr_tpl, {
+                        id: "",
+                        cls: "pr_big"
+                    }) + "</div></div>"),
+                        this._els.tt = new ElementTooltip(this._els.layerPlace,{
+                            id: "audio_layer_tt",
+                            content: this._els.container,
+                            width: 660,
+                            offset: [22, 5],
+                            autoShow: !1,
+                            customShow: !0,
+                            setPos: this._layerPosition.bind(this),
+                            forceSide: "bottom",
+                            onHide: function() {
+                                _this2._page && _this2._page.onLayerHide()
+                            },
+                            onShow: function() {
+                                _this2._page && _this2._page.onLayerShow(_this2._initSection)
+                            }
+                        }),
+                        ajax.post("al_audio.php", {
+                            act: "layer",
+                            is_layer: 1,
+                            is_current_playlist: ap.getCurrentPlaylist() ? 1 : 0
+                        }, {
+                            onDone: function onDone(html, data, templatesScript) {
+                                eval(templatesScript),
+                                    _this2._els.container.innerHTML = html,
+                                    _this2._page = new AudioPage(geByClass1("_audio_page_layout", _this2._els.container),data),
+                                    _this2._initSection = "recoms" == data.initSection ? data.initSection : void 0,
+                                    _this2._page.onLayerShow(_this2._initSection)
+                            }
+                        }))
+                }
+                ,
+                AudioLayer
+        }();
+        exports["default"] = AudioLayer
+    },
+    38: function(t, e) {
         "use strict";
         function i() {
             return window.wbopen && ~(window.open + "").indexOf("wbopen")
