@@ -299,6 +299,10 @@
     top: -3px;
 }
 
+.top_nav_btn_audio_group {
+    display: none !important;
+}
+
 .audio_row_dropdown.pdd_ralign {
     left: auto;
     right: -11px
