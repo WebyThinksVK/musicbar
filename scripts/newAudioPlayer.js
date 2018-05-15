@@ -862,7 +862,7 @@ var MusicBar = function(context) {
 
     this.addRowTemplate = function() {
 
-        addTemplates({
+        /*addTemplates({
 
             audio_row_new: '<div class="audio_row audio_row_with_cover _audio_row _audio_row_%1%_%0% %cls%" data-full-id="%1%_%0%"\n     ' +
             'onclick="return getAudioPlayer().toggleAudio(this, event)" data-audio="%serialized%"\n     ' +
@@ -888,8 +888,37 @@ var MusicBar = function(context) {
             '        <div class="audio_player__place _audio_player__place"></div>\n' +
             '    </div>\n' +
             '</div>',
+        });
+*/
 
+        addTemplates({
 
+            audio_row_new: `
+            <div   tabindex="0" class="audio_row audio_row_with_cover _audio_row _audio_row_%1%_%0% %cls%" data-full-id="%1%_%0%" onclick="return getAudioPlayer().toggleAudio(this, event)" data-audio="%serialized%" onmouseover="AudioUtils.onRowOver(this, event)" onmouseleave="AudioUtils.onRowLeave(this, event)">
+              <div class="audio_row_content _audio_row_content">
+                <button class="blind_label _audio_row__play_btn" aria-label="Play" onclick="getAudioPlayer().toggleAudio(this, event); return cancelEvent(event)"></button>
+            
+                <div class="audio_row__cover" style="%cover_style%"></div>
+                <div class="audio_row__cover_back _audio_row__cover_back"></div>
+                <div class="audio_row__cover_icon _audio_row__cover_icon"></div>
+                <div class="audio_row__counter"></div>
+                <div class="audio_row__play_btn"></div>
+            
+                <div class="audio_row__inner">
+                  <div class="audio_row__performer_title">
+                    <div onmouseover="setTitle(this)" class="audio_row__performers">%performers%</div>
+                    <div class="audio_row__title _audio_row__title" onmouseover="setTitle(this)">
+                      <span class="audio_row__title_inner _audio_row__title_inner">%3%</span>
+                      <span class="audio_row__title_inner_subtitle _audio_row__title_inner_subtitle">%16%</span>
+                    </div>
+                  </div>
+                  <div class="audio_row__info _audio_row__info"><div class="audio_row__duration _audio_row__duration">%duration%</div></div>
+                </div>
+            
+                <div class="audio_player__place _audio_player__place"></div>
+              </div>
+            </div>
+            `
         });
     };
     this.addRowTemplate();
@@ -1436,17 +1465,47 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         if (i[o])
             return i[o].exports;
         var a = i[o] = {
-            exports: {},
-            id: o,
-            loaded: !1
+            i: o,
+            l: !1,
+            exports: {}
         };
         return t[o].call(a.exports, a, a.exports, e),
-            a.loaded = !0,
+            a.l = !0,
             a.exports
     }
     var i = {};
     return e.m = t,
         e.c = i,
+        e.d = function(t, i, o) {
+            e.o(t, i) || Object.defineProperty(t, i, {
+                configurable: !1,
+                enumerable: !0,
+                get: o
+            })
+        }
+        ,
+        e.r = function(t) {
+            Object.defineProperty(t, "__esModule", {
+                value: !0
+            })
+        }
+        ,
+        e.n = function(t) {
+            var i = t && t.__esModule ? function() {
+                    return t["default"]
+                }
+                : function() {
+                    return t
+                }
+            ;
+            return e.d(i, "a", i),
+                i
+        }
+        ,
+        e.o = function(t, e) {
+            return Object.prototype.hasOwnProperty.call(t, e)
+        }
+        ,
         e.p = "",
         e(0)
 }({
@@ -2788,6 +2847,32 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     }
                     return cancelEvent(i)
                 },
+                getAudioArtistsString: function(t, e) {
+                    var i = "";
+                    return t.forEach(function(o, a) {
+                        var s = "/audio?performer=1&q=" + encodeURIComponent(o.name);
+                        o.id && (s = "/artist/" + o.id),
+                            i += e ? '<a href="' + s + '">' + o.name + "</a>" : o.name,
+                        a < t.length - 1 && (i += ", ")
+                    }),
+                        i
+                },
+                getAudioPerformers: function(t) {
+                    var e = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : !0
+                        , i = "";
+                    if (isArray(t[AudioUtils.AUDIO_ITEM_INDEX_MAIN_ARTISTS]) && (i = AudioUtils.getAudioArtistsString(t[AudioUtils.AUDIO_ITEM_INDEX_MAIN_ARTISTS], e)),
+                        isArray(t[AudioUtils.AUDIO_ITEM_INDEX_FEAT_ARTISTS]) && (i += " feat. ",
+                            i += AudioUtils.getAudioArtistsString(t[AudioUtils.AUDIO_ITEM_INDEX_FEAT_ARTISTS], e)),
+                            !i) {
+                        var o = t[AudioUtils.AUDIO_ITEM_INDEX_PERFORMER].replace(/<\/?em>/g, "");
+                        if (e) {
+                            var a = "/audio?performer=1&q=" + encodeURIComponent(o);
+                            i = '<a data-performer="' + o + '" href="' + a + '">' + o + "</a>"
+                        } else
+                            i = o
+                    }
+                    return i
+                },
                 drawAudio: function(t, e) {
                     for (var i = JSON.parse(getTemplate("audio_bits_to_cls")), o = t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS], a = [], s = 0; 32 > s; s++) {
                         var r = 1 << s;
@@ -2832,16 +2917,15 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         var n = t[AudioUtils.AUDIO_ITEM_INDEX_COVER_URL].split(",");
                         l = "background-image: url(" + n[0] + ")"
                     }
-                    var d = formatTime(t[AudioUtils.AUDIO_ITEM_INDEX_DURATION])
-                        , u = t[AudioUtils.AUDIO_ITEM_INDEX_PERFORMER].replace(/<\/?em>/g, "")
+                    var d = AudioUtils.getAudioPerformers(t)
+                        , u = formatTime(t[AudioUtils.AUDIO_ITEM_INDEX_DURATION])
                         , _ = clean(JSON.stringify(t)).split("$").join("$$")
                         , c = getTemplate("audio_row_new", t);
                     return c = c.replace(/%cls%/, a.join(" ")),
-                        c = c.replace(/%duration%/, d),
+                        c = c.replace(/%duration%/, u),
                         c = c.replace(/%serialized%/, _),
                         c = c.replace(/%cover_style%/, l),
-                        c = c.replace(/%bitrate%/, ""),
-                        c = c.replace(/%search_href%/, "/search?c[q]=" + encodeURIComponent(u) + "&c[section]=audio&c[performer]=1")
+                        c = c.replace(/%performers%/, d)
                 },
                 isClaimedAudio: function(t) {
                     return t = AudioUtils.asObject(t),
