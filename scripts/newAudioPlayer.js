@@ -5100,27 +5100,33 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             if (hasClass(e.target, "_audio_row__title_inner") && o.lyrics && !o.isInAttach)
                 return AudioUtils.toggleAudioLyrics(i, o),
                     cancelEvent(e);
-            if (hasClass(e.target, "audio_row__performer"))
-                return checkEvent(e) || vk.widget ? !0 : (AudioUtils.audioSearchPerformer(e.target, o.performer, e),
-                    cancelEvent(e));
+            if (hasClass(e.target.parentNode, "audio_row__performers")) {
+                if (checkEvent(e) || vk.widget)
+                    return !0;
+                var s = domData(e.target, "performer");
+                return s ? (AudioUtils.audioSearchPerformer(e.target, s, e),
+                    cancelEvent(e)) : !0
+            }
+
             var s = cur.cancelClick || e && (hasClass(e.target, "audio_lyrics") ||  hasClass(e.target, "select-check") || hasClass(e.target, "select-check-wrapper") || domClosest("_audio_duration_wrap", e.target) || domClosest("_audio_inline_player", e.target) || domClosest("audio_performer", e.target));
+
             if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", i) && (s = !0),
                     delete cur.cancelClick,
                     delete cur._sliderMouseUpNowEl,
                     s)
                 return !0;
             if (AudioUtils.isClaimedAudio(o) || o.isReplaceable) {
-                var r = AudioUtils.getAudioExtra(o)
-                    , l = r.claim;
-                if (l)
-                    return void (hasClass(i, "no_actions") || o.isInEditBox || showAudioClaimWarning(o, l, AudioUtils.replaceWithOriginal.bind(AudioUtils, i, o)))
+                var l = AudioUtils.getAudioExtra(o)
+                    , n = l.claim;
+                if (n)
+                    return void (hasClass(i, "no_actions") || o.isInEditBox || showAudioClaimWarning(o, n, AudioUtils.replaceWithOriginal.bind(AudioUtils, i, o)))
             }
             if (o.isPlaying)
                 this.pause();
             else {
-                var n = AudioUtils.getContextPlaylist(i);
-                this.play(o.fullId, n.playlist, o.context || n.context),
-                cur.audioPage && cur.audioPage.onUserAction(o, n.playlist)
+                var d = AudioUtils.getContextPlaylist(i);
+                this.play(o.fullId, d.playlist, o.context || d.context),
+                cur.audioPage && cur.audioPage.onUserAction(o, d.playlist)
             }
             AudioUtils.onRowOver(i, !1, !0)
         }
