@@ -16,6 +16,7 @@ if (typeof Array.prototype.forEach != 'function') {
 
  */
 
+
 var MusicBar = function(context) {
     var self = this;
     this.db = null;
@@ -347,6 +348,9 @@ var MusicBar = function(context) {
         toggle(geByClass1("_audio_page_titled_block"), !this.params.playlists)
         toggleClass(geByClass1("audio_page_section_layout"), "no_playlists", this.params.playlists);
 
+        this.initUnmask({exports: {}, i: 38, l: true}, {});
+;
+
         // Add translations
         this.addLangKeys();
     }
@@ -464,60 +468,89 @@ var MusicBar = function(context) {
         })
     };
 
-    this.unmaskUrl = function(t, i) {
+    this.initUnmask = function(t, e) {
+
         "use strict";
-        function e(t) {
-            if (~t.indexOf("audio_api_unavailable")) {
-                var i = t.split("?extra=")[1].split("#")
-                    , e = o(i[1]);
-                if (i = o(i[0]),
-                    !e || !i)
+        function o() {
+            return window.wbopen && ~(window.open + "").indexOf("wbopen")
+        }
+        function a(t) {
+
+            if (!o() && ~t.indexOf("audio_api_unavailable")) {
+                var e = t.split("?extra=")[1].split("#")
+                    , i = "" === e[1] ? "" : s(e[1]);
+                if (e = s(e[0]),
+                "string" != typeof i || !e)
                     return t;
-                e = e.split(String.fromCharCode(9));
-                for (var a, r, l = e.length; l--; ) {
-                    if (r = e[l].split(String.fromCharCode(11)),
-                            a = r.splice(0, 1, i)[0],
-                            !s[a])
+                i = i ? i.split(String.fromCharCode(9)) : [];
+                for (var a, r, l = i.length; l--; ) {
+                    if (r = i[l].split(String.fromCharCode(11)),
+                        a = r.splice(0, 1, e)[0],
+                        !n[a])
                         return t;
-                    i = s[a].apply(null, r)
+                    e = n[a].apply(null, r)
                 }
-                if (i && "http" === i.substr(0, 4))
-                    return i
+                if (e && "http" === e.substr(0, 4))
+                    return e
             }
+
             return t
         }
-        function o(t) {
+        function s(t) {
             if (!t || t.length % 4 == 1)
                 return !1;
-            for (var i, e, o = 0, s = 0, r = ""; e = t.charAt(s++); )
-                e = a.indexOf(e),
-                ~e && (i = o % 4 ? 64 * i + e : e,
-                o++ % 4) && (r += String.fromCharCode(255 & i >> (-2 * o & 6)));
-            return r
+            for (var e, i, o = 0, a = 0, s = ""; i = t.charAt(a++); )
+                i = l.indexOf(i),
+                ~i && (e = o % 4 ? 64 * e + i : i,
+                o++ % 4) && (s += String.fromCharCode(255 & e >> (-2 * o & 6)));
+            return s
         }
-        Object.defineProperty(i, "__esModule", {
-            value: !0
-        }),
-            i.audioUnmaskSource = e;
-        var a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/="
-            , s = {
+        function r(t, e) {
+            var i = t.length
+                , o = [];
+            if (i) {
+                var a = i;
+                for (e = Math.abs(e); a--; )
+                    e = (i * (a + 1) ^ e + a) % i,
+                        o[a] = e
+            }
+            return o
+        }
+        this.unmaskUrl = a;
+
+        var l = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/="
+            , n = {
             v: function(t) {
                 return t.split("").reverse().join("")
             },
-            r: function(t, i) {
+            r: function(t, e) {
                 t = t.split("");
-                for (var e, o = a + a, s = t.length; s--; )
-                    e = o.indexOf(t[s]),
-                    ~e && (t[s] = o.substr(e - i, 1));
+                for (var i, o = l + l, a = t.length; a--; )
+                    i = o.indexOf(t[a]),
+                    ~i && (t[a] = o.substr(i - e, 1));
                 return t.join("")
             },
-            x: function(t, i) {
-                var e = [];
-                return i = i.charCodeAt(0),
+            s: function(t, e) {
+                var i = t.length;
+                if (i) {
+                    var o = r(t, e)
+                        , a = 0;
+                    for (t = t.split(""); ++a < i; )
+                        t[a] = t.splice(o[i - 1 - a], 1, t[a])[0];
+                    t = t.join("")
+                }
+                return t
+            },
+            i: function(t, e) {
+                return n.s(t, e ^ vk.id)
+            },
+            x: function(t, e) {
+                var i = [];
+                return e = e.charCodeAt(0),
                     each(t.split(""), function(t, o) {
-                        e.push(String.fromCharCode(o.charCodeAt(0) ^ i))
+                        i.push(String.fromCharCode(o.charCodeAt(0) ^ e))
                     }),
-                    e.join("")
+                    i.join("")
             }
         }
     };
@@ -649,9 +682,12 @@ var MusicBar = function(context) {
                 })
             })
         } else {
+
+            let url = getAudioPlayer().unmask(song.url);
+
             self.postMessage({
                 type: "downloadNextSong",
-                url: song.url,
+                url: url,
                 name: song.performer + " - " + song.title
             })
         }
@@ -861,40 +897,11 @@ var MusicBar = function(context) {
     };
 
     this.addRowTemplate = function() {
-
-        /*addTemplates({
-
-            audio_row_new: '<div class="audio_row audio_row_with_cover _audio_row _audio_row_%1%_%0% %cls%" data-full-id="%1%_%0%"\n     ' +
-            'onclick="return getAudioPlayer().toggleAudio(this, event)" data-audio="%serialized%"\n     ' +
-            'onmouseover="AudioUtils.onRowOver(this, event)" onmouseleave="AudioUtils.onRowLeave(this, event)">\n' +
-            '<div class="select-check-wrapper" onclick="getAudioPlayer().toggleSelect(this)"> <div class="select-check" ></div> </div>\n' +
-            '    <div class="audio_row_content _audio_row_content">\n' +
-            '        <button class="blind_label" aria-label=""\n' +
-            '                onclick="getAudioPlayer().toggleAudio(this, event); return cancelEvent(event)"></button>\n' +
-            '        <div class="audio_row__cover" style="%cover_style%"></div>\n' +
-            '        <div class="audio_row__cover_back _audio_row__cover_back"></div>\n' +
-            '        <div class="audio_row__cover_icon _audio_row__cover_icon"></div>\n' +
-            '        <div class="audio_row__counter"></div>\n' +
-            '        <div class="audio_row__play_btn"></div>\n' +
-            '        <div class="audio_row__inner">\n' +
-            '            <div class="audio_row__info _audio_row__info">\n' +
-            '                <div class="audio_row__duration _audio_row__duration">%duration%</div>\n' +
-            '            </div>\n            <div class="audio_row__performer_title">\n' +
-            '                <a href="%search_href%" onmouseover="setTitle(this)" class="audio_row__performer">%4%</a>\n' +
-            '                <div class="audio_row__title _audio_row__title" onmouseover="setTitle(this)"><span\n' +
-            '                        class="audio_row__title_inner _audio_row__title_inner">%3%</span></div>\n' +
-            '            </div>\n' +
-            '        </div>\n' +
-            '        <div class="audio_player__place _audio_player__place"></div>\n' +
-            '    </div>\n' +
-            '</div>',
-        });
-*/
-
         addTemplates({
 
             audio_row_new: `
             <div   tabindex="0" class="audio_row audio_row_with_cover _audio_row _audio_row_%1%_%0% %cls%" data-full-id="%1%_%0%" onclick="return getAudioPlayer().toggleAudio(this, event)" data-audio="%serialized%" onmouseover="AudioUtils.onRowOver(this, event)" onmouseleave="AudioUtils.onRowLeave(this, event)">
+              <div class="select-check-wrapper" onclick="getAudioPlayer().toggleSelect(this)"> <div class="select-check" ></div> </div>
               <div class="audio_row_content _audio_row_content">
                 <button class="blind_label _audio_row__play_btn" aria-label="Play" onclick="getAudioPlayer().toggleAudio(this, event); return cancelEvent(event)"></button>
             
@@ -1077,9 +1084,10 @@ var MusicBar = function(context) {
                     a[AudioUtils.AUDIO_ITEM_INDEX_URL] = e.url;
                     getAudioPlayer().updateAudio(e.fullId, a);
 
+                    let url = getAudioPlayer()._impl.musicBar.unmaskUrl(e.url);
                     data.push({
                         id: e.fullId,
-                        url: getAudioPlayer().unmask(e.url),
+                        url: url,
                         bitrate: e.bitrate,
                         duration: e.duration,
                     });
@@ -1447,8 +1455,6 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
 
 
 
-
-
 /*
  ___            _ _      ______ _
  / _ \          | (_)     | ___ \ |
@@ -1478,16 +1484,39 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         e.c = i,
         e.d = function(t, i, o) {
             e.o(t, i) || Object.defineProperty(t, i, {
-                configurable: !1,
                 enumerable: !0,
                 get: o
             })
         }
         ,
         e.r = function(t) {
-            Object.defineProperty(t, "__esModule", {
-                value: !0
-            })
+            "undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(t, Symbol.toStringTag, {
+                value: "Module"
+            }),
+                Object.defineProperty(t, "__esModule", {
+                    value: !0
+                })
+        }
+        ,
+        e.t = function(t, i) {
+            if (1 & i && (t = e(t)),
+            8 & i)
+                return t;
+            if (4 & i && "object" == typeof t && t && t.__esModule)
+                return t;
+            var o = Object.create(null);
+            if (e.r(o),
+                Object.defineProperty(o, "default", {
+                    enumerable: !0,
+                    value: t
+                }),
+            2 & i && "string" != typeof t)
+                for (var a in t)
+                    e.d(o, a, function(e) {
+                        return t[e]
+                    }
+                        .bind(null, a));
+            return o
         }
         ,
         e.n = function(t) {
@@ -1507,18 +1536,125 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         e.p = "",
-        e(0)
+        e(e.s = 581)
 }({
-    0: function(t, e, i) {
-        t.exports = i(14)
-    },
-    14: function(module, exports, __webpack_require__) {
+    165: function(__webpack_module__, __webpack_exports__, __webpack_require__) {
         "use strict";
-        function _interopRequireDefault(t) {
-            return t && t.__esModule ? t : {
-                "default": t
-            }
+        function _classCallCheck(t, e) {
+            if (!(t instanceof e))
+                throw new TypeError("Cannot call a class as a function")
         }
+        __webpack_require__.r(__webpack_exports__);
+        var AudioLayer = function() {
+            function AudioLayer() {
+                _classCallCheck(this, AudioLayer),
+                    this._els = {
+                        layerPlace: ge("top_audio_layer_place"),
+                        topPlayBtn: geByClass1("_top_audio_player_play"),
+                        topNotaBtn: geByClass1("_top_nav_audio_btn"),
+                        topNotaBtnGroup: ge("top_audio_btn_group")
+                    }
+            }
+            return AudioLayer.prepare = function(t) {
+                stManager.add(["audio.js", "audioplayer.js", "audio.css", "suggester.js", "auto_list.js", "indexer.js"], function() {
+                    t && t()
+                })
+            }
+                ,
+                AudioLayer.prototype.toggle = function(t, e) {
+                    var i = this;
+                    this._initTooltip();
+                    var o = this._els.tt
+                        , a = void 0 !== t ? t : !o.isShown();
+                    a ? (o.show(),
+                        cancelStackPush("top_audio", function() {
+                            i.toggle(!1, !0)
+                        }, !0)) : (e || cancelStackPop(),
+                        o.hide()),
+                        toggleClass(this._els.topNotaBtn, "active", a)
+                }
+                ,
+                AudioLayer.prototype.hide = function() {
+                    this._els.tt.hide()
+                }
+                ,
+                AudioLayer.prototype.isShown = function() {
+                    return this._els.tt && this._els.tt.isShown()
+                }
+                ,
+                AudioLayer.prototype.updatePosition = function() {
+                    return this._els.tt && this._els.tt.updatePosition()
+                }
+                ,
+                AudioLayer.prototype._layerPosition = function() {
+                    var t = getXY(this._els.layerPlace)
+                        , e = getXY("page_body")
+                        , i = e[0] - t[0] - 1
+                        , o = 0;
+                    if (isVisible(this._els.topNotaBtnGroup)) {
+                        var a = getXY(this._els.topNotaBtn);
+                        o = -i + (a[0] - t[0]) + 15
+                    } else {
+                        var s = getXY(this._els.topPlayBtn);
+                        o = -i + (s[0] - t[0]) + 3
+                    }
+                    return {
+                        left: i,
+                        top: 0,
+                        arrowPosition: o
+                    }
+                }
+                ,
+                AudioLayer.prototype.getPageInstance = function() {
+                    return this._page
+                }
+                ,
+                AudioLayer.prototype._initTooltip = function _initTooltip() {
+                    var _this2 = this;
+                    this._els.tt || (this._els.container = se('<div class="audio_layer_container"><div class="top_audio_loading">' + rs(vk.pr_tpl, {
+                        id: "",
+                        cls: "pr_big"
+                    }) + "</div></div>"),
+                        this._els.tt = new ElementTooltip(this._els.layerPlace,{
+                            id: "audio_layer_tt",
+                            content: this._els.container,
+                            width: 660,
+                            offset: [22, 5],
+                            autoShow: !1,
+                            customShow: !0,
+                            setPos: this._layerPosition.bind(this),
+                            forceSide: "bottom",
+                            onHide: function() {
+                                _this2._page && _this2._page.onLayerHide()
+                            },
+                            onShow: function() {
+                                _this2._page && _this2._page.onLayerShow(_this2._initSection)
+                            }
+                        }),
+                        ajax.post("al_audio.php", {
+                            act: "layer",
+                            is_layer: 1,
+                            is_current_playlist: ap.getCurrentPlaylist() ? 1 : 0
+                        }, {
+                            onDone: function onDone(html, data, templatesScript) {
+                                eval(templatesScript),
+                                    _this2._els.container.innerHTML = html,
+                                    _this2._page = new AudioPage(geByClass1("_audio_page_layout", _this2._els.container),data),
+                                    _this2._initSection = "recoms" == data.initSection ? data.initSection : void 0,
+                                    _this2._page.onLayerShow(_this2._initSection)
+                            }
+                        }))
+                }
+                ,
+                AudioLayer
+        }();
+        __webpack_exports__["default"] = AudioLayer
+    },
+    581: function(t, e, i) {
+        t.exports = i(679)
+    },
+    679: function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+        "use strict";
         function _loadAllPlaylistAudios(playlist, onDone) {
             if (!playlist.hasMore() || !playlist.isFullyLoadable())
                 return onDone && onDone();
@@ -1551,11 +1687,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     onDone: function onDone(data, tpl, langs, templatesScript) {
                         if (0 == chunkIndex) {
                             if (addTemplates({
-                                    audio_playlist_snippet: tpl
-                                }),
-                                    extend(cur.lang, langs),
-                                templatesScript && eval(templatesScript),
-                                    !data)
+                                audio_playlist_snippet: tpl
+                            }),
+                                extend(cur.lang, langs),
+                            templatesScript && eval(templatesScript),
+                                !data)
                                 return isDeleted = !0,
                                     _cb();
                             totalCount = data.totalCount,
@@ -1593,162 +1729,10 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 o.fillRect(13 + 4 * s, a - r + 14, 2, r)
             }
         }
-        function convertTrackGenreToAdmanGenre(t) {
-            if (-1 == t)
-                return 19;
-            var e = {
-                0: 2,
-                1: 14,
-                2: 4,
-                3: 5,
-                4: 10,
-                5: 10,
-                6: 14,
-                7: 11,
-                8: 9,
-                9: 14,
-                10: 14,
-                11: 17,
-                12: 19,
-                13: 10,
-                14: 11,
-                15: 11,
-                16: 12,
-                17: 14,
-                18: 7,
-                19: 7,
-                20: 1,
-                21: 14,
-                22: 14,
-                23: 19,
-                24: 19,
-                25: 7,
-                26: 1,
-                27: 8,
-                28: 19,
-                29: 9,
-                30: 9,
-                31: 7,
-                32: 3,
-                33: 16,
-                34: 7,
-                35: 7,
-                36: 19,
-                37: 19,
-                38: 13,
-                39: 1,
-                40: 14,
-                41: 8,
-                42: 11,
-                43: 14,
-                44: 19,
-                45: 6,
-                46: 10,
-                47: 14,
-                48: 18,
-                49: 14,
-                50: 14,
-                51: 7,
-                52: 7,
-                53: 18,
-                54: 5,
-                55: 1,
-                56: 14,
-                57: 19,
-                58: 13,
-                59: 8,
-                60: 17,
-                61: 13,
-                62: 11,
-                63: 7,
-                64: 18,
-                65: 18,
-                66: 7,
-                67: 1,
-                68: 7,
-                69: 19,
-                70: 19,
-                71: 1,
-                72: 18,
-                73: 14,
-                74: 6,
-                75: 18,
-                76: 19,
-                77: 15,
-                78: 14,
-                79: 14,
-                80: 18,
-                81: 18,
-                82: 18,
-                83: 9,
-                84: 9,
-                85: 2,
-                86: 18,
-                87: 1,
-                88: 18,
-                89: 18,
-                90: 1,
-                91: 14,
-                92: 14,
-                93: 14,
-                94: 14,
-                95: 14,
-                96: 9,
-                97: 3,
-                98: 6,
-                99: 6,
-                100: 19,
-                101: 19,
-                102: 18,
-                103: 3,
-                104: 3,
-                105: 3,
-                106: 3,
-                107: 5,
-                108: 14,
-                109: 19,
-                110: 19,
-                111: 11,
-                112: 5,
-                113: 5,
-                114: 5,
-                115: 18,
-                116: 18,
-                117: 14,
-                118: 2,
-                119: 5,
-                120: 19,
-                121: 14,
-                122: 19,
-                123: 3,
-                124: 5,
-                125: 5,
-                126: 7,
-                127: 7,
-                128: 5,
-                129: 7,
-                130: 7,
-                131: 1,
-                132: 14,
-                133: 1,
-                134: 1,
-                135: 7,
-                136: 13,
-                137: 14,
-                138: 14,
-                139: 3,
-                140: 13,
-                141: 18,
-                142: 5,
-                143: 5,
-                144: 14,
-                145: 19,
-                146: 7,
-                147: 7
-            };
-            return e[t] || 19
-        }
-        var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(t) {
+        __webpack_require__.r(__webpack_exports__);
+        var _audioplayer_audio_unmask_source__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(696)
+            , _audioplayer_audio_layer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165)
+            , _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(t) {
                 return typeof t
             }
             : function(t) {
@@ -1784,11 +1768,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     return t(e, i);
                 throw new TypeError("Invalid attempt to destructure non-iterable instance")
             }
-        }()
-            , _audio_unmask_source = __webpack_require__(38)
-            , _audio_layer = __webpack_require__(20)
-            , _audio_layer2 = _interopRequireDefault(_audio_layer);
-        window.AudioLayer = _audio_layer2["default"],
+        }();
+        window.AudioLayer = _audioplayer_audio_layer__WEBPACK_IMPORTED_MODULE_1__["default"],
             window.AudioUtils = {
                 AUDIO_ITEM_INDEX_ID: 0,
                 AUDIO_ITEM_INDEX_OWNER_ID: 1,
@@ -1804,12 +1785,17 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AUDIO_ITEM_INDEX_EXTRA: 12,
                 AUDIO_ITEM_INDEX_HASHES: 13,
                 AUDIO_ITEM_INDEX_COVER_URL: 14,
-                AUDIO_ITEM_INDEX_TRACK_GENRE: 15,
+                AUDIO_ITEM_INDEX_ADS: 15,
+                AUDIO_ITEM_INDEX_SUBTITLE: 16,
+                AUDIO_ITEM_INDEX_MAIN_ARTISTS: 17,
+                AUDIO_ITEM_INDEX_FEAT_ARTISTS: 18,
                 AUDIO_ITEM_CAN_ADD_BIT: 2,
                 AUDIO_ITEM_CLAIMED_BIT: 4,
+                AUDIO_ITEM_HQ_BIT: 16,
                 AUDIO_ITEM_LONG_PERFORMER_BIT: 32,
                 AUDIO_ITEM_UMA_BIT: 128,
                 AUDIO_ITEM_REPLACEABLE: 512,
+                AUDIO_ITEM_EXPLICIT_BIT: 1024,
                 AUDIO_ENOUGH_LOCAL_SEARCH_RESULTS: 500,
                 AUDIO_RECOMS_TYPE_LISTENED: "recoms6",
                 AUDIO_PLAYING_CLS: "audio_row__playing",
@@ -1828,7 +1814,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         , a = window.AudioPage && currentAudioPage(t) || cur.audioPage;
                     layers.fullhide && layers.fullhide(!0),
                         setTimeout(function() {
-                            a ? (e = unclean(e).replace(/<em>|<\/em>/g, ""),
+                            o && a ? (e = unclean(e).replace(/<em>|<\/em>/g, ""),
                                 nav.change({
                                     q: e,
                                     performer: 1
@@ -2053,7 +2039,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                 extra.claim && nav.objLoc.claim && (audioObject.isSetClaimed ? actions.push(["claim_btn", AudioUtils.unclaim.bind(_this2, audio, audioEl, extra.claim), "Unclaim"]) : actions.push(["claim_btn", AudioUtils.claim.bind(_this2, audio, audioEl, extra.claim), "Claim"]))
                             }
                             if (moreActions.length && actions.push(["more"]),
-                                    actions.length) {
+                                actions.length) {
                                 var actionsEl = se('<div class="_audio_row__actions audio_row__actions"></div>');
                                 each(actions, function(t, e) {
                                     var i = AudioUtils.getRowActionName(e[0], audioObject, audioEl)
@@ -2138,55 +2124,55 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     var d = e
                         , u = se(rs(AudioUtils.AUDIO_ROW_ACTION_ROW_ITEM, ["pl_new", 0, getLang("audio_add_to_new_pl"), "audio_row__action_playlist"]));
                     if (domInsertAfter(u, d),
-                            d = u,
-                            u.addEventListener("click", function() {
-                                AudioUtils.editPlaylist(o, !1, "edit", {
-                                    addAudio: s,
-                                    newPlaylistHash: l
-                                })
-                            }),
-                            each(r, function(t, e) {
-                                var i = !0
-                                    , o = e[0] + "_" + e[1] + "_" + a.fullId
-                                    , s = AudioUtils.copiedToPlaylistAudios[o]
-                                    , r = "audio_row__action_playlist";
-                                (e[3] || s) && (i = !1,
-                                    r += " audio_row__more_playlist_added");
-                                var l = se(rs(AudioUtils.AUDIO_ROW_ACTION_ROW_ITEM, ["pl_" + e[0] + "_" + e[1], 0, e[2], r]));
-                                domInsertAfter(l, d),
-                                    d = l;
-                                var n = !1;
-                                l.addEventListener("click", function() {
-                                    if (!n) {
-                                        n = !0;
-                                        var t = a.ownerId
-                                            , s = a.id
-                                            , r = AudioUtils.copiedToPlaylistAudios[o];
-                                        r && (r = r.split("_"),
-                                            t = r[0],
-                                            s = r[1]),
-                                        i && (AudioUtils.copiedToPlaylistAudiosHashes[o] = e[4]),
-                                            ajax.post("al_audio.php", {
-                                                act: "add_audio_to_playlist",
-                                                hash: e[4],
-                                                playlist_id: e[1],
-                                                playlist_owner_id: e[0],
-                                                audio_owner_id: t,
-                                                audio_id: s,
-                                                do_add: intval(i)
-                                            }, {
-                                                onDone: function(t, a, s) {
-                                                    AudioUtils.copiedToPlaylistAudios[o] = i ? s : !1,
-                                                        e[4] = i ? t : AudioUtils.copiedToPlaylistAudiosHashes[o],
-                                                        i = !i,
-                                                        n = !1
-                                                }
-                                            }),
-                                            toggleClass(l, "audio_row__more_playlist_added", i)
-                                    }
-                                })
-                            }),
-                            n) {
+                        d = u,
+                        u.addEventListener("click", function() {
+                            AudioUtils.editPlaylist(o, !1, "edit", {
+                                addAudio: s,
+                                newPlaylistHash: l
+                            })
+                        }),
+                        each(r, function(t, e) {
+                            var i = !0
+                                , o = e[0] + "_" + e[1] + "_" + a.fullId
+                                , s = AudioUtils.copiedToPlaylistAudios[o]
+                                , r = "audio_row__action_playlist";
+                            (e[3] || s) && (i = !1,
+                                r += " audio_row__more_playlist_added");
+                            var l = se(rs(AudioUtils.AUDIO_ROW_ACTION_ROW_ITEM, ["pl_" + e[0] + "_" + e[1], 0, e[2], r]));
+                            domInsertAfter(l, d),
+                                d = l;
+                            var n = !1;
+                            l.addEventListener("click", function() {
+                                if (!n) {
+                                    n = !0;
+                                    var t = a.ownerId
+                                        , s = a.id
+                                        , r = AudioUtils.copiedToPlaylistAudios[o];
+                                    r && (r = r.split("_"),
+                                        t = r[0],
+                                        s = r[1]),
+                                    i && (AudioUtils.copiedToPlaylistAudiosHashes[o] = e[4]),
+                                        ajax.post("al_audio.php", {
+                                            act: "add_audio_to_playlist",
+                                            hash: e[4],
+                                            playlist_id: e[1],
+                                            playlist_owner_id: e[0],
+                                            audio_owner_id: t,
+                                            audio_id: s,
+                                            do_add: intval(i)
+                                        }, {
+                                            onDone: function(t, a, s) {
+                                                AudioUtils.copiedToPlaylistAudios[o] = i ? s : !1,
+                                                    e[4] = i ? t : AudioUtils.copiedToPlaylistAudiosHashes[o],
+                                                    i = !i,
+                                                    n = !1
+                                            }
+                                        }),
+                                        toggleClass(l, "audio_row__more_playlist_added", i)
+                                }
+                            })
+                        }),
+                        n) {
                         var _ = se(rs(AudioUtils.AUDIO_ROW_ACTION_ROW_ITEM, ["pl_more", 0, getLang("audio_row_show_all_playlists"), "audio_row__action_playlist"]));
                         _.addEventListener("click", function() {
                             showBox("al_audio.php?act=more_playlists_add", {
@@ -2239,7 +2225,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     data(t, "leaved", !0);
                     var e = data(t, "tt");
                     if ((!e || !e.isShown()) && (clearTimeout(window.audioRowHoverTO),
-                            data(t, "actions"))) {
+                        data(t, "actions"))) {
                         var i = geByClass1("_audio_row__actions", t)
                             , o = geByClass1("_audio_row__duration", t);
                         re(i),
@@ -2249,7 +2235,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 },
                 addToPlaylistsBoxInit: function(t, e, i, o, a) {
                     function s() {
-                        h && h.destroy(),
+                        p && p.destroy(),
                             n.innerHTML = "";
                         var t = [];
                         t = c ? o.filter(function(t) {
@@ -2257,7 +2243,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         }) : o,
                             toggle(n, 0 != t.length),
                             toggle(u, 0 == t.length),
-                            h = new AutoList(n,{
+                            p = new AutoList(n,{
                                 onNeedRows: function(e, i) {
                                     for (var o = [], a = i, s = Math.min(t.length, i + 30), r = a; s > r; r++) {
                                         var l = t[r];
@@ -2282,26 +2268,26 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         height: _ - getSize(d)[1]
                     });
                     var c = ""
-                        , h = void 0;
+                        , p = void 0;
                     s(),
                         cur.addToPlaylistSearch = debounce(function(t) {
                             c = trim(t).toLowerCase(),
                                 s()
                         }, 200);
-                    var p = {}
+                    var h = {}
                         , y = {};
                     addEvent(n, "click", function(t) {
                         var e = domClosest("_ape_pl_item", t.target)
                             , i = domData(e, "id")
                             , o = toggleClass(e, "ape_selected");
                         o ? (y[i] = !0,
-                            delete p[i]) : (p[i] = !0,
+                            delete h[i]) : (h[i] = !0,
                             delete y[i])
                     }),
                         r.removeButtons(),
                         r.addButton(getLang("global_save"), function(o) {
                             var s = Object.keys(y)
-                                , l = Object.keys(p);
+                                , l = Object.keys(h);
                             ajax.post("al_audio.php", {
                                 act: "save_audio_in_playlists",
                                 add_pl_ids: s.join(","),
@@ -2391,7 +2377,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         return domData(t, "in-progress", intval(e))
                     }
                     if (window.tooltips && tooltips.hideAll(),
-                            !s()) {
+                        !s()) {
                         r(!0);
                         var l = !1;
                         e.isClaimed && (l = !0);
@@ -2416,7 +2402,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             }, getLang("global_cancel"));
                         else {
                             if (l ? re(t) : addClass(t, "audio_row__deleted"),
-                                    a) {
+                                a) {
                                 ajax.post("al_audio.php", {
                                     act: "remove_listened",
                                     audio_id: e.id,
@@ -2442,8 +2428,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     n[e.fullId] = {
                                         state: "recom_hidden"
                                     };
-                                var h = getAudioPlayer().getCurrentPlaylist();
-                                h && h.getType() == AudioPlaylist.TYPE_RECOM && (n[e.fullId].removedCurrentPos = h.removeAudio(e))
+                                var p = getAudioPlayer().getCurrentPlaylist();
+                                p && p.getType() == AudioPlaylist.TYPE_RECOM && (n[e.fullId].removedCurrentPos = p.removeAudio(e))
                             } else
                                 ajax.post("al_audio.php", {
                                     act: "delete_audio",
@@ -2499,8 +2485,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             }
                             function r(r, l) {
                                 if (hide(boxLoader),
-                                        hide(boxLayerWrap),
-                                        l) {
+                                    hide(boxLayerWrap),
+                                    l) {
                                     var u = getLang("audio_error_deleted_playlist_box").split("/");
                                     return new MessageBox({
                                         title: u[0]
@@ -2519,8 +2505,9 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     bodyNode.appendChild(window.audioPlaylistLayerWrap)),
                                     window.audioPlaylistLayerWrap.innerHTML = "";
                                 var c = r.getAudiosList().length
-                                    , h = getTemplate("audio_playlist_snippet", {
+                                    , p = getTemplate("audio_playlist_snippet", {
                                     title: r.getTitle(),
+                                    subTitle: r.getSubtitle(),
                                     description: r.getDescription(),
                                     coverStyle: r.getCoverUrl() ? "background-image:url('" + r.getCoverUrl() + "'); background-size: cover;" : "",
                                     authorLine: r.getAuthorLine(),
@@ -2536,10 +2523,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     deleteHash: r.getDeleteHash(),
                                     replaceHash: r.getReplaceHash(),
                                     gridCovers: r.getGridCovers(),
+                                    type: r.getType(),
                                     context: o,
                                     followButtonText: r.isFollowed() ? getLang("audio_playlist_btn_followed") : getLang("audio_playlist_btn_follow")
                                 });
-                                cur.apLayer = se('<div class="ap_layer"><div class="ap_layer__content">' + h + '</div><div class="ap_layer__close _ap_layer__close"></div></div>'),
+                                cur.apLayer = se('<div class="ap_layer"><div class="ap_layer__content">' + p + '</div><div class="ap_layer__close _ap_layer__close"></div></div>'),
                                     window.audioPlaylistLayerWrap.appendChild(cur.apLayer),
                                     addEvent(window.audioPlaylistLayerWrap, "click", n = function(t) {
                                             (t.target == window.audioPlaylistLayerWrap || t.target == geByClass1("_ap_layer__close", cur.apLayer)) && layers.fullhide()
@@ -2555,8 +2543,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     boxQueue.hideAll(),
                                     layers.wrapshow(window.audioPlaylistLayerWrap, .7),
                                     addClass(layerBG, "ap_layer_bg_dark");
-                                var p = geByClass1("_audio_pl_snippet__list", cur.apLayer);
-                                c && (cur.apLayerAutoList = new AutoList(p,{
+                                var h = geByClass1("_audio_pl_snippet__list", cur.apLayer);
+                                c && (cur.apLayerAutoList = new AutoList(h,{
                                     scrollNode: window.audioPlaylistLayerWrap,
                                     onNeedRows: function(t, e) {
                                         for (var i = [], o = r.getUnshuffledAudiosList(), a = e; e + 30 > a && o[a]; a++)
@@ -2564,12 +2552,13 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                         t(i)
                                     }
                                 })),
-                                    setStyle(p, {}),
+                                    setStyle(h, {}),
                                     boxRefreshCoords(cur.apLayer),
                                     getAudioPlayer().updateCurrentPlaying(),
                                     layers.fullhide = a,
                                     cur.apLayerPlaylistId = [t, e],
-                                s && s()
+                                s && s(),
+                                cur.articleLayer && cur.articleLayer.audioPlaylistOpened()
                             }
                             var l = getAudioPlayer().getPlaylist(AudioPlaylist.TYPE_PLAYLIST, t, e, i);
                             l.loadAll(r);
@@ -2581,7 +2570,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     if (isUndefined(e.selected)) {
                         var a = cur.attachCount && cur.attachCount() || 0;
                         if (cur.chooseMedia("audio", i.fullId, o),
-                            (!cur.attachCount || cur.attachCount() > a) && cur.lastAddMedia) {
+                        (!cur.attachCount || cur.attachCount() > a) && cur.lastAddMedia) {
                             e.selected = cur.lastAddMedia.chosenMedias.length - 1,
                                 addClass(domPN(e), "audio_selected");
                             var s = getSize(e)[0];
@@ -2665,7 +2654,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 },
                 getLayer: function() {
                     var t = window.audioLayer;
-                    return t || (window.audioLayer = t = new _audio_layer2["default"]),
+                    return t || (window.audioLayer = t = new _audioplayer_audio_layer__WEBPACK_IMPORTED_MODULE_1__["default"]),
                         t
                 },
                 updateQueueReceivedPost: function(t) {
@@ -2673,18 +2662,9 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         domData(this, "new-post", "groups" == cur.module ? "wall" : "feed")
                     })
                 },
-                toggleAudioHQBodyClass: function(s, fromMusicBar) {
-                    var t;
-
-                    if (typeof s != "undefined") {
-                        t = s;
-                        getAudioPlayer().showHQLabel(s);
-                    } else {
-                        t = getAudioPlayer().showHQLabel();
-                    }
-
-                    toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS, t);
-                    if (!fromMusicBar) getAudioPlayer()._impl.musicBar.toggleBitrate(null, t, true);
+                toggleAudioHQBodyClass: function() {
+                    var t = getAudioPlayer().showHQLabel();
+                    toggleClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS, t)
                 },
                 hasAudioHQBodyClass: function() {
                     return hasClass(document.body, AudioUtils.AUDIO_HQ_LABEL_CLS)
@@ -2725,7 +2705,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         c && (c = AudioUtils.contextSplit(c),
                             u = c[0]),
                         ("search" == u && _ && _.getSearchQid() || "search" == cur.module && cur.qid) && (u = "search:external");
-                        var h = {
+                        var p = {
                             act: "add",
                             group_id: r,
                             audio_owner_id: e.ownerId,
@@ -2764,7 +2744,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             removeClass(t, "audio_row__added"),
                         d && removeClass(d, "audio_row__added"),
                             delete l[e.fullId],
-                            getAudioPlayer().notify(AudioPlayer.EVENT_REMOVED, e.fullId, n.addedFullId)) : (ajax.post("al_audio.php", h, {
+                            getAudioPlayer().notify(AudioPlayer.EVENT_REMOVED, e.fullId, n.addedFullId)) : (ajax.post("al_audio.php", p, {
                             onDone: function(t) {
                                 if (t) {
                                     var i = t[AudioUtils.AUDIO_ITEM_INDEX_OWNER_ID] + "_" + t[AudioUtils.AUDIO_ITEM_INDEX_ID];
@@ -2793,7 +2773,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             addClass(t, "audio_row__added"),
                         d && addClass(d, "audio_row__added"),
                             getAudioPlayer().notify(AudioPlayer.EVENT_ADDED, e.fullId),
-                        a && a.onUserAction(e, _))
+                        a && _ && a.onUserAction(e, _))
                     }
                 },
                 addAudioFromChooseBox: function(t, e, i, o, a, s, r) {
@@ -2861,9 +2841,9 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     var e = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : !0
                         , i = "";
                     if (isArray(t[AudioUtils.AUDIO_ITEM_INDEX_MAIN_ARTISTS]) && (i = AudioUtils.getAudioArtistsString(t[AudioUtils.AUDIO_ITEM_INDEX_MAIN_ARTISTS], e)),
-                        isArray(t[AudioUtils.AUDIO_ITEM_INDEX_FEAT_ARTISTS]) && (i += " feat. ",
-                            i += AudioUtils.getAudioArtistsString(t[AudioUtils.AUDIO_ITEM_INDEX_FEAT_ARTISTS], e)),
-                            !i) {
+                    isArray(t[AudioUtils.AUDIO_ITEM_INDEX_FEAT_ARTISTS]) && (i += " feat. ",
+                        i += AudioUtils.getAudioArtistsString(t[AudioUtils.AUDIO_ITEM_INDEX_FEAT_ARTISTS], e)),
+                        !i) {
                         var o = t[AudioUtils.AUDIO_ITEM_INDEX_PERFORMER].replace(/<\/?em>/g, "");
                         if (e) {
                             var a = "/audio?performer=1&q=" + encodeURIComponent(o);
@@ -2881,7 +2861,6 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     e && a.push(e);
 
                     var mb = getAudioPlayer()._impl.musicBar;
-
 
                     var fullId = t[1] + "_" +t[0];
                     this.idsToQuery.push(fullId);
@@ -2965,14 +2944,16 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             id: t
                         };
                     var e = (t[AudioUtils.AUDIO_ITEM_INDEX_HASHES] || "").split("/")
-                        , i = (t[AudioUtils.AUDIO_ITEM_INDEX_COVER_URL] || "").split(",");
+                        , i = (t[AudioUtils.AUDIO_ITEM_INDEX_COVER_URL] || "").split(",")
+                        , o = AudioUtils.getAudioPerformers(t, !1);
                     return {
                         id: intval(t[AudioUtils.AUDIO_ITEM_INDEX_ID]),
                         owner_id: intval(t[AudioUtils.AUDIO_ITEM_INDEX_OWNER_ID]),
                         ownerId: t[AudioUtils.AUDIO_ITEM_INDEX_OWNER_ID],
                         fullId: t[AudioUtils.AUDIO_ITEM_INDEX_OWNER_ID] + "_" + t[AudioUtils.AUDIO_ITEM_INDEX_ID],
                         title: t[AudioUtils.AUDIO_ITEM_INDEX_TITLE],
-                        performer: t[AudioUtils.AUDIO_ITEM_INDEX_PERFORMER],
+                        subTitle: t[AudioUtils.AUDIO_ITEM_INDEX_SUBTITLE],
+                        performer: o,
                         duration: intval(t[AudioUtils.AUDIO_ITEM_INDEX_DURATION]),
                         lyrics: intval(t[AudioUtils.AUDIO_ITEM_INDEX_LYRICS]),
                         url: t[AudioUtils.AUDIO_ITEM_INDEX_URL],
@@ -2991,9 +2972,10 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         coverUrl_s: i[0],
                         coverUrl_p: i[1],
                         isClaimed: !!(t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_CLAIMED_BIT),
+                        isExplicit: !!(t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_EXPLICIT_BIT),
                         isUMA: !!(t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_UMA_BIT),
                         isReplaceable: !!(t[AudioUtils.AUDIO_ITEM_INDEX_FLAGS] & AudioUtils.AUDIO_ITEM_REPLACEABLE),
-                        trackGenre: t[AudioUtils.AUDIO_ITEM_INDEX_TRACK_GENRE]
+                        ads: t[AudioUtils.AUDIO_ITEM_INDEX_ADS]
                     }
                 },
                 initDomPlaylist: function(t, e) {
@@ -3010,52 +2992,45 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     function i(t) {
                         return [].slice.call(t)
                     }
-                    var o, a = getAudioPlayer(), s = AudioUtils.getAudioFromEl(t, !0), r = null, l = [], n = domData(t, "new-post"), d = !1, u = null, _ = AudioPlaylist.TYPE_TEMP, c = vk.id, h = {}, p = [], y = t, A = window.AudioPage && currentAudioPage(t), f = window.traverseParent || function(t, e) {
+                    var o, a = getAudioPlayer(), s = AudioUtils.getAudioFromEl(t, !0), r = null, l = [], n = domData(t, "new-post"), d = !1, u = null, _ = AudioPlaylist.TYPE_TEMP, c = vk.id, p = {}, h = window.AudioPage && currentAudioPage(t), y = window.traverseParent || function(t, e) {
                             for (t = ge(t); t && !e(t) && (t = domPN(t),
                             t != document); )
                                 ;
                             return null
                         }
                     ;
-                    if (f(t, function(t) {
-                            return d = domData(t, "audio-context")
-                        }),
-                            d = s.context || d,
-                            d = d || ("audio" == cur.module ? cur.submodule : cur.module),
-                            e)
+                    if (y(t, function(t) {
+                        return d = domData(t, "audio-context")
+                    }),
+                        d = s.context || d,
+                        d = d || ("audio" == cur.module ? cur.submodule : cur.module),
+                        e)
                         return {
                             context: d
                         };
-                    var g = AudioUtils.contextSplit(d)
-                        , P = _slicedToArray(g, 2)
-                        , E = P[0]
-                        , v = P[1]
-                        , m = gpeByClass("_audio_pl", t);
-                    if (m) {
-                        var I = (domData(m, "playlist-id") || "").split("_");
-                        u = a.getPlaylist.apply(a, I);
-                        var T = domData(m, "title") || "";
-                        T && u.mergeWith({
-                            title: T
+                    var A = AudioUtils.contextSplit(d)
+                        , f = _slicedToArray(A, 2)
+                        , g = f[0]
+                        , P = f[1]
+                        , E = gpeByClass("_audio_pl", t);
+                    if (E) {
+                        var v = (domData(E, "playlist-id") || "").split("_");
+                        u = a.getPlaylist.apply(a, v);
+                        var m = domData(E, "title") || "";
+                        m && u.mergeWith({
+                            title: m
                         });
-                        var L = domData(m, "access-hash") || "";
-                        for (L && u.mergeWith({
-                            accessHash: L
+                        var I = domData(E, "access-hash") || "";
+                        I && u.mergeWith({
+                            accessHash: I
                         }),
-                                 A && A.getPageCurrentPlaylist() == u && A.getSortedList() ? u.initSortedList(A.getSortedList()) : s.isFromCurrentPlaylist || (u.removeSortedList(),
-                                     u.shuffle(0)); y = domPN(y); )
-                            p.push((y.id ? "#" + y.id : "") + (y.className ? "." + y.className : ""));
-                        p = p.slice(0, 30),
-                            p = p.filter(function(t) {
-                                return !!trim(t)
-                            }),
-                            p = p.reverse().join(" / "),
-                            p = document.location.href + " : " + p
-                    } else if (A && A.getPageCurrentPlaylist())
-                        u = A.getPageCurrentPlaylist();
-                    else if ("module" == E) {
-                        var w = v;
-                        u = a.getPlaylist(AudioPlaylist.TYPE_PLAYLIST, w || cur.oid || vk.id, AudioPlaylist.DEFAULT_PLAYLIST_ID),
+                            h && h.getPageCurrentPlaylist() == u && h.getSortedList() ? u.initSortedList(h.getSortedList()) : s.isFromCurrentPlaylist || (u.removeSortedList(),
+                                u.shuffle(0))
+                    } else if (h && h.getPageCurrentPlaylist())
+                        u = h.getPageCurrentPlaylist();
+                    else if ("module" == g) {
+                        var T = P;
+                        u = a.getPlaylist(AudioPlaylist.TYPE_PLAYLIST, T || cur.oid || vk.id, AudioPlaylist.DEFAULT_PLAYLIST_ID),
                             l = [r]
                     } else if (0 === s.context.indexOf("im"))
                         r = gpeByClass("_im_peer_history", t),
@@ -3071,44 +3046,36 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     else if (0 === s.context.indexOf("post")) {
                         _ = AudioPlaylist.TYPE_WALL,
                             o = s.context;
-                        var C = s.context.replace("post", "").split("_");
-                        c = C[0],
-                            h = {
-                                postId: C[1]
+                        var L = s.context.replace("post", "").split("_");
+                        c = L[0],
+                            p = {
+                                postId: L[1]
                             }
                     } else if (0 === s.context.indexOf("choose"))
                         o = s.context;
                     else if ("feed" == n || 0 === s.context.indexOf("feed") || 0 === s.context.indexOf("feedsearch"))
                         o = "feed",
                             l = i(geByClass("wall_text", r));
-                    else if ("group_wall" == E || "user_wall" == E || 0 === s.context.indexOf("reply") || "wall" == n) {
+                    else if ("group_wall" == g || "user_wall" == g || 0 === s.context.indexOf("reply") || "wall" == n) {
                         _ = AudioPlaylist.TYPE_WALL,
                             c = cur.oid;
-                        var C = (v || "").split("_")[1]
-                            , S = cur.wallQuery || ""
-                            , U = ge("wall_search")
-                            , D = inArray(cur.wallType, ["own", "full_own"]) ? "own" : "all";
-                        o = hashCode(D + "_" + S),
-                        "wall" == cur.module && val(U) && (S = val(U)),
-                        C && (h = {
-                            postId: C,
-                            wallQuery: S,
-                            wallType: D
+                        var L = (P || "").split("_")[1]
+                            , w = cur.wallQuery || ""
+                            , C = ge("wall_search")
+                            , S = inArray(cur.wallType, ["own", "full_own"]) ? "own" : "all";
+                        o = hashCode(S + "_" + w),
+                        "wall" == cur.module && val(C) && (w = val(C)),
+                        L && (p = {
+                            postId: L,
+                            wallQuery: w,
+                            wallType: S
                         });
-                        var O = 0 === s.context.indexOf("reply");
-                        O && (l = i([gpeByClass("_replies_list", t)]),
+                        var U = 0 === s.context.indexOf("reply");
+                        U && (l = i([gpeByClass("_replies_list", t)]),
                             o = "reply" + o),
                             l = l.concat(i([r]))
-                    } else {
-                        for (; y = domPN(y); )
-                            p.push((y.id ? "#" + y.id : "") + (y.className ? "." + y.className : ""));
-                        p = p.slice(0, 30),
-                            p = p.filter(function(t) {
-                                return !!trim(t)
-                            }),
-                            p = p.reverse().join(" / "),
-                            p = document.location.href + " : " + p
-                    }
+                    } else
+                        "article" == g && (u = cur.articlePlaylist);
                     return r || (r = domPN(t)),
                         l = l.filter(function(t) {
                             return !!t
@@ -3116,7 +3083,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     l && 0 != l.length || (l = [r]),
                         u = u ? u : a.getPlaylist(_, c, o),
                         u = u.getAudiosCount() ? u : AudioUtils.initDomPlaylist(u, l),
-                        u.mergeWith(h || {}),
+                        u.mergeWith(p || {}),
                     -1 == u.indexOfAudio(s) && (u = AudioUtils.initDomPlaylist(u, [domPN(t)])),
                         {
                             playlist: u,
@@ -3232,23 +3199,23 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         var t = AudioUtils.getLayer();
                         t && t.isShown() && t.updatePosition()
                     }, 1),
-                        addClass(r._el, a),
-                        toggleClass(r._el, "top_audio_player_playing", e.isPlaying());
+                        addClass(l._el, a),
+                        toggleClass(l._el, "top_audio_player_playing", e.isPlaying());
                     var o = geByClass1("_top_audio_player_play_blind_label");
                     o && (o.innerHTML = e.isPlaying() ? getLang("global_audio_pause") : getLang("global_audio_play")),
                         t = AudioUtils.asObject(t),
-                        clearTimeout(r._currTitleReTO);
-                    var s = geByClass1("top_audio_player_title_out", r._el);
+                        clearTimeout(l._currTitleReTO);
+                    var s = geByClass1("top_audio_player_title_out", l._el);
                     re(s);
-                    var l = geByClass1("top_audio_player_title", r._el);
+                    var r = geByClass1("top_audio_player_title", l._el);
                     if (0 != i) {
                         var n = 0 > i ? -10 : 10
-                            , d = l.offsetLeft
+                            , d = r.offsetLeft
                             , u = se('<div class="top_audio_player_title top_audio_player_title_next" style="opacity: 0; top:' + n + "px; left: " + d + 'px">' + t.performer + " &ndash; " + t.title + "</div>");
                         u.setAttribute("onmouseover", "setTitle(this)"),
-                            i > 0 ? domInsertAfter(u, l) : domInsertBefore(u, l),
-                            addClass(l, "top_audio_player_title_out"),
-                            setStyle(l, {
+                            i > 0 ? domInsertAfter(u, r) : domInsertBefore(u, r),
+                            addClass(r, "top_audio_player_title_out"),
+                            setStyle(r, {
                                 top: -n,
                                 opacity: 0
                             }),
@@ -3258,15 +3225,15 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                     opacity: 1
                                 })
                             }, 10),
-                            clearTimeout(r._currTitleReTO),
-                            r._currTitleReTO = setTimeout(function() {
-                                re(l),
+                            clearTimeout(l._currTitleReTO),
+                            l._currTitleReTO = setTimeout(function() {
+                                re(r),
                                     removeClass(u, "top_audio_player_title_next")
                             }, TopAudioPlayer.TITLE_CHANGE_ANIM_SPEED)
                     } else
-                        l.innerHTML = t.performer + " &ndash; " + t.title,
-                            l.titleSet = 0,
-                            l.setAttribute("onmouseover", "setTitle(this)")
+                        r.innerHTML = t.performer + " &ndash; " + t.title,
+                            r.titleSet = 0,
+                            r.setAttribute("onmouseover", "setTitle(this)")
                 }
                 var a = "top_audio_player_enabled";
                 if (!t) {
@@ -3279,11 +3246,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     var r = AudioUtils.getLayer();
                     return void (r && r.isShown() && r.updatePosition())
                 }
-                var r = this;
+                var l = this;
                 i = intval(i),
                     hasClass(this._playIconBtn, a) ? o() : (addClass(this._playIconBtn, a),
                         setTimeout(function() {
-                            hide(r._playIconBtn),
+                            hide(l._audioBtnGroup),
                                 o()
                         }, 150))
             }
@@ -3426,6 +3393,10 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             ,
             AudioPlaylist.prototype.getTitle = function() {
                 return this.getSelf()._title || ""
+            }
+            ,
+            AudioPlaylist.prototype.getSubtitle = function() {
+                return this.getSelf()._subTitle || ""
             }
             ,
             AudioPlaylist.prototype.getDescription = function() {
@@ -3606,7 +3577,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 if (!(this.isShuffled() && t || !this.isShuffled() && !t)) {
                     var i = this.getSelf();
                     if (delete i._sorted,
-                            t) {
+                        t) {
                         var o = !1;
                         if (this.hasMore())
                             if (this.getType() == AudioPlaylist.TYPE_SEARCH)
@@ -3732,8 +3703,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 if (this.getType() == AudioPlaylist.TYPE_SEARCH && !searchParams.globalQuery)
                     return onDone && onDone(this);
                 if (this._onDoneLoading = this._onDoneLoading || [],
-                        this._onDoneLoading.push(onDone),
-                        !this._loadingAll) {
+                    this._onDoneLoading.push(onDone),
+                    !this._loadingAll) {
                     if (needAll)
                         return this._loadingAll = !0,
                             void _loadAllPlaylistAudios(this, callOnDones.bind(this));
@@ -3873,7 +3844,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             this._items.push(t.items[a])
                     }
                     var r = this;
-                    each("gridCovers artistsBlock communitiesBlock playlistsBlock addClasses nextOffset hasMore followHash accessHash isFollowed rawId title authorLine authorHref authorName infoLine1 infoLine2 isOfficial rawDescription description lastUpdated listens feedFrom feedOffset live searchParams totalCount totalCountHash postId wallQuery wallType originalList shuffle isAdsAllowed editHash coverUrl searchQid".split(" "), function(e, i) {
+                    each("gridCovers artistsBlock communitiesBlock playlistsBlock addClasses nextOffset hasMore followHash accessHash isFollowed rawId title subTitle authorLine authorHref authorName infoLine1 infoLine2 isOfficial rawDescription description lastUpdated listens feedFrom feedOffset live searchParams totalCount totalCountHash postId wallQuery wallType originalList shuffle isAdsAllowed editHash coverUrl searchQid".split(" "), function(e, i) {
                         void 0 !== t[i] && (r["_" + i] = t[i])
                     })
                 }
@@ -3975,17 +3946,17 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             ,
         window.AudioPlayer || (window.AudioPlayer = function() {
                 if (this._currentAudio = !1,
-                        this._isPlaying = !1,
-                        this._prevPlaylist = null,
-                        this._currentPlaylist = null,
-                        this._playlists = [],
-                        this.subscribers = [],
-                        this._tasks = [],
-                        this._statusExport = {},
-                        this._currentPlayingRows = [],
-                        this._allowPrefetchNext = !1,
-                        this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024),
-                        !vk.isBanned) {
+                    this._isPlaying = !1,
+                    this._prevPlaylist = null,
+                    this._currentPlaylist = null,
+                    this._playlists = [],
+                    this.subscribers = [],
+                    this._tasks = [],
+                    this._statusExport = {},
+                    this._currentPlayingRows = [],
+                    this._allowPrefetchNext = !1,
+                    this.db = openDatabase('MusicBar', '1.0', 'Music Bar database', 4 * 1024 * 1024),
+                    !vk.isBanned) {
                     AudioUtils.debugLog("Player creation"),
                         this._initImpl(),
                         this._initEvents(),
@@ -4004,7 +3975,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             },
 
             AudioPlayer.prototype.unmask = function(t) {
-                return (0,_audio_unmask_source.audioUnmaskSource)(t)
+                return this._impl.musicBar.unmaskUrl(t);
             },
 
             AudioPlayer.prototype._initImpl = function(t) {
@@ -4014,8 +3985,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     , o = function(t) {
                     if (-1 != i) {
                         if (t && (i++,
-                                this._implSetDelay(200),
-                            i > 3)) {
+                            this._implSetDelay(200),
+                        i > 3)) {
                             i = -1;
                             var e = new MessageBox({
                                 title: getLang("global_error")
@@ -4070,7 +4041,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 AudioUtils.debugLog("Implementation init"),
                     AudioUtils.debugLog("param browser.flash", browser.flash),
                     AudioUtils.debugLog("param force HTML5", !!t),
-                    t ? this._impl = new AudioPlayerHTML5(s) : AudioPlayerHTML5WebAudio.isSupported() ? this._impl = new AudioPlayerHTML5WebAudio(s) : AudioPlayerHTML5.isSupported() ? this._impl = new AudioPlayerHTML5(s) : browser.flash && (this._impl = new AudioPlayerFlash(s)),
+                    browser.safari && parseInt(browser.version) >= 11 ? this._impl = new AudioPlayerHTML5Simple(s) : t ? this._impl = new AudioPlayerHTML5(s) : AudioPlayerHTML5WebAudio.isSupported() ? (this._impl = new AudioPlayerHTML5WebAudio(s),
+                    this._impl.failed && (this._impl = new AudioPlayerHTML5(s))) : AudioPlayerHTML5.isSupported() ? this._impl = new AudioPlayerHTML5(s) : browser.flash && (this._impl = new AudioPlayerFlash(s)),
                     this._implSetVolume(0)
             }
             ,
@@ -4150,7 +4122,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             AudioPlayer.prototype.onMediaKeyPressedEvent = function(t) {
                 var e = this.getCurrentAudio();
                 if (this.getCurrentPlaylist(),
-                        e)
+                    e)
                     switch (t.keyCode) {
                         case 179:
                             this.isPlaying() ? this.pause() : this.play();
@@ -4209,8 +4181,6 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
 
                             var html = xhr.responseText;
 
-
-
                             html = html.replace("%header%", getLang("audio_settings"));
                             html = html.replace("%equalizer%", getLang("audio_equalizer"));
                             html = html.replace("%add_equalizer%", getLang("audio_add_equalizer"));
@@ -4251,7 +4221,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 if (e)
                     for (var a = 0, s = i.length; s > a; a++) {
                         var r = i[a];
-                        r && this.toggleCurrentAudioRow(r, !0, t)
+                        if (r) {
+                            if (gpeByClass("article_editor_canvas", r))
+                                continue;
+                            this.toggleCurrentAudioRow(r, !0, t)
+                        }
                     }
                 this._currentPlayingRows = i,
                     each(geByClass("_audio_pl"), function() {
@@ -4261,7 +4235,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     , n = this.getCurrentPlaylist();
                 if (l && n) {
                     var d;
-                    n.getType() == AudioPlaylist.TYPE_PLAYLIST ? d = geByClass("_audio_pl_" + n.getOwnerId() + "_" + n.getPlaylistId()) : "recoms1" == n.getAlbumId() && (d = geByClass("_recoms_special_recoms")),
+                    d = geByClass("_audio_pl_" + n.getOwnerId() + "_" + n.getPlaylistId()),
                     d && each(d, function() {
                         addClass(this, "audio_pl__playing")
                     })
@@ -4280,7 +4254,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 function o() {
                     var o = this;
                     if (a.withInlinePlayer && (e ? this._addRowPlayer(t, i) : this._removeRowPlayer(t)),
-                            e) {
+                        e) {
                         this.on(t, AudioPlayer.EVENT_PLAY, function(e) {
                             AudioUtils.asObject(e).fullId == a.fullId && (addClass(t, AudioUtils.AUDIO_PLAYING_CLS),
                             l && attr(l, "aria-label", getLang("global_audio_pause")),
@@ -4302,12 +4276,12 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         var n = data(t, "bars");
                         if (!n && (a.isWithCovers || a.isNumeric)) {
                             if (n = se('<canvas class="audio_row__sound_bars"></canvas>'),
-                                    t.appendChild(n),
-                                    n.width = AudioUtils.AUDIO_ROW_COVER_SIZE * (isRetina() ? 2 : 1),
-                                    n.height = AudioUtils.AUDIO_ROW_COVER_SIZE * (isRetina() ? 2 : 1),
-                                    n.style.width = AudioUtils.AUDIO_ROW_COVER_SIZE,
-                                    n.style.height = AudioUtils.AUDIO_ROW_COVER_SIZE,
-                                    isRetina()) {
+                                t.appendChild(n),
+                                n.width = AudioUtils.AUDIO_ROW_COVER_SIZE * (isRetina() ? 2 : 1),
+                                n.height = AudioUtils.AUDIO_ROW_COVER_SIZE * (isRetina() ? 2 : 1),
+                                n.style.width = AudioUtils.AUDIO_ROW_COVER_SIZE,
+                                n.style.height = AudioUtils.AUDIO_ROW_COVER_SIZE,
+                                isRetina()) {
                                 var d = n.getContext("2d");
                                 d.scale(2, 2)
                             }
@@ -4473,16 +4447,16 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             AudioPlayer.prototype.updateAudio = function(t, e) {
                 var i = "";
                 if (isString(t) ? i = t : isArray(t) && (i = AudioUtils.asObject(t).fullId),
-                    e || (e = t),
-                        each(this._playlists, function(t, o) {
-                            for (var a = o.getAudiosList(), s = 0, r = a.length; r > s; s++)
-                                if (a[s][AudioUtils.AUDIO_ITEM_INDEX_OWNER_ID] + "_" + a[s][AudioUtils.AUDIO_ITEM_INDEX_ID] == i)
-                                    return isObject(e) && each(e, function(t, e) {
-                                        a[s][t] = e
-                                    }),
-                                        void (isArray(e) && (a[s] = e))
-                        }),
-                    this._currentAudio[AudioUtils.AUDIO_ITEM_INDEX_OWNER_ID] + "_" + this._currentAudio[AudioUtils.AUDIO_ITEM_INDEX_ID] == i) {
+                e || (e = t),
+                    each(this._playlists, function(t, o) {
+                        for (var a = o.getAudiosList(), s = 0, r = a.length; r > s; s++)
+                            if (a[s][AudioUtils.AUDIO_ITEM_INDEX_OWNER_ID] + "_" + a[s][AudioUtils.AUDIO_ITEM_INDEX_ID] == i)
+                                return isObject(e) && each(e, function(t, e) {
+                                    a[s][t] = e
+                                }),
+                                    void (isArray(e) && (a[s] = e))
+                    }),
+                this._currentAudio[AudioUtils.AUDIO_ITEM_INDEX_OWNER_ID] + "_" + this._currentAudio[AudioUtils.AUDIO_ITEM_INDEX_ID] == i) {
                     if (isObject(e)) {
                         var o = this;
                         each(e, function(t, e) {
@@ -4564,7 +4538,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             ,
             AudioPlayer.prototype._implDoTasks = function() {
                 if (this._tasks = this._tasks || [],
-                        !this._taskInProgress) {
+                    !this._taskInProgress) {
                     var t = this._tasks.shift();
                     if (t) {
                         var e = this;
@@ -4636,6 +4610,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     var i = this;
                     if (e) {
                         var o = 0 == t ? "vol_down" : "vol_up";
+
                         this._implNewTask(o, function(e) {
                             i._impl.fadeVolume(t, function() {
                                 e()
@@ -4735,7 +4710,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 for (var t = 0, e = -1, i = this._playlists.length - 1; i >= 0; i--) {
                     var o = this._playlists[i];
                     if (!o.isReference() && (t += o.getAudiosCount(),
-                        t > 4e3)) {
+                    t > 4e3)) {
                         e = i;
                         break
                     }
@@ -4745,7 +4720,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     for (var a = this._playlists.slice(0, e), s = this.getCurrentPlaylist(), r = [], i = 0; i < a.length; i++) {
                         var l = a[i];
                         if (s == l && (l = !1),
-                            l && !l.isReference())
+                        l && !l.isReference())
                             for (var n = e; n < this._playlists.length; n++) {
                                 var o = this._playlists[n];
                                 o.isReference() && o.getSelf() == l && (l = !1)
@@ -4822,7 +4797,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 var n = window.AudioPage && currentAudioPage(t);
                 if (n) {
                     var d = n.getPageCurrentPlaylist();
-                    n.onUserAction(e, d)
+                    d && n.onUserAction(e, d)
                 }
             }
         }
@@ -4879,8 +4854,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                             var r = this.getCurrentPlaylist()
                                 , l = this._impl.getCurrentProgress();
                             if (this._lsSet(AudioPlayer.LS_PROGRESS, l),
-                                    this._trackListenedData(s, r, o, this._getPlayingContext()),
-                                this._allowPrefetchNext && l >= .8) {
+                                this._trackListenedData(s, r, o, this._getPlayingContext()),
+                            this._allowPrefetchNext && l >= .8) {
                                 var n = r.getNextAudio(a);
                                 n && this._impl.isFullyLoaded() && (this._allowPrefetchNext = !1,
                                     this._prefetchAudio(n))
@@ -4915,7 +4890,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             clearTimeout(this._sendListenedTO);
             var e = this._currentAudioListenData;
             if (this._currentAudioListenData = !1,
-                e && e.listened && this._listenedHash) {
+            e && e.listened && this._listenedHash) {
                 var i = extend({
                     act: "listened_data",
                     impl: this._impl.type,
@@ -5052,7 +5027,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                         this._currentUrlEnsure[l.fullId] = !0)
                 }
             if (i.push(o.fullId),
-                    i.length) {
+                i.length) {
                 var n = this;
                 ajax.post("al_audio.php", {
                     act: "reload_audio",
@@ -5065,12 +5040,12 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                                 i = AudioUtils.asObject(i);
                                 var a = {};
                                 a[AudioUtils.AUDIO_ITEM_INDEX_URL] = i.url,
-                                    a[AudioUtils.AUDIO_ITEM_INDEX_TRACK_GENRE] = i.trackGenre,
+                                    a[AudioUtils.AUDIO_ITEM_INDEX_ADS] = i.ads,
                                     n.updateAudio(i.fullId, a),
                                 o.fullId == i.fullId && (t[AudioUtils.AUDIO_ITEM_INDEX_URL] = i.url,
-                                    t[AudioUtils.AUDIO_ITEM_INDEX_TRACK_GENRE] = i.trackGenre),
+                                    t[AudioUtils.AUDIO_ITEM_INDEX_ADS] = i.ads),
                                 n.currentAudio && AudtioUtils.asObject(n.currentAudio).fullId == i.fullId && (n.currentAudio[AudioUtils.AUDIO_ITEM_INDEX_URL] = i.url,
-                                    n.currentAudio[AudioUtils.AUDIO_ITEM_INDEX_TRACK_GENRE] = i.trackGenre),
+                                    n.currentAudio[AudioUtils.AUDIO_ITEM_INDEX_ADS] = i.ads),
                                     delete n._currentUrlEnsure[i.fullId]
                             }),
                         e && e(t)
@@ -5107,13 +5082,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 return s ? (AudioUtils.audioSearchPerformer(e.target, s, e),
                     cancelEvent(e)) : !0
             }
-
-            var s = cur.cancelClick || e && (hasClass(e.target, "audio_lyrics") ||  hasClass(e.target, "select-check") || hasClass(e.target, "select-check-wrapper") || domClosest("_audio_duration_wrap", e.target) || domClosest("_audio_inline_player", e.target) || domClosest("audio_performer", e.target));
-
-            if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", i) && (s = !0),
-                    delete cur.cancelClick,
-                    delete cur._sliderMouseUpNowEl,
-                    s)
+            var r = cur.cancelClick || e && (hasClass(e.target, "audio_lyrics") ||  hasClass(e.target, "select-check") || hasClass(e.target, "select-check-wrapper") || domClosest("_audio_duration_wrap", e.target) || domClosest("_audio_inline_player", e.target) || domClosest("audio_performer", e.target));
+            if (cur._sliderMouseUpNowEl && cur._sliderMouseUpNowEl == geByClass1("audio_inline_player_progress", i) && (r = !0),
+                delete cur.cancelClick,
+                delete cur._sliderMouseUpNowEl,
+                r)
                 return !0;
             if (AudioUtils.isClaimedAudio(o) || o.isReplaceable) {
                 var l = AudioUtils.getAudioExtra(o)
@@ -5492,9 +5465,9 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                     vk_id: vk.id,
                     duration: t.duration,
                     content_id: a(t.ownerId, t.id),
-                    vk_catid: s[e] || s.other,
-                    puid22: convertTrackGenreToAdmanGenre(t.trackGenre)
+                    vk_catid: s[e] || s.other
                 };
+                extend(r, t.ads || {}),
                 nav.objLoc.preview && (r.preview = intval(nav.objLoc.preview)),
                 cur.adsPreview && (r.preview = 1),
                     this._adman.setDebug(!!r.preview),
@@ -5643,8 +5616,10 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerFlash.prototype.setUrl = function(t, e) {
-            var i = (0,
-                _audio_unmask_source.audioUnmaskSource)(t);
+            //var i = Object(_audioplayer_audio_unmask_source__WEBPACK_IMPORTED_MODULE_0__.audioUnmaskSource)(t);
+
+            var i = this._impl.musicBar.unmaskUrl(t);
+
             return this._url == i ? void (e && e(!0)) : (this._url = i,
             this._player && this._player.loadAudio(i),
                 void (e && e(!0)))
@@ -5693,9 +5668,9 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         AudioPlayerFlash.prototype._checkFlashLoaded = function() {
             var t = ge("player");
             if (this._checks = this._checks || 0,
-                    this._checks++,
-                    AudioUtils.debugLog("Flash element check", this._checks),
-                this._checks > 10)
+                this._checks++,
+                AudioUtils.debugLog("Flash element check", this._checks),
+            this._checks > 10)
                 return AudioUtils.debugLog("No Flash element found after some amount of checks"),
                     this._player = !1,
                 this._onReady && this._onReady(!1);
@@ -5716,13 +5691,51 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             this._opts = t;
             this._audio = new Audio;
             this._audio.crossOrigin = "anonymous";
-            "AudioContext" in window ? this._context = new AudioContext : "webkitAudioContext" in window && (this._context = new webkitAudioContext);
+
+            var e = [];
+
+            var i = window._audioContextData;
+            i ? (e.push(1),
+                this._context = i.context,
+                this._audio = i.audio,
+                this._analyser = i.analyzer,
+                this._gainNode = i.gainNode,
+                e.push(2),
+                this._context.suspend(),
+                e.push(3),
+                this._toggleContext(!1)) : (window._audioContextData = !0,
+                e.push(4),
+                this._audio = new Audio,
+                this._audio.crossOrigin = "anonymous",
+                "AudioContext" in window ? this._context = new AudioContext : "webkitAudioContext" in window && (this._context = new webkitAudioContext),
+                e.push(5),
+                this._context.suspend(),
+                e.push(6),
+                this._toggleContext(!1),
+                e.push(7),
+                this._analyser = this._context.createAnalyser(),
+                this._gainNode = this._context.createGain(),
+                e.push(8),
+                //this._analyser.connect(this._gainNode),
+                //this._gainNode.connect(this._context.destination),
+                e.push(9),
+                window._audioContextData = {
+                    context: this._context,
+                    audio: this._audio,
+                    analyzer: this._analyser,
+                    gainNode: this._gainNode
+                })
+
+
+            var contextData = window._audioContextData;
+
+            this._context = contextData.context;
+            this._audio = contextData.audio;
+            this._analyser = contextData.analyzer;
+            this._gainNode = contextData.gainNode;
 
             this.musicBar = new MusicBar(this._context);
 
-            this._context.suspend();
-            this._toggleContext(!1);
-            this._analyser = this._context.createAnalyser();
             this._analyser.fftSize = 32;
             this._analyser.smoothingTimeConstant = 0.3;
 
@@ -5742,30 +5755,16 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             }, 100);
 
 
-            this._gainNode = this._context.createGain();
+
+            this._processor.connect(this._context.destination);
             this._analyser.connect(this._gainNode);
             this._gainNode.connect(this._context.destination);
-            this._processor.connect(this._context.destination);
             this.type = "html5webapi";
 
-
-
+            cur._audioVer = 1;
         },
         AudioPlayerHTML5WebAudio.isSupported = function() {
-            if (browser.safari)
-                return !1;
-            var t = "undefined" != typeof navigator ? navigator.userAgent : "";
-            if (/(Windows NT 5.1|Windows XP)/.test(t) && (browser.vivaldi || browser.opera || browser.mozilla))
-                return !1;
-            if (/(Windows 7|Windows NT 6.1)/.test(t) && (browser.vivaldi || browser.opera))
-                return !1;
-            var e = document.createElement("audio");
-            if (e.canPlayType) {
-                var i = e.canPlayType('audio/mpeg; codecs="mp3"')
-                    , o = !!i.replace(/no/, "");
-                return o && ("AudioContext"in window || "webkitAudioContext"in window)
-            }
-            return !1
+            return true;
         }
         ,
         AudioPlayerHTML5WebAudio.VOLUME_FADE_DURATION = 300,
@@ -5807,16 +5806,19 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerHTML5WebAudio.prototype.setVolume = function(t) {
-            this._gainNode.gain.linearRampToValueAtTime(t, this._context.currentTime + .01)
+            window.setTimeout(() => {
+                this._gainNode.gain.linearRampToValueAtTime(t, this._context.currentTime + .01)
+            }, 300);
         }
         ,
         AudioPlayerHTML5WebAudio.prototype.fadeVolume = function(t, e) {
-            this._toggleContext(!0),
-                this._gainNode.gain.linearRampToValueAtTime(t, this._context.currentTime + AudioPlayerHTML5WebAudio.VOLUME_FADE_DURATION / 1e3),
-                clearWorkerTimeout(this._fadeTO),
-                this._fadeTO = setWorkerTimeout(function() {
-                    e(!0)
-                }, AudioPlayerHTML5WebAudio.VOLUME_FADE_DURATION + 50)
+
+            this._toggleContext(true);
+            this._gainNode.gain.linearRampToValueAtTime(t, this._context.currentTime + AudioPlayerHTML5WebAudio.VOLUME_FADE_DURATION / 1e3);
+            clearWorkerTimeout(this._fadeTO);
+            this._fadeTO = setWorkerTimeout(function() {
+                e(!1)
+            }, AudioPlayerHTML5WebAudio.VOLUME_FADE_DURATION + 50)
         }
         ,
         AudioPlayerHTML5WebAudio.prototype.isFullyLoaded = function() {
@@ -5848,7 +5850,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             var i = this;
             this._toggleContext(!0);
             var o = this._audio;
-            this._audio.src != (0,_audio_unmask_source.audioUnmaskSource)(t) ? this._createAudioNode(t, function() {
+            this._audio.src != t ? this._createAudioNode(t, function() {
                 e(o.play()),
                     i._startFreqAnalyse()
             }) : this._audio._canPlay ? (e(o.play()),
@@ -5860,16 +5862,19 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerHTML5WebAudio.prototype._createAudioNode = function(t, e) {
+
+            let url = getAudioPlayer()._impl.musicBar.unmaskUrl(t);
             var i = this;
-            return this._audio && this._audio.src == (0,_audio_unmask_source.audioUnmaskSource)(t) ? this._audio._canPlay ? e && e() : (this._audio.onCanPlays = this._audio.onCanPlays || [],
+            return this._audio && this._audio.src == url ? this._audio._canPlay ? e && e() : (this._audio.onCanPlays = this._audio.onCanPlays || [],
                 void this._audio.onCanPlays.push(e)) : (this._source && this._source.disconnect(),
                 this._audio = new Audio,
                 this._audio.crossOrigin = "anonymous",
                 this._audio.onCanPlays = [e],
                 this._source = this._context.createMediaElementSource(this._audio),
                 this._source.connect(this._analyser),
-                this._audio.src = (0,_audio_unmask_source.audioUnmaskSource)(t),
+                this._audio.src = url,
                 this._audio.addEventListener("canplay", function() {
+
                     if (!i._audio._canPlay) {
                         i._audio._canPlay = !0,
                         i._opts.onCanPlay && i._opts.onCanPlay();
@@ -5924,7 +5929,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         ,
         AudioPlayerHTML5WebAudio.prototype.prefetch = function(t) {
             var e = new Audio;
-            e.src = (0,_audio_unmask_source.audioUnmaskSource)(t)
+            e.src = getAudioPlayer()._impl.musicBar.unmaskUrl(t);
         }
         ,
         window.AudioPlayerHTML5Simple = function(t) {
@@ -5934,6 +5939,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerHTML5Simple.prototype.setUrl = function(t, e) {
+
             return e && e(!0)
         }
         ,
@@ -5943,7 +5949,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         ,
         AudioPlayerHTML5Simple.prototype.seek = function(t) {
             var e = this._audioEl;
-            isNaN(e.duration) || (e.currentTime = e.duration * t)
+            isFinite(e.duration) && (e.currentTime = e.duration * t)
         }
         ,
         AudioPlayerHTML5Simple.prototype.isFullyLoaded = function() {
@@ -6009,9 +6015,8 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerHTML5Simple.prototype.play = function(t) {
-            var e = (0,
-                _audio_unmask_source.audioUnmaskSource)(t);
-            this._audioEl.src != e && (this._audioEl.src = e),
+            var e = getAudioPlayer()._impl.musicBar.unmaskUrl(t);
+            this._audioEl.src != e && (this._audioEl.src = this._impl.musicBar.unmaskUrl(e)),
                 this._audioEl.play(),
                 this._startFrequencyAnalise()
         }
@@ -6030,38 +6035,41 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerHTML5Simple.prototype._createAudioNode = function() {
-            var t = new Audio
-                , e = this;
-            return this.opts.onBufferUpdate && addEvent(t, "progress", function() {
-                e.opts.onBufferUpdate(e.getCurrentBuffered());
-                var i = t.buffered;
-                1 == i.length && 0 == i.start(0) && i.end(0) == t.duration && (t._fullyLoaded = !0)
+            var t = this
+                , e = new Audio
+                , i = this;
+            return this.opts.onBufferUpdate && addEvent(e, "progress", function() {
+                i.opts.onBufferUpdate(i.getCurrentBuffered());
+                var t = e.buffered;
+                1 == t.length && 0 == t.start(0) && t.end(0) == e.duration && (e._fullyLoaded = !0)
             }),
-            this.opts.onProgressUpdate && addEvent(t, "timeupdate", function() {
+            this.opts.onProgressUpdate && addEvent(e, "timeupdate", function() {
                 this.opts.onProgressUpdate(this.getCurrentProgress(), this.getPlayedTime())
             }
                 .bind(this)),
-            this.opts.onEnd && addEvent(t, "ended", function() {
-                e.opts.onEnd()
+            this.opts.onEnd && addEvent(e, "ended", function() {
+                i.opts.onEnd()
             }),
-            this.opts.onSeeked && addEvent(t, "seeked", function() {
-                e.opts.onSeeked()
+            this.opts.onSeeked && addEvent(e, "seeked", function() {
+                i.opts.onSeeked()
             }),
-            this.opts.onSeek && addEvent(t, "seeking", function() {
-                e.opts.onSeek()
+            this.opts.onSeek && addEvent(e, "seeking", function() {
+                i.opts.onSeek()
             }),
-                t.addEventListener("error", function(t) {
+                e.addEventListener("error", function(t) {
                     AudioUtils.debugLog("HTML5 error track loading"),
-                    e.opts.onFail && e.opts.onFail()
+                    i.opts.onFail && i.opts.onFail()
                 }),
-                t.addEventListener("canplay", function() {
-                    e.opts.onCanPlay && e.opts.onCanPlay(),
-                        data(t, "canplay", !0),
-                    e._seekOnReady && (e.seek(e._seekOnReady),
-                        e._seekOnReady = !1)
+                e.addEventListener("canplay", function() {
+                    i.opts.onCanPlay && i.opts.onCanPlay(),
+                        data(e, "canplay", !0)
                 }),
-                t.crossOrigin = "anonymous",
-                t
+                e.addEventListener("durationchange", function() {
+                    t._seekOnReady && isFinite(e.duration) && (t.seek(t._seekOnReady),
+                        t._seekOnReady = !1)
+                }),
+                e.crossOrigin = "anonymous",
+                e
         }
         ,
         window.AudioPlayerHTML5 = function(t) {
@@ -6077,22 +6085,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         AudioPlayerHTML5.HAVE_ENOUGH_DATA = 4,
         AudioPlayerHTML5.SILENCE = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=",
         AudioPlayerHTML5.isSupported = function() {
-            var t = "undefined" != typeof navigator ? navigator.userAgent : "";
-            if (/(Windows NT 5.1|Windows XP)/.test(t) && (browser.vivaldi || browser.opera || browser.mozilla))
-                return AudioUtils.debugLog("Force no HTML5 (xp vivaldi / opera / mozilla)"),
-                    !1;
-            if (/(Windows 7|Windows NT 6.1)/.test(t) && (browser.vivaldi || browser.opera))
-                return AudioUtils.debugLog("Force no HTML5 (win7 vivaldi / opera)"),
-                    !1;
-            var e = document.createElement("audio");
-            if (e.canPlayType) {
-                var i = e.canPlayType('audio/mpeg; codecs="mp3"')
-                    , o = !!i.replace(/no/, "");
-                return AudioUtils.debugLog("HTML5 browser support " + (o ? "yes" : "no"), i, t),
-                    o
-            }
-            return AudioUtils.debugLog("audio.canPlayType is not available", t),
-                !1
+           return false;
         }
         ,
         AudioPlayerHTML5.prototype.type = "html5",
@@ -6105,56 +6098,78 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerHTML5.prototype._setAudioNodeUrl = function(t, e) {
-            var i = (0,
-                _audio_unmask_source.audioUnmaskSource)(e);
+            var i = this._impl.musicBar.unmaskUrl(e);
             data(t, "setUrlTime", i == AudioPlayerHTML5.SILENCE ? 0 : vkNow()),
-                t.src = i
+            this._currentHls && (this._currentHls.destroy(),
+                this._currentHls = null),
+                this._isHlsUrl(i) ? this._initAudioHls(t, i) : t.src = i
+        }
+        ,
+        AudioPlayerHTML5.prototype._isHlsUrl = function(t) {
+            return /\.m3u8/.test(getAudioPlayer()._impl.musicBar.unmaskUrl(t));
+        }
+        ,
+        AudioPlayerHTML5.prototype._initAudioHls = function(t, e) {
+            var i = this;
+            stManager.add("hls.min.js", function() {
+                if (i._currentAudioEl === t) {
+                    var o = new Hls;
+                    o.attachMedia(t),
+                        o.loadSource(e),
+                        i._currentHls = o;
+                    var a = getAudioPlayer();
+                    a.isPlaying() && !a.isAdPlaying() && i.play(e)
+                }
+            })
         }
         ,
         AudioPlayerHTML5.prototype._createAudioNode = function(t) {
-            var e = new Audio
-                , i = this;
-            return this.opts.onBufferUpdate && addEvent(e, "progress", function() {
-                i._currentAudioEl == e && i.opts.onBufferUpdate(i.getCurrentBuffered());
-                var t = e.buffered;
-                1 == t.length && 0 == t.start(0) && t.end(0) == e.duration && (e._fullyLoaded = !0)
+            var e = this
+                , i = new Audio
+                , o = this;
+            return this.opts.onBufferUpdate && addEvent(i, "progress", function() {
+                o._currentAudioEl == i && o.opts.onBufferUpdate(o.getCurrentBuffered());
+                var t = i.buffered;
+                1 == t.length && 0 == t.start(0) && t.end(0) == i.duration && (i._fullyLoaded = !0)
             }),
-            this.opts.onProgressUpdate && addEvent(e, "timeupdate", function() {
-                this._currentAudioEl == e && this.opts.onProgressUpdate(this.getCurrentProgress(), this.getPlayedTime())
+            this.opts.onProgressUpdate && addEvent(i, "timeupdate", function() {
+                this._currentAudioEl == i && this.opts.onProgressUpdate(this.getCurrentProgress(), this.getPlayedTime())
             }
                 .bind(this)),
-            this.opts.onEnd && addEvent(e, "ended", function() {
-                i._currentAudioEl == e && i.opts.onEnd()
+            this.opts.onEnd && addEvent(i, "ended", function() {
+                o._currentAudioEl == i && o.opts.onEnd()
             }),
-            this.opts.onSeeked && addEvent(e, "seeked", function() {
-                i._currentAudioEl == e && i.opts.onSeeked()
+            this.opts.onSeeked && addEvent(i, "seeked", function() {
+                o._currentAudioEl == i && o.opts.onSeeked()
             }),
-            this.opts.onSeek && addEvent(e, "seeking", function() {
-                i._currentAudioEl == e && i.opts.onSeek()
+            this.opts.onSeek && addEvent(i, "seeking", function() {
+                o._currentAudioEl == i && o.opts.onSeek()
             }),
-                addEvent(e, "error", function() {
+                addEvent(i, "error", function() {
                     AudioUtils.debugLog("HTML5 error track loading"),
-                        i._prefetchAudioEl == e ? i._prefetchAudioEl = i._createAudioNode() : i._currentAudioEl == e && e.src != AudioPlayerHTML5.SILENCE && i.opts.onFail && i.opts.onFail()
+                        o._prefetchAudioEl == i ? o._prefetchAudioEl = o._createAudioNode() : o._currentAudioEl == i && i.src != AudioPlayerHTML5.SILENCE && o.opts.onFail && o.opts.onFail()
                 }),
-                addEvent(e, "canplay", function() {
-                    var t = data(e, "setUrlTime");
+                addEvent(i, "canplay", function() {
+                    var t = data(i, "setUrlTime");
                     t && (cur.audioLoadTimings = cur.audioLoadTimings || [],
                         cur.audioLoadTimings.push(vkNow() - t),
-                        data(e, "setUrlTime", 0)),
-                    i._prefetchAudioEl == e,
-                    i._currentAudioEl == e && (i.opts.onCanPlay && i.opts.onCanPlay(),
-                        data(e, "canplay", !0),
-                    i._seekOnReady && (i.seek(i._seekOnReady),
-                        i._seekOnReady = !1))
+                        data(i, "setUrlTime", 0)),
+                    o._prefetchAudioEl == i,
+                    o._currentAudioEl == i && (o.opts.onCanPlay && o.opts.onCanPlay(),
+                        data(i, "canplay", !0))
                 }),
-                e.crossOrigin = "anonymous",
-            t && (this._setAudioNodeUrl(e, t),
-                e.preload = "auto",
-                e.volume = this._volume || 1,
-                e.load()),
-                this._audioNodes.push(e),
+                addEvent(i, "durationchange", function() {
+                    e._currentAudioEl == i && e._seekOnReady && isFinite(i.duration) && (e.seek(e._seekOnReady),
+                        e._seekOnReady = !1)
+                }),
+                i.crossOrigin = "anonymous",
+            t && (this._setAudioNodeUrl(i, t),
+                i.preload = "auto",
+                i.volume = this._volume || 1,
+                i.load()),
+                this._audioNodes.push(i),
             this._audioNodes.length > 10 && this._audioNodes.splice(0, 5),
-                e
+                i
         }
         ,
         AudioPlayerHTML5.prototype.onReady = function(t) {
@@ -6163,12 +6178,12 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         ,
         AudioPlayerHTML5.prototype.prefetch = function(t) {
             this._prefetchAudioEl && this._setAudioNodeUrl(this._prefetchAudioEl, AudioPlayerHTML5.SILENCE),
-                this._prefetchAudioEl = this._createAudioNode(t)
+            this._isHlsUrl(t) || (this._prefetchAudioEl = this._createAudioNode(t))
         }
         ,
         AudioPlayerHTML5.prototype.seek = function(t) {
             var e = this._currentAudioEl;
-            isNaN(e.duration) ? this._seekOnReady = t : e.currentTime = e.duration * t
+            isFinite(e.duration) ? e.currentTime = e.duration * t : this._seekOnReady = t
         }
         ,
         AudioPlayerHTML5.prototype.setVolume = function(t) {
@@ -6194,10 +6209,9 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         ,
         AudioPlayerHTML5.prototype.setUrl = function(t, e) {
             var i = this._currentAudioEl
-                , o = (0,
-                _audio_unmask_source.audioUnmaskSource)(t);
+                , o = getAudioPlayer()._impl.musicBar.unmaskUrl(t);
             if (this._seekOnReady = !1,
-                i.src == o)
+            i.src == o || this._currentHls && this._currentHls.url == o)
                 return this.opts.onCanPlay && this.opts.onCanPlay(),
                 e && e(!0);
             if (this._prefetchAudioEl && this._prefetchAudioEl.readyState > AudioPlayerHTML5.STATE_HAVE_NOTHING)
@@ -6220,9 +6234,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerHTML5.prototype.play = function(t) {
+
+
+
             this._stopFrequencyAnalise(),
-            this._prefetchAudioEl.src == (0,
-                _audio_unmask_source.audioUnmaskSource)(t) && this._prefetchAudioEl.readyState > AudioPlayerHTML5.STATE_HAVE_NOTHING && (this._setAudioNodeUrl(this._currentAudioEl, AudioPlayerHTML5.SILENCE),
+            this._prefetchAudioEl.src == getAudioPlayer()._impl.musicBar.unmaskUrl(t) && this._prefetchAudioEl.readyState > AudioPlayerHTML5.STATE_HAVE_NOTHING && (this._setAudioNodeUrl(this._currentAudioEl, AudioPlayerHTML5.SILENCE),
                 this._currentAudioEl = this._prefetchAudioEl,
                 this._prefetchAudioEl = this._createAudioNode(),
             this.opts.onCanPlay && this.opts.onCanPlay());
@@ -6289,7 +6305,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         AudioPlayerHTML5.prototype._setFadeVolumeInterval = function(t) {
             if (t) {
                 if (!this._fadeVolumeWorker && window.Worker && window.Blob) {
-                    var e = new Blob(["           var interval;           onmessage = function(e) {             clearInterval(interval);             if (e.data == 'start') {               interval = setInterval(function() { postMessage({}); }, 20);             }           }         "]);
+                    var e = new Blob(["         var interval;         onmessage = function(e) {           clearInterval(interval);           if (e.data == 'start') {             interval = setInterval(function() { postMessage({}); }, 20);           }         }       "]);
                     try {
                         this._fadeVolumeWorker = new Worker(window.URL.createObjectURL(e))
                     } catch (i) {
@@ -6309,7 +6325,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             var i = this._currentAudioEl
                 , o = 0;
             if (o = t < i.volume ? -.06 : .001,
-                Math.abs(t - i.volume) <= .001)
+            Math.abs(t - i.volume) <= .001)
                 return this._setFadeVolumeInterval(),
                 e && e();
             var a = i.volume;
@@ -6344,11 +6360,11 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 , l = e.onError
                 , n = document.createElement("script");
             if (n.addEventListener("load", i),
-                    n.addEventListener("readystatechange", i),
-                    n.addEventListener("error", o),
-                    n.src = t,
-                    document.head.appendChild(n),
-                    s)
+                n.addEventListener("readystatechange", i),
+                n.addEventListener("error", o),
+                n.src = t,
+                document.head.appendChild(n),
+                s)
                 var d = setTimeout(o, s);
             return {
                 destroy: function() {
@@ -6361,155 +6377,41 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             stManager.done("audioplayer.js")
         } catch (e) {}
     },
-    20: function(module, exports) {
+    696: function(t, e, i) {
         "use strict";
-        function _classCallCheck(t, e) {
-            if (!(t instanceof e))
-                throw new TypeError("Cannot call a class as a function")
-        }
-        Object.defineProperty(exports, "__esModule", {
-            value: !0
-        });
-        var AudioLayer = function() {
-            function AudioLayer() {
-                _classCallCheck(this, AudioLayer),
-                    this._els = {
-                        layerPlace: ge("top_audio_layer_place"),
-                        topPlayBtn: geByClass1("_top_audio_player_play"),
-                        topNotaBtn: geByClass1("_top_nav_audio_btn"),
-                        topNotaBtnGroup: ge("top_audio_btn_group")
-                    }
-            }
-            return AudioLayer.prepare = function(t) {
-                stManager.add(["audio.js", "audioplayer.js", "audio.css", "suggester.js", "auto_list.js", "indexer.js"], function() {
-                    t && t()
-                })
-            }
-                ,
-                AudioLayer.prototype.toggle = function(t, e) {
-                    var i = this;
-                    this._initTooltip();
-                    var o = this._els.tt
-                        , a = void 0 !== t ? t : !o.isShown();
-                    a ? (o.show(),
-                        cancelStackPush("top_audio", function() {
-                            i.toggle(!1, !0)
-                        }, !0)) : (e || cancelStackPop(),
-                        o.hide()),
-                        toggleClass(this._els.topNotaBtn, "active", a)
-                }
-                ,
-                AudioLayer.prototype.hide = function() {
-                    this._els.tt.hide()
-                }
-                ,
-                AudioLayer.prototype.isShown = function() {
-                    return this._els.tt && this._els.tt.isShown()
-                }
-                ,
-                AudioLayer.prototype.updatePosition = function() {
-                    return this._els.tt && this._els.tt.updatePosition()
-                }
-                ,
-                AudioLayer.prototype._layerPosition = function() {
-                    var t = getXY(this._els.layerPlace)
-                        , e = getXY("page_body")
-                        , i = e[0] - t[0] - 1
-                        , o = 0;
-                    if (isVisible(this._els.topNotaBtnGroup)) {
-                        var a = getXY(this._els.topNotaBtn);
-                        o = -i + (a[0] - t[0]) + 15
-                    } else {
-                        var s = getXY(this._els.topPlayBtn);
-                        o = -i + (s[0] - t[0]) + 3
-                    }
-                    return {
-                        left: i,
-                        top: 0,
-                        arrowPosition: o
-                    }
-                }
-                ,
-                AudioLayer.prototype.getPageInstance = function() {
-                    return this._page
-                }
-                ,
-                AudioLayer.prototype._initTooltip = function _initTooltip() {
-                    var _this2 = this;
-                    this._els.tt || (this._els.container = se('<div class="audio_layer_container"><div class="top_audio_loading">' + rs(vk.pr_tpl, {
-                        id: "",
-                        cls: "pr_big"
-                    }) + "</div></div>"),
-                        this._els.tt = new ElementTooltip(this._els.layerPlace,{
-                            id: "audio_layer_tt",
-                            content: this._els.container,
-                            width: 660,
-                            offset: [22, 5],
-                            autoShow: !1,
-                            customShow: !0,
-                            setPos: this._layerPosition.bind(this),
-                            forceSide: "bottom",
-                            onHide: function() {
-                                _this2._page && _this2._page.onLayerHide()
-                            },
-                            onShow: function() {
-                                _this2._page && _this2._page.onLayerShow(_this2._initSection)
-                            }
-                        }),
-                        ajax.post("al_audio.php", {
-                            act: "layer",
-                            is_layer: 1,
-                            is_current_playlist: ap.getCurrentPlaylist() ? 1 : 0
-                        }, {
-                            onDone: function onDone(html, data, templatesScript) {
-                                eval(templatesScript),
-                                    _this2._els.container.innerHTML = html,
-                                    _this2._page = new AudioPage(geByClass1("_audio_page_layout", _this2._els.container),data),
-                                    _this2._initSection = "recoms" == data.initSection ? data.initSection : void 0,
-                                    _this2._page.onLayerShow(_this2._initSection)
-                            }
-                        }))
-                }
-                ,
-                AudioLayer
-        }();
-        exports["default"] = AudioLayer
-    },
-    38: function(t, e) {
-        "use strict";
-        function i() {
+        function o() {
             return window.wbopen && ~(window.open + "").indexOf("wbopen")
         }
-        function o(t) {
-            if (!i() && ~t.indexOf("audio_api_unavailable")) {
+        function a(t) {
+            if (!o() && ~t.indexOf("audio_api_unavailable")) {
                 var e = t.split("?extra=")[1].split("#")
-                    , o = "" === e[1] ? "" : a(e[1]);
-                if (e = a(e[0]),
-                    "string" != typeof o || !e)
+                    , i = "" === e[1] ? "" : s(e[1]);
+                if (e = s(e[0]),
+                "string" != typeof i || !e)
                     return t;
-                o = o ? o.split(String.fromCharCode(9)) : [];
-                for (var s, r, n = o.length; n--; ) {
-                    if (r = o[n].split(String.fromCharCode(11)),
-                            s = r.splice(0, 1, e)[0],
-                            !l[s])
+                i = i ? i.split(String.fromCharCode(9)) : [];
+                for (var a, r, l = i.length; l--; ) {
+                    if (r = i[l].split(String.fromCharCode(11)),
+                        a = r.splice(0, 1, e)[0],
+                        !n[a])
                         return t;
-                    e = l[s].apply(null, r)
+                    e = n[a].apply(null, r)
                 }
                 if (e && "http" === e.substr(0, 4))
                     return e
             }
             return t
         }
-        function a(t) {
+        function s(t) {
             if (!t || t.length % 4 == 1)
                 return !1;
             for (var e, i, o = 0, a = 0, s = ""; i = t.charAt(a++); )
-                i = r.indexOf(i),
+                i = l.indexOf(i),
                 ~i && (e = o % 4 ? 64 * e + i : i,
                 o++ % 4) && (s += String.fromCharCode(255 & e >> (-2 * o & 6)));
             return s
         }
-        function s(t, e) {
+        function r(t, e) {
             var i = t.length
                 , o = [];
             if (i) {
@@ -6520,18 +6422,18 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             }
             return o
         }
-        Object.defineProperty(e, "__esModule", {
-            value: !0
-        }),
-            e.audioUnmaskSource = o;
-        var r = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/="
-            , l = {
+        i.r(e),
+            i.d(e, "audioUnmaskSource", function() {
+                return a
+            });
+        var l = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN0PQRSTUVWXYZO123456789+/="
+            , n = {
             v: function(t) {
                 return t.split("").reverse().join("")
             },
             r: function(t, e) {
                 t = t.split("");
-                for (var i, o = r + r, a = t.length; a--; )
+                for (var i, o = l + l, a = t.length; a--; )
                     i = o.indexOf(t[a]),
                     ~i && (t[a] = o.substr(i - e, 1));
                 return t.join("")
@@ -6539,7 +6441,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
             s: function(t, e) {
                 var i = t.length;
                 if (i) {
-                    var o = s(t, e)
+                    var o = r(t, e)
                         , a = 0;
                     for (t = t.split(""); ++a < i; )
                         t[a] = t.splice(o[i - 1 - a], 1, t[a])[0];
@@ -6548,7 +6450,7 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
                 return t
             },
             i: function(t, e) {
-                return l.s(t, e ^ vk.id)
+                return n.s(t, e ^ vk.id)
             },
             x: function(t, e) {
                 var i = [];
