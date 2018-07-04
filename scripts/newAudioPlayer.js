@@ -4613,7 +4613,12 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
 
                         this._implNewTask(o, function(e) {
                             i._impl.fadeVolume(t, function() {
-                                e()
+
+                                window.setTimeout(() => {
+                                    e()
+                                }, 300);
+
+
                             })
                         })
                     } else
@@ -5806,13 +5811,10 @@ MusicBar.formEqualizerModalUrl = "chrome-extension://" + MusicBar.EXTENSION_ID +
         }
         ,
         AudioPlayerHTML5WebAudio.prototype.setVolume = function(t) {
-            window.setTimeout(() => {
-                this._gainNode.gain.linearRampToValueAtTime(t, this._context.currentTime + .01)
-            }, 300);
+            this._gainNode.gain.linearRampToValueAtTime(t, this._context.currentTime + .01)
         }
         ,
         AudioPlayerHTML5WebAudio.prototype.fadeVolume = function(t, e) {
-
             this._toggleContext(true);
             this._gainNode.gain.linearRampToValueAtTime(t, this._context.currentTime + AudioPlayerHTML5WebAudio.VOLUME_FADE_DURATION / 1e3);
             clearWorkerTimeout(this._fadeTO);
